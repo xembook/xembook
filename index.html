@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 	<link rel="apple-touch-icon" href="icon.png">
 	<title>XEMBook for Symbol</title>
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="style.css" />
 	<script>
 	var address ="";
@@ -43,7 +43,7 @@
 
 </head>
 <body>
-<h1>XEMBook</h1>
+<h1>XEMBook for Symbol</h1>
 <hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
@@ -62,9 +62,12 @@
 				<dt>残高</dt><dd><span id="account_balance"></span></dd>
 				<dt>時価総額</dt><dd><span id="polo_price"></span></dd>
 				<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+<!--
 				<dt id="comsa_label">COMSA</dt><dd><span id="account_balance_cms"></span></dd>
 				<dd><span id="account_balance_cms_jpy"></span></dd>
+-->
 			</dl>
+<!--
 			<h2>取引所</h2>
 			<dl>
 				<dt><a href="https://zaif.jp/trade_xem_jpy">Zaif</a></dt><dd><span id="zaif_lastprice"></span></dd>
@@ -73,9 +76,9 @@
 				<dt><a href="https://www.binance.com/trade.html?symbol=XEM_BTC">Binance</a></dt><dd><span id="binance_lastprice"></span></dd>
 				<dt><a href="https://upbit.com/home">UPbit</a></dt><dd><span id="upbit_lastprice"></span></dd>
 				<dt><a href="https://bittrex.com/Market/Index?MarketName=BTC-XEM">BITTREX</a></dt><dd><span id="bittrex_lastprice"></span></dd>
-<!--				<dt><a href="https://poloniex.com/exchange#BTC_XEM">Poloniex</a></dt><dd><span id="polo_lastprice"></span></dd> -->
-<!--				<dt><a href="https://www.okex.com/spot.html">OKEX</a></dt><dd><span id="okex_lastprice"></span></dd> -->
+
 			</dl>
+-->
 		</div>
 		<div class="col-sm-4">
 			<h2>ハーベスト</h2>
@@ -109,20 +112,13 @@
 	<div class="faucet">
 		<h2>リンク</h2>
 		<dl>
-			<dd><a id="nemqrip" href="nemqrip.html">NEMQRip</a></dd>
-			<dd><a id="tipnem" href="">TipNEM</a></dd>
-			<dd><a id="nemgallery" href="">NEMGallery</a></dd>
 			<dd><a id="xemtax" href="">XEMTax</a></dd>
 			<dd><a id="xemmessage" href="">XEMMessage</a></dd>
 			<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
-			<dd><a id="xembooken" href="">XEMBook English</a></dd>
-			<dd><a id="openapostille" target="_blank" href="">OpenApostille</a></dd>
-			<dd><a target="_blank" href="https://nem-login.com/login">NEM Login</a></dd>
 			<!-- <dd><a target="_blank" href="http://namuyan.dip.jp/nem/mainnet_nodb/">NEM Mainnet Faucet</a></dd> -->
 			<!-- <dd><a target="_blank" href="https://sen.xemstore.net/">XEM専</a></dd> -->
 			<!-- <dd><a target="_blank" href="https://www.nemche.com">nemche</a></dd> -->
 		</dl>
-<iframe style="border:1px solid #999;" src="https://nemlog.nem.social/iframe/ranking" width="320px" height="680px" frameborder="1" scrolling="no"></iframe>
 
 	</div>
 	<div class="qr">
@@ -137,21 +133,6 @@
 				<img  id="qr_address" src="" alt="QRコード">
 			</div>
 			<div class="col-sm-4">
-				<h4>XEM割り</h4>
-				<input type="text" value="0" id="xs_amount">円を
-				<select name="member" id="xs_member">
-					<option value="1">１人</option>
-					<option value="2">２人</option>
-					<option value="3">３人</option>
-					<option value="4">４人</option>
-					<option value="5">５人</option>
-					<option value="6">６人</option>
-					<option value="7">７人</option>
-					<option value="8">８人</option>
-					<option value="9">９人</option>
-					<option value="10">１０人</option>
-				</select>で割る<br>
-				<img  id="qr_xemsplit" src="" alt="QRコード" width="0" height="0">
 			</div>
 		</div>
 	</div>
