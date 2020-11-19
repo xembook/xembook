@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMBook for Symbol</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	var address ="";
+	if (1 < document.location.search.length) {
+
+		var query = document.location.search.substring(1);
+		var prms = query.split('&');
+		var item = new Object();
+		for (var i = 0; i < prms.length; i++) {
+			var elm   = prms[i].split('=');
+			var idx   = decodeURIComponent(elm[0]);
+			var val   = decodeURIComponent(elm[1]);
+			item[idx] = decodeURIComponent(val);
+		}
+		address = item["address"];
+	}
+
+	if( address == ""){
+	//		var proaddress = prompt_address();
+		var proaddress = window.prompt('NEMアドレスを入力してください','');
+		if(proaddress === ''){
+
+		}else if(proaddress === null){
+			alert("サンプル：XEMBookアカウントを表示します");
+			address = "NBZNQL-2JDWTG-UAW237-PXV4SS-XSPORY-43GUSW-GSB7";
+		}else{
+
+			proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
+			location.href = "http://xembook.net/?address=" + proaddress;
+		}
+
+	}
+	address = address.replace( /-/g , "" ).toUpperCase();
+	</script>
+
+</head>
+<body>
+<h1>XEMBook</h1>
+<hr class="zigzag-orange-white">
+<div class="container">
+	<div class="row">
+		<div class="account col-sm-4">
+			<span id="information"></span>
+<!--
+			<dl>
+			<dt>[NEM PR]</dt>
+			<dd><a href="http://chain.nem.ninja/#/search/NBZNQL-2JDWTG-UAW237-PXV4SS-XSPORY-43GUSW-GSB7" ><img src="320x50.png" ></a></dd>
+			<dd>ここにメッセージが入ります。ここにメッセージが入ります。</dd>
+			</dl>
+-->
+			<h2>アカウント</h2>
+			<dl>
+				<dt>口座名</dt><dd><span id="account_address"></span></dd>
+				<dt>残高</dt><dd><span id="account_balance"></span></dd>
+				<dt>時価総額</dt><dd><span id="polo_price"></span></dd>
+				<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+				<dt id="comsa_label">COMSA</dt><dd><span id="account_balance_cms"></span></dd>
+				<dd><span id="account_balance_cms_jpy"></span></dd>
+			</dl>
+			<h2>取引所</h2>
+			<dl>
+				<dt><a href="https://zaif.jp/trade_xem_jpy">Zaif</a></dt><dd><span id="zaif_lastprice"></span></dd>
+				<dt><a href="https://www.huobi.co.jp/exchange/xem_jpy/">Huobi</a></dt><dd><span id="huobi_lastprice"></span></dd>
+				<dt><a href="https://coincheck.com/ja/exchange">coincheck</a></dt><dd><span id="coincheck_lastprice"></span></dd>
+				<dt><a href="https://www.binance.com/trade.html?symbol=XEM_BTC">Binance</a></dt><dd><span id="binance_lastprice"></span></dd>
+				<dt><a href="https://upbit.com/home">UPbit</a></dt><dd><span id="upbit_lastprice"></span></dd>
+				<dt><a href="https://bittrex.com/Market/Index?MarketName=BTC-XEM">BITTREX</a></dt><dd><span id="bittrex_lastprice"></span></dd>
+<!--				<dt><a href="https://poloniex.com/exchange#BTC_XEM">Poloniex</a></dt><dd><span id="polo_lastprice"></span></dd> -->
+<!--				<dt><a href="https://www.okex.com/spot.html">OKEX</a></dt><dd><span id="okex_lastprice"></span></dd> -->
+			</dl>
+		</div>
+		<div class="col-sm-4">
+			<h2>ハーベスト</h2>
+			<dl>
+			<dt>重要度</dt><dd><span id="account_importance2"></span></dd>
+			<dt>直近のハーベスト</dt>
+			<dd><span id="last_harvest"></span></dd>
+			</dl>
+			<table id="harvests">
+				<thead><tr><th>日時</th><th>金額</th></tr></thead>
+				<tbody></tbody>
+			</table>
+			<dl>
+				<dd><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
+		<div class="col-sm-4">
+			<h2>入出金履歴</h2>
+			<table id="transfers">
+			<thead><tr><th>日時</th><th>区分</th><th>金額</th></tr></thead>
+			<tbody></tbody>
+			</table>
+			<dl>
+				<dt>ここまでの入金総額：</dt><dd><span id="sum_income"></span></dd>
+				<dt>ここまでの出金総額：</dt><dd><span id="sum_outcome"></span></dd>
+				<dd><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+				<dd><a id="transfers_nembex">explorerで確認</a></dd>
+			</dl>
+		</div>
+	</div>
+	<div class="faucet">
+		<h2>リンク</h2>
+		<dl>
+			<dd><a id="nemqrip" href="nemqrip.html">NEMQRip</a></dd>
+			<dd><a id="tipnem" href="">TipNEM</a></dd>
+			<dd><a id="nemgallery" href="">NEMGallery</a></dd>
+			<dd><a id="xemtax" href="">XEMTax</a></dd>
+			<dd><a id="xemmessage" href="">XEMMessage</a></dd>
+			<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
+			<dd><a id="xembooken" href="">XEMBook English</a></dd>
+			<dd><a id="openapostille" target="_blank" href="">OpenApostille</a></dd>
+			<dd><a target="_blank" href="https://nem-login.com/login">NEM Login</a></dd>
+			<!-- <dd><a target="_blank" href="http://namuyan.dip.jp/nem/mainnet_nodb/">NEM Mainnet Faucet</a></dd> -->
+			<!-- <dd><a target="_blank" href="https://sen.xemstore.net/">XEM専</a></dd> -->
+			<!-- <dd><a target="_blank" href="https://www.nemche.com">nemche</a></dd> -->
+		</dl>
+<iframe style="border:1px solid #999;" src="https://nemlog.nem.social/iframe/ranking" width="320px" height="680px" frameborder="1" scrolling="no"></iframe>
+
+	</div>
+	<div class="qr">
+		<h2>QRコード</h2>
+		<div class="row">
+			<div class="col-sm-4">
+				<h4>XEMBook URL</h4>
+				<img id="qr_xembook" src="" alt="QRコード">
+			</div>
+			<div class="col-sm-4">
+				<h4>NEMアドレス</h4>
+				<img  id="qr_address" src="" alt="QRコード">
+			</div>
+			<div class="col-sm-4">
+				<h4>XEM割り</h4>
+				<input type="text" value="0" id="xs_amount">円を
+				<select name="member" id="xs_member">
+					<option value="1">１人</option>
+					<option value="2">２人</option>
+					<option value="3">３人</option>
+					<option value="4">４人</option>
+					<option value="5">５人</option>
+					<option value="6">６人</option>
+					<option value="7">７人</option>
+					<option value="8">８人</option>
+					<option value="9">９人</option>
+					<option value="10">１０人</option>
+				</select>で割る<br>
+				<img  id="qr_xemsplit" src="" alt="QRコード" width="0" height="0">
+			</div>
+		</div>
+	</div>
+	<div>
+		<h2>アドレス(コピー用)</h2>
+		<ul class="list-inline">
+		<li><input id="full_address" type="textarea" value="" onclick="this.setSelectionRange(0,9999);" readonly></li>
+		<li><button id="clipboard" type="button" class="btn btn-default" data-clipboard-target="#full_address">Copy</button></li>
+		</ul>
+	</div>
+	<div>
+		<h2>開発者への寄付</h2>
+		<ul class="list-inline">
+		<li><input id="dev_address" type="textarea" value="NBZNQL2JDWTGUAW237PXV4SSXSPORY43GUSWGSB7" onclick="this.setSelectionRange(0,9999);" readonly></li>
+		<li><button id="clipboard" type="button" class="btn btn-default" data-clipboard-target="#dev_address">Copy</button></li>
+		</ul>
+		<dl>
+		<dt>収支報告</dt>
+		<dd><a href="http://chain.nem.ninja/#/search/NBZNQL-2JDWTG-UAW237-PXV4SS-XSPORY-43GUSW-GSB7" >nembexで確認</a></dd>
+		<dd><a href="?address=NBZNQL-2JDWTG-UAW237-PXV4SS-XSPORY-43GUSW-GSB7" >XEMBookで確認</a></dd>
+		</dl>
+	</div>
+</div>
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://cdn.jsdelivr.net/clipboard.js/1.5.3/clipboard.min.js"></script>
+<script src="xembook2.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-100421513-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+</body>
+</html>
