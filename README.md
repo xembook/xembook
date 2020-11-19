@@ -1,4 +1,5 @@
 ### Hi there 👋
+this is XEMBook for Symbol from NEM.
 
 <!--
 **xembook/xembook** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
