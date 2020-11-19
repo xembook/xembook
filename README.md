@@ -1,6 +1,11 @@
 ### Hi there 👋
 this is XEMBook for Symbol from NEM.
 
+
+### ライセンス
+XEMBookという名称と共に秘密鍵やニーモニック入力を求めるフォームを設置しないでください。
+あとは商用問わず、自由にご利用ください。
+
 <!--
 **xembook/xembook** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
