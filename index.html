@@ -8,37 +8,6 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="style.css" />
 	<script>
-	var address ="";
-	if (1 < document.location.search.length) {
-
-		var query = document.location.search.substring(1);
-		var prms = query.split('&');
-		var item = new Object();
-		for (var i = 0; i < prms.length; i++) {
-			var elm   = prms[i].split('=');
-			var idx   = decodeURIComponent(elm[0]);
-			var val   = decodeURIComponent(elm[1]);
-			item[idx] = decodeURIComponent(val);
-		}
-		address = item["address"];
-	}
-
-	if( address == ""){
-	//		var proaddress = prompt_address();
-		var proaddress = window.prompt('NEMアドレスを入力してください','');
-		if(proaddress === ''){
-
-		}else if(proaddress === null){
-			alert("サンプル：XEMBookアカウントを表示します");
-			address = "NBZNQL-2JDWTG-UAW237-PXV4SS-XSPORY-43GUSW-GSB7";
-		}else{
-
-			proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
-			location.href = "http://xembook.net/?address=" + proaddress;
-		}
-
-	}
-	address = address.replace( /-/g , "" ).toUpperCase();
 	</script>
 
 </head>
@@ -158,7 +127,9 @@
 </div>
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <script src="https://cdn.jsdelivr.net/clipboard.js/1.5.3/clipboard.min.js"></script>
-<script src="xembook2.js"></script>
+<script src="symbol-sdk-pack-0.21.0.js"></script>
+<script src="xembook-tools.js"></script>
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -168,6 +139,72 @@
   ga('create', 'UA-100421513-1', 'auto');
   ga('send', 'pageview');
 </script>
+<script>
+const NODE = 'https://d3rmzi6ltfh1jy.cloudfront.net';
+const nem = require("/node_modules/symbol-sdk");
 
+const accountHttp = new nem.AccountHttp(NODE);
+
+
+var address ="";
+if (1 < document.location.search.length) {
+
+	var query = document.location.search.substring(1);
+	var prms = query.split('&');
+	var item = new Object();
+	for (var i = 0; i < prms.length; i++) {
+		var elm   = prms[i].split('=');
+		var idx   = decodeURIComponent(elm[0]);
+		var val   = decodeURIComponent(elm[1]);
+		item[idx] = decodeURIComponent(val);
+	}
+	address = item["address"];
+}
+
+if( address == ""){
+//		var proaddress = prompt_address();
+	var proaddress = window.prompt('NEMアドレスを入力してください','');
+	if(proaddress === ''){
+
+	}else if(proaddress === null){
+		alert("サンプル：XEMBookアカウントを表示します");
+		address = "TBFUPLVLQEZQZGOVIOBS6RPXOJCIDSMJYVNE4MQ";
+	}else{
+
+		proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
+		location.href = "http://xembook.net/?address=" + proaddress;
+	}
+
+}
+address = address.replace( /-/g , "" ).toUpperCase();
+const alice = nem.Address.createFromRawAddress(address);
+
+accountHttp.getAccountTransactions(alice)
+.subscribe(_=>{
+
+    for( tx of _){
+        var mosaicAmount = "";
+        for(mosaic of  tx.mosaics){
+            if(mosaic.id.id.toHex() == "D525AD41D95FCF29"){
+                mosaicAmount = mosaic.amount.toString();
+            }
+        }
+
+        var txType = "出金";
+        if(address == tx.recipientAddress ){
+
+            txType = "入金"
+        }
+
+        $("#table").append("<tr>"
+        + "<td>"+ dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000) + "</td>"
+        + "<td>"+ txType + "</td>"
+        + "<td>"+ dispAmount(mosaicAmount,6) + "</td>"
+        + "</tr>"
+        );
+    }
+});
+
+</script>
 </body>
 </html>

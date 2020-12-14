@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMBook</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-100421513-1', 'auto');
+	  ga('send', 'pageview');
+	</script>
+</head>
+<body>
+
+<div class="container">
+	<h2>アカウント</h2>
+	<dl id="account_info">
+		<dt>口座名</dt><dd><span id="account_address"></span></dd>
+		<dt>残高</dt><dd><span id="account_balance"></span></dd>
+	</dl>
+
+    <h2>送受信履歴:</h2>
+    <table id="table"  class="table">
+        <thead><tr>
+            <th>日時</th>
+			<th>区分</th>
+            <th>モザイク</th>
+            <th>数量</th>
+            <th>メッセージ</th>
+        </tr></thead>
+    </table>
+	<dd><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-pack-0.21.0.js"></script>
+
+<script>
+
+//const NODE = 'https://sym-test.opening-line.jp:3001';
+const NODE = 'https://d3rmzi6ltfh1jy.cloudfront.net';
+const nem = require("/node_modules/symbol-sdk");
+const op = require("/node_modules/rxjs/operators");
+const rxjs = require("/node_modules/rxjs");
+
+
+const nodeHttp = new nem.NodeHttp(NODE);
+const accountHttp = new nem.AccountHttp(NODE);
+const mosaicHttp = new nem.MosaicHttp(NODE);
+const nsHttp = new nem.NamespaceHttp(NODE);
+const receiptHttp = new nem.ReceiptHttp(NODE);
+const txHttp = new nem.TransactionHttp(NODE);
+
+const nsService = new nem.NamespaceService(nsHttp);
+
+nodeHttp.getNodeInfo()
+.subscribe(
+x=>{
+	console.log(x);
+}
+
+)
+
+$('#transfers_more').click(function(){getTransfers(25);return false;});
+
+//var address ="TBZ6G6M7Q2BA4H4LPG4FHBXNZHSZX6DCCR2XSYDG";
+//var address ="TBFUPLVLQEZQZGOVIOBS6RPXOJCIDSMJYVNE4MQ";
+var address ="TBQMNBY7Z3YTT2V7Y32CKSVQPJ3YDAD4RJ665AA";
+var address ="TB4BIZTP7VKFMF66MQPWEXQOS6HNDO7QH24XYLA";
+
+
+	if (1 < document.location.search.length) {
+
+		var query = document.location.search.substring(1);
+		var prms = query.split('&');
+		var item = new Object();
+		for (var i = 0; i < prms.length; i++) {
+			var elm   = prms[i].split('=');
+			var idx   = decodeURIComponent(elm[0]);
+			var val   = decodeURIComponent(elm[1]);
+			item[idx] = decodeURIComponent(val);
+		}
+		address = item["address"];
+	}
+
+	if( address == ""){
+	//		var proaddress = prompt_address();
+		var proaddress = window.prompt('NEMアドレスを入力してください','');
+		if(proaddress === ''){
+
+		}else if(proaddress === null){
+			alert("サンプル：XEMBookアカウントを表示します");
+			address = "TBFUPLVLQEZQZGOVIOBS6RPXOJCIDSMJYVNE4MQ";
+		}else{
+
+			proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
+			location.href = "http://xembook.net/?address=" + proaddress;
+		}
+		address = address.replace( /-/g , "" ).toUpperCase();
+		//history.replaceState(null,null,"/?address=" + address)
+
+	}
+	address = address.replace( /-/g , "" ).toUpperCase();
+
+const alice = nem.Address.createFromRawAddress(address);
+$("#account_address").text(alice.address);
+
+
+
+//var mosaicInfos;	//モザイク情報格納用
+//var mosaicNames;	//モザイク名格納用
+
+var accountInfo = accountHttp.getAccountInfo(alice);
+//アカウント情報
+
+accountInfo
+.pipe(
+	op.mergeMap(_=>_.mosaics),
+	op.map(_ => _.id),
+	op.toArray()
+)
+.subscribe(_=>{
+	rxjs.zip(
+		accountInfo
+		.pipe(
+			op.mergeMap(_=>_.mosaics),
+			op.toArray()
+		),
+		mosaicHttp.getMosaics(_),
+		nsHttp.getMosaicsNames(_)
+	)
+	.subscribe(_=>{
+		console.log(_);
+		var mosaicInfos = _[1];
+		var mosaicNames = _[2]
+
+		for(var i of _[0]){
+
+
+			var mosaicInfo = mosaicInfos.filter(item => item.id.toHex() === i.id.toHex());
+			var mosaicName = mosaicNames.filter(item => item.mosaicId.toHex() == i.id.toHex());
+	//		console.log(mosaicName[0].names[0].name);
+			if (mosaicName[0].names[0]){
+				mosaicLabel = mosaicName[0].names[0].name;
+			}else{
+				mosaicLabel = mosaicName[0].mosaicId.toHex();
+			}
+			console.log(mosaicName);
+			$("#account_info ").append("<dt>[" + mosaicLabel + "]</dt><dd>" + dispAmount(i.amount.toString(),mosaicInfo[0].divisibility) + "</dd>");
+		}
+
+		//トランザクション取得
+		txHttp.search({address:alice,group:nem.TransactionGroup.Confirmed})
+		.subscribe(_=>{
+//			parseTx(_.data,mosaicInfos,mosaicNames);
+		});
+	});
+});
+
+/*
+accountInfo
+.pipe(
+	ro.mergeMap(_=>_.mosaics),
+	ro.map(_ => _.id),
+	ro.toArray()
+)
+.subscribe(_=>{
+	r.zip(
+		accountInfo
+		.pipe(
+			ro.mergeMap(_=>_.mosaics),
+			ro.toArray()
+		),
+		mosaicHttp.getMosaics(_),
+		nsHttp.getMosaicsNames(_)
+	)
+	.subscribe(_=>{
+		console.log(_);
+		var mosaicInfos = _[1];
+		var mosaicNames = _[2]
+
+		for(var i of _[0]){
+
+			console.log(i.id.toHex());
+			var mosaicInfo = mosaicInfos.filter(function(item, index){
+			  if (item.id.toHex() == i.id.toHex()) return true;
+			});
+			var mosaicName = mosaicNames.filter(function(item, index){
+			  if (item.mosaicId.toHex() == i.id.toHex()) return true;
+			});
+	//		console.log(mosaicName[0].names[0].name);
+			if (mosaicName[0].names[0]){
+				mosaicLabel = mosaicName[0].names[0].name;
+			}else{
+				mosaicLabel = mosaicName[0].mosaicId.toHex();
+			}
+			console.log(mosaicName);
+			$("#account_info ").append("<dt>[" + mosaicLabel + "]</dt><dd>" + dispAmount(i.amount.toString(),mosaicInfo[0].divisibility) + "</dd>");
+		}
+
+		//トランザクション取得
+//		accountHttp.getAccountTransactions(alice)
+		txHttp.search({address:alice,group:nem.TransactionGroup.Confirmed})
+		.subscribe(_=>{
+			parseTx(_.data,mosaicInfos,mosaicNames);
+		});
+	});
+});
+
+function procMosaic(tx,mosaicInfos,mosaicNames){
+	var mosaicInfo = mosaicInfos.filter(function(item, index){
+	  if (item.id.toHex() == mosaic.id.toHex()) return true;
+	});
+	var mosaicName = mosaicNames.filter(function(item, index){
+	  if (item.mosaicId.id.toHex() == mosaic.id.toHex()) return true;
+	});
+
+	if (mosaicName[0].names[0]){
+		mosaicLabel = mosaicName[0].names[0].name;
+	}else{
+		mosaicLabel = mosaicName[0].mosaicId.toHex();
+	}
+//	$("#"+ tx.transactionInfo.height + mosaic.id.toHex()).text(mosaicLabel);
+	$("#name"+ tx.transactionInfo.id + mosaic.id.toHex()).text(mosaicLabel);
+
+	if(alice.plain() == tx.signer.address.plain()){
+//	if(alice.address.toString() == tx.signer.address.address.toString()){
+		r.zip(
+			txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+			r.of([tx,mosaic,mosaicInfo])
+		).subscribe(x => {
+			$("#amount"+ x[1][0].transactionInfo.id + x[1][1].id.toHex())
+			.text(
+				dispAmount(
+					x[1][1].amount.add(
+						nem.UInt64.fromNumericString(x[0].toString())
+					),
+					x[1][2][0].divisibility
+				)
+			);
+		});
+	}else{
+		$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount ,mosaicInfo[0].divisibility));
+	}
+}
+
+function procRegistNamespace(tx){
+	r.zip(
+		receiptHttp.searchReceipts({height:tx.transactionInfo.height}),
+
+//		receiptHttp.getBlockReceipts(tx.transactionInfo.height),
+		txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+		r.of(tx)
+	)
+	.subscribe(x => {
+		console.log(x);
+//		for (var stmt of x[0].transactionStatements){
+		for (var stmt of x[0].data){
+			for (var receipt of stmt.receipts){
+				//console.log(receipt);
+				if(receipt.type == 4942
+					&& receipt.sender.publicKey == x[2].signer.publicKey){
+
+					console.log(receipt.amount);
+					console.log(x[1]);
+					$("#amount"+ x[2].transactionInfo.id)
+					.text(
+						dispAmount(
+							receipt.amount.add(
+								nem.UInt64.fromNumericString(
+									x[1].toString()
+								)
+							)
+							,6
+						)
+					);
+				}
+			}
+			//console.log(x[2].signer.publicKey);
+		}
+	});
+
+}
+
+//トランザクション一覧
+function parseTx(_,mosaicInfos,mosaicNames){
+
+    for(var tx of _){
+		console.log(tx)
+
+		if(tx.type != nem.TransactionType.TRANSFER){ //16724
+			 $("#table").append("<tr>"
+			 + "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
+			 	+ tx.transactionInfo.hash + "''>"
+				+ dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000)
+			+ "</a></td>"
+			 + "<td id='type" + tx.transactionInfo.id + "'></td>" //mosaicLabel
+			 + "<td id='name" + tx.transactionInfo.id + "'></td>" //mosaicLabel
+			 + "<td id='amount" + tx.transactionInfo.id + "'></td>"
+			 + "<td id='message" + tx.transactionInfo.id + "'></td>"
+			 + "</tr>"
+			 );
+
+		}else{
+//			 console.log(tx);
+			 for(mosaic of tx.mosaics){
+
+				 $("#table").append("<tr>"
+				 + "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
+				 	+ tx.transactionInfo.hash + "''>"
+					+ dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000)
+				+ "</a></td>"
+				 + "<td id='type" + tx.transactionInfo.id + "'></td>" //mosaicLabel
+				 + "<td id='name" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>" //mosaicLabel
+				 + "<td id='amount" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>"
+				 + "<td id='message" + tx.transactionInfo.id + "'></td>"
+				 + "</tr>"
+				 );
+			}
+		}
+
+		if(tx.type == nem.TransactionType.MOSAIC_DEFINITION ){ //16717
+
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[モザイク定義]");
+
+
+		}else if(tx.type == nem.TransactionType.MOSAIC_ALIAS ){//17230
+			//モザイク名バインド
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[モザイク名バインド]");
+			r.zip(
+				txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+				r.of(tx)
+			).subscribe(x => {
+				$("#amount"+ x[1].transactionInfo.id )
+				.text(
+					dispAmount(
+
+							nem.UInt64.fromNumericString(x[0].toString()),6
+					)
+				);
+			});
+		}else if(tx.type == nem.TransactionType.ADDRESS_ALIAS ){//16974
+			//アドレス名バインド
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[アドレス名バインド]");
+			r.zip(
+				txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+				r.of(tx)
+			).subscribe(x => {
+				$("#amount"+ x[1].transactionInfo.id )
+				.text(
+					dispAmount(
+
+							nem.UInt64.fromNumericString(x[0].toString()),6
+					)
+				);
+			});
+		}else if(tx.type == nem.TransactionType.MOSAIC_SUPPLY_CHANGE ){ //16973
+
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[モザイク変更]");
+
+		}else if(tx.type == nem.TransactionType.NAMESPACE_REGISTRATION ){//16718
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[ネームスペース登録]");
+			$("#message"+ tx.transactionInfo.id).text(tx.namespaceName);
+
+			procRegistNamespace(tx);
+		}else if(tx.type == nem.TransactionType.VRF_KEY_LINK ){ //16963
+
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[VRF鍵リンク]");
+		}else if(tx.type == nem.TransactionType.VOTING_KEY_LINK ){ //16707
+
+			tranType = "<font color='red'>送信</font>";
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[VOTING鍵リンク]");
+
+		}else if(tx.type == nem.TransactionType.TRANSFER){//16724
+			for(mosaic of tx.mosaics){
+
+				var tranType;
+				if(alice.plain() == tx.recipientAddress.plain()){
+					tranType = "<font color='green'>受信</font>";
+				}else{
+					tranType = "<font color='red'>送信</font>";
+				}
+				$("#type"+ tx.transactionInfo.id ).html(tranType);
+				$("#message"+ tx.transactionInfo.id).text(tx.message.payload);
+
+				var assetName = mosaic.id.constructor.name;
+				if(assetName == "MosaicId"){
+
+					procMosaic(tx,mosaicInfos,mosaicNames);
+
+				}else{ //NamespaceId
+
+					procNamespace(tx,mosaic,mosaicInfos,mosaicNames);
+				}
+			}
+		}else if(tx.type == nem.TransactionType.AGGREGATE_COMPLETE ){//16705
+			var tranType;
+//			console.log(tx);
+			if(alice.address.toString() == tx.signer.address.address.toString()){
+				tranType = "<font color='red'>送信</font>";
+			}else{
+				tranType = "<font color='green'>受信</font>";
+			}
+			$("#type"+ tx.transactionInfo.id ).html(tranType);
+			$("#name"+ tx.transactionInfo.id).text("[アグリゲートトランザクション]");
+
+			parseTx(tx.innerTransactions,mosaicInfos,mosaicNames);
+			console.log(tx.transactionInfo.hash);
+
+		}
+    }
+}
+function procNamespace(tx,mosic,mosaicInfos,mosaicNames){
+	r.zip(
+//		receiptHttp.getBlockReceipts(tx.transactionInfo.height.toString()),
+		receiptHttp.searchMosaicResolutionStatements({height:tx.transactionInfo.height}),
+		r.of([mosaic,tx])
+	)
+	.subscribe(x => {
+		console.log(x);
+		var namespace = x[1][0];
+		var txhash    = x[1][1].transactionInfo.hash;
+		var txheight  = x[1][1].transactionInfo.height;
+		var txid  = x[1][1].transactionInfo.id;
+		for (var stmt of x[0].data){
+			if(namespace.id.toHex() == stmt.unresolved.id.toHex()){
+
+				var mosaicInfo = mosaicInfos.filter(function(item, index){
+				  if (item.id.toHex() == stmt.resolutionEntries[0].resolved.id.toHex()) return true;
+				});
+				var mosaicName = mosaicNames.filter(function(item, index){
+				  if (item.mosaicId.toHex() == stmt.resolutionEntries[0].resolved.id.toHex()) return true;
+				});
+
+				$("#name"+ txid + stmt.unresolved.id.toHex()).text(mosaicName[0].names[0].name);
+
+
+				if(alice.address.toString() == tx.signer.address.address.toString()){
+					r.zip(
+						txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+						r.of([tx,mosaic,mosaicInfo])
+					).subscribe(fee => {
+						$("#amount"+ txid + stmt.unresolved.id.toHex())
+						.text(
+							dispAmount(
+								namespace.amount.add(
+									nem.UInt64.fromNumericString(fee[0].toString())
+								),
+								mosaicInfo[0].divisibility
+							)
+						);
+					});
+				}else{
+//					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount ,mosaicInfo[0].divisibility));
+					$("#amount"+ txid + stmt.unresolved.id.toHex()).text(dispAmount(namespace.amount,mosaicInfo[0].divisibility));
+				}
+
+				console.log(tx.transactionInfo.hash)
+			}
+		}
+	});
+}
+*/
+function dispAmount(amount,divisibility){
+
+	var strNum = amount.toString();
+	if(divisibility > 0){
+
+		if(amount < Math.pow(10, divisibility)){
+
+			return "0." + paddingAmount0(strNum,0,divisibility);
+
+		}else{
+
+			var r = strNum.slice(-divisibility);
+			var l = strNum.substring(0,strNum.length - divisibility);
+			return comma3(l) + "." + r;
+		}
+
+	}else{
+
+		return comma3(strNum);
+	}
+
+}
+function comma3(strNum){
+	return strNum.replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+}
+
+function paddingAmount0(val,char,n){
+	for(; val.length < n; val= char + val);
+	return val;
+}
+
+function dispTimeStamp(timeStamp){
+
+	var d = new Date(timeStamp)
+	var strDate = d.getFullYear()%100
+		+ "-" + paddingDate0( d.getMonth() + 1 )
+		+ '-' + paddingDate0( d.getDate() )
+		+ ' ' + paddingDate0( d.getHours() )
+		+ ':' + paddingDate0( d.getMinutes() ) ;
+	return 	strDate;
+}
+
+function paddingDate0(num) {
+	return ( num < 10 ) ? '0' + num  : num;
+};
+
+
+</script>
+</body>
+</html>
