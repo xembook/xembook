@@ -23,10 +23,18 @@
 	<div class="account col-sm-4">
 	<h2>アカウント</h2>
 	<dl id="account_info">
-		<dt>口座名</dt><dd><p><span id="account_address"></span></p></dd>
+		<dt>口座名</dt><dd><span id="account_address"></span></dd>
 		<dt>残高</dt><dd><span id="account_balance"></span></dd>
 		<dt>重要度</dt><dd><span id="account_importance"></span></dd>
 	</dl>
+
+	<h2>取引所</h2>
+	<h2>接続ノード</h2>
+	<dl id="node_info">
+		<dt>ノード</dt><dd><p><span id="node_host"></span></p></dd>
+		<dt>ブロック</dt><dd><span id="chain_height"></span></dd>
+	</dl>
+
 	</div>
 	<div class="account col-sm-4">
     <h2>ハーベスト:</h2>
@@ -70,6 +78,7 @@ const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
 
 const nodeHttp = new nem.NodeHttp(NODE);
+const chainHttp = new nem.ChainHttp(NODE);
 const accountHttp = new nem.AccountHttp(NODE);
 const mosaicHttp = new nem.MosaicHttp(NODE);
 const nsHttp = new nem.NamespaceHttp(NODE);
@@ -78,11 +87,24 @@ const txHttp = new nem.TransactionHttp(NODE);
 const blockHttp = new nem.BlockHttp(NODE);
 const nsService = new nem.NamespaceService(nsHttp);
 
-var transferPageNumber = 0;
-var harvestPageNumber = 0;
+var transferPageNumber = 1;
+var harvestPageNumber = 1;
 
+
+chainHttp.getChainInfo().subscribe(x=>{
+	console.log(x);
+	$("#chain_height").text(x.height + " [finalized:" + x.latestFinalizedBlock.height + "]");
+
+});
+nodeHttp.getNodeInfo().subscribe(x=>{
+	console.log(x);
+	$("#node_host").text(
+		x.host
+	);
+});
 
 $('#transfers_more').click(function(){getTransfers();return false;});
+$('#harvests_more').click(function(){getHarvests();return false;});
 
 var address = "";
 //var address ="TBZ6G6M7Q2BA4H4LPG4FHBXNZHSZX6DCCR2XSYDG";
@@ -127,7 +149,7 @@ var address ="TCBAUSZO3YIS2E3YW5KTSTIQ4VHCLYLL65DANCA";
 	address = address.replace( /-/g , "" ).toUpperCase();
 
 alice = nem.Address.createFromRawAddress(address);
-$("#account_address"    ).text(
+$("#account_address").text(
 	alice.address.substring(0,6)
 	+ "-" +alice.address.substring(6,12)
 	+ "-" + alice.address.substring(12,18)
@@ -158,7 +180,7 @@ accountInfo
 
 	$("#account_importance").append("<dd>" + account_importance + "</dd>");
 	getTransfers();
-	getHavests();
+	getHarvests();
 
 });
 
@@ -166,17 +188,28 @@ accountInfo
 //トランザクション取得
 function getTransfers(){
 
-	txHttp.search({address:alice,group:nem.TransactionGroup.Confirmed,embedded:true,pageNumber:transferPageNumber,order:"desc"})
+	txHttp.search({
+		address:alice,
+		group:nem.TransactionGroup.Confirmed,
+		embedded:true,
+		pageNumber:transferPageNumber,
+		order:"desc"})
 	.subscribe(_=>{
 		transferPageNumber++;
-		parseTx(_.data);
+console.log("!!!!!")
+			parseTx(_.data);
 	});
-	
 }
 
-function getHavests(){
+function getHarvests(){
 
-	receiptHttp.searchReceipts({targetAddress:alice,receiptTypes:[nem.ReceiptType.Harvest_Fee],pageNumber:harvestPageNumber,order:"desc"})
+	receiptHttp.searchReceipts({
+		targetAddress:alice,
+		receiptTypes:[nem.ReceiptType.Harvest_Fee],
+		pageNumber:harvestPageNumber,
+		pageSize:10,
+		order:"desc"
+	})
 	.pipe(
 		op.mergeMap(_=>_.data),
 	)
