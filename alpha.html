@@ -63,7 +63,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-pack-0.22.2.js"></script>
+<script src="symbol-sdk-0.22.2.js"></script>
 
 <script>
 
@@ -263,9 +263,11 @@ function parseTx(txs){
 			 );
 
 			var tranType;
+ 			if(alice.plain() === tx.recipientAddress.plain()){
+				tranType = "<font color='green'>受信{集約}</font>";
 
- 			if(alice.plain() == tx.signer.address.plain()){
- 				tranType = "<font color='red'>送信{集約}</font>";
+ 			}else{
+				tranType = "<font color='red'>送信{集約}</font>";
  				rxjs.zip(
  					txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
  					rxjs.of({tx:tx})
@@ -275,8 +277,6 @@ function parseTx(txs){
  						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
  					);
  				});
- 			}else{
- 				tranType = "<font color='green'>受信{集約}</font>";
  			}
  			$("#type"+ tx.transactionInfo.id ).html(tranType);
 
@@ -285,8 +285,6 @@ function parseTx(txs){
 
  				parseTx(aggTx[0].innerTransactions);
  			});
-
-
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
@@ -304,7 +302,7 @@ function parseTx(txs){
 				);
 
 				var tranType;
-				if(alice.plain() == tx.recipientAddress.plain()){
+				if(alice.plain() === tx.recipientAddress.plain()){
 
 					tranType = "<font color='green'>受信</font>";
 					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
@@ -331,15 +329,6 @@ function parseTx(txs){
 			}
 		}else{
 			console.log(tx);
-		}
-
-		if([
-			nem.TransactionType.AGGREGATE_COMPLETE,
-			nem.TransactionType.AGGREGATE_BONDED
-		   ].includes(tx.type)){
-
-		}else{
-			console.log(tx.type);
 		}
 	}
 }
