@@ -100,7 +100,7 @@ chainHttp.getChainInfo().subscribe(x=>{
 
 	).subscribe(x => {
 
-		$("#chain_height").text(
+		$("#chain_height").html(
 			dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH) 
 			+ "<br> [finalized:" + dispTimeStamp(Number(x[1].timestamp.toString()),SYMBOL_EPOCH)  + "]"
 		);
