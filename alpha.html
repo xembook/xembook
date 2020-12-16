@@ -208,7 +208,7 @@ function getTransfers(){
 		order:"desc"})
 	.subscribe(_=>{
 		transferPageNumber++;
-		parseTx(_.data);
+		parseTx(_.data,true);
 	});
 }
 
@@ -254,7 +254,7 @@ function getHarvests(){
 }
 
 //トランザクション一覧
-function parseTx(txs){
+function parseTx(txs,enableCalcFee){
 
 	for(var tx of txs){
 
@@ -273,10 +273,8 @@ function parseTx(txs){
 			 );
 
 			var tranType;
- 			if(alice.plain() === tx.recipientAddress.plain()){
-				tranType = "<font color='green'>受信{集約}</font>";
-
- 			}else{
+			if(alice.plain() ===  tx.signer.address.plain()){
+ //			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信{集約}</font>";
  				rxjs.zip(
  					txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
@@ -287,13 +285,16 @@ function parseTx(txs){
  						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
  					);
  				});
+
+ 			}else{
+				tranType = "<font color='green'>受信{集約}</font>";
  			}
  			$("#type"+ tx.transactionInfo.id ).html(tranType);
 
  			txHttp.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
  			.subscribe(aggTx =>{
 
- 				parseTx(aggTx[0].innerTransactions);
+ 				parseTx(aggTx[0].innerTransactions,false);
  			});
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
@@ -312,12 +313,9 @@ function parseTx(txs){
 				);
 
 				var tranType;
-				if(alice.plain() === tx.recipientAddress.plain()){
 
-					tranType = "<font color='green'>受信</font>";
-					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
-
-				}else{
+				if(enableCalcFee && alice.plain() ===  tx.signer.address.plain()){
+//				if(alice.plain() === tx.recipientAddress.plain()){
 
 					tranType = "<font color='red'>送信</font>";
 					rxjs.zip(
@@ -334,6 +332,12 @@ function parseTx(txs){
 							)
 						);
 					});
+				}else{
+
+					tranType = "<font color='green'>受信</font>";
+					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
+
+
 				}
 				$("#type"+ tx.transactionInfo.id +mosaic.id.toHex() ).html(tranType);
 			}
