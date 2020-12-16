@@ -93,7 +93,19 @@ var harvestPageNumber = 1;
 
 chainHttp.getChainInfo().subscribe(x=>{
 	console.log(x);
-	$("#chain_height").text(x.height + " [finalized:" + x.latestFinalizedBlock.height + "]");
+
+	rxjs.zip(
+		blockHttp.getBlockByHeight(x.height),
+		blockHttp.getBlockByHeight(x.latestFinalizedBlock.height),
+
+	).subscribe(x => {
+
+		$("#chain_height").text(
+			dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH) 
+			+ " [finalized:" + dispTimeStamp(Number(x[1].timestamp.toString()),SYMBOL_EPOCH)  + "]"
+		);
+	})
+
 
 });
 nodeHttp.getNodeInfo().subscribe(x=>{
