@@ -63,7 +63,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-pack-0.21.0.js"></script>
+<script src="symbol-sdk-pack-0.22.2.js"></script>
 
 <script>
 
@@ -196,8 +196,7 @@ function getTransfers(){
 		order:"desc"})
 	.subscribe(_=>{
 		transferPageNumber++;
-console.log("!!!!!")
-			parseTx(_.data);
+		parseTx(_.data);
 	});
 }
 
@@ -247,12 +246,12 @@ function getHarvests(){
 //トランザクション一覧
 function parseTx(txs){
 
-	cnt = 0;
 	for(var tx of txs){
-		cnt++;
-		console.log(tx)
 
-		if(tx.type === nem.TransactionType.AGGREGATE_COMPLETE){ //16724
+		if([
+			nem.TransactionType.AGGREGATE_COMPLETE,
+			nem.TransactionType.AGGREGATE_BONDED
+		   ].includes(tx.type)){
 			 $("#table").append("<tr>"
 			 + "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
 			 	+ tx.transactionInfo.hash + "''>"
@@ -263,12 +262,37 @@ function parseTx(txs){
 			 + "</tr>"
 			 );
 
+			var tranType;
+
+ 			if(alice.plain() == tx.signer.address.plain()){
+ 				tranType = "<font color='red'>送信{集約}</font>";
+ 				rxjs.zip(
+ 					txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+ 					rxjs.of({tx:tx})
+ 				).subscribe(x => {
+ 					$("#amount"+ x[1].tx.transactionInfo.id)
+ 					.text(
+ 						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
+ 					);
+ 				});
+ 			}else{
+ 				tranType = "<font color='green'>受信{集約}</font>";
+ 			}
+ 			$("#type"+ tx.transactionInfo.id ).html(tranType);
+
+ 			txHttp.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
+ 			.subscribe(aggTx =>{
+
+ 				parseTx(aggTx[0].innerTransactions);
+ 			});
+
+
+
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
 			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE","5B66E76BECAD0860"].includes(item.id.toHex()));
 
 			for(mosaic of xym){
-				console.log(cnt);
 				$("#table").append("<tr>"
 				+ "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
 				   + tx.transactionInfo.hash + "''>"
@@ -314,29 +338,6 @@ function parseTx(txs){
 			nem.TransactionType.AGGREGATE_BONDED
 		   ].includes(tx.type)){
 
-			var tranType;
-
-			if(alice.plain() == tx.signer.address.plain()){
-				tranType = "<font color='red'>送信{集約}</font>";
-				rxjs.zip(
-					txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
-					rxjs.of({tx:tx})
-				).subscribe(x => {
-					$("#amount"+ x[1].tx.transactionInfo.id)
-					.text(
-						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
-					);
-				});
-			}else{
-				tranType = "<font color='green'>受信{集約}</font>";
-			}
-			$("#type"+ tx.transactionInfo.id ).html(tranType);
-
-			txHttp.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
-			.subscribe(aggTx =>{
-
-				parseTx(aggTx[0].innerTransactions);
-			});
 		}else{
 			console.log(tx.type);
 		}
