@@ -247,9 +247,7 @@ function getHarvests(){
 		).subscribe(x => {
 
 			$("#harvest_date"+ x[1].height).text(
-				dispAmount(
-					dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH),6
-				)
+				dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH)
 			);
 		})
 	});
