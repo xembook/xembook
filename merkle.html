@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMBook</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-100421513-1', 'auto');
+	  ga('send', 'pageview');
+	</script>
+</head>
+<body>
+
+<div class="container">
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-0.22.2.js"></script>
+
+<script>
+
+//const NODE = 'https://sym-test.opening-line.jp:3001';
+const NODE = 'http://api-01.ap-southeast-1.0.10.0.x.symboldev.network:3000';
+const GENERATION_HASH = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
+
+const SYMBOL_EPOCH = 1573430400000;
+
+//const NODE = 'https://symbol-testnet-node.next-web-technology.com:3001';
+
+const nem = require("/node_modules/symbol-sdk");
+const op = require("/node_modules/rxjs/operators");
+const rxjs = require("/node_modules/rxjs");
+const sha3_256 = require('/node_modules/js-sha3').sha3_256;
+
+const repo = new nem.RepositoryFactoryHttp(NODE, nem.NetworkType.TEST_NET,GENERATION_HASH);
+const accountRepo = repo.createAccountRepository()
+const blockRepo = repo.createBlockRepository()
+const stateProofService = new nem.StateProofService(repo);
+
+const alice = nem.Account.createFromPrivateKey("F153F89498331537CB9436965DBE2F41660FBEFA911BD61635ADF3DE15ECD367",nem.NetworkType.TEST_NET);
+stateProofService.accountById(alice.address)
+.subscribe(proof=>{
+	console.log(proof);
+
+	bit = "";
+	link = proof.merkleTree.leaf.leafHash;
+	merkle = proof.merkleTree
+	merkleBranches = merkle.branches.reverse();
+	for(let i = 0; i < merkleBranches.length; i++){
+	    merkleTreeBranchLink = merkleBranches[i].links.find(x=>x.link === link)
+	    link = merkleBranches[i].branchHash;
+	    bit =  merkleTreeBranchLink.bit + bit;
+	}
+	addressHash = "bits:" + bit + "+path:"+ merkle.leaf.path;
+	console.log(addressHash);
+})
+
+hasher = sha3_256.create();
+aliceHash = hasher.update(nem.RawAddress.stringToAddress(alice.address.plain())).hex().toUpperCase();
+console.log("Raw Address Hash:" + aliceHash + "(=branch.bits+leaf.path)");
+
+blockRepo.search({order: nem.Order.Desc})
+.subscribe(x=>console.log("Block State Hash:" + x.data[0].stateHashSubCacheMerkleRoots[0] + "(=rootHash)"))
+
+hasher = sha3_256.create();
+accountRepo.getAccountInfo(alice.address)
+.subscribe(aliceInfo =>{
+	console.log(aliceInfo)
+	aliceInfoHash = hasher.update(aliceInfo.serialize()).hex().toUpperCase();
+
+	console.log("AccountInfo Hash:" + aliceInfoHash + "(=stateHash)");
+
+})
+
+/*
+(async () => {
+
+const alice = nem.Account.createFromPrivateKey("F153F89498331537CB9436965DBE2F41660FBEFA911BD61635ADF3DE15ECD367",nem.NetworkType.TEST_NET);
+const proof = await stateProofService.accountById(alice.address).toPromise().then(
+	x=>{console.log(x)}
+);
+bit = "";
+link = proof.merkleTree.leaf.leafHash;
+console.log(link);
+
+
+merkle = proof.merkleTree
+merkleBranches = merkle.branches.reverse();
+
+for(i of merkleBranches){
+    console.log()
+    merkleTreeBranchLink = i.links.find(x=>x.link === link)
+    link = merkleTreeBranchLink.link;
+    bit =+ merkleTreeBranchLink.bit;
+}
+})
+*/
+
+</script>
+</body>
+</html>
