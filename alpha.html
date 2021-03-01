@@ -63,13 +63,13 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-0.22.2.js"></script>
+<script src="symbol-sdk-0.23.2.js"></script>
 
 <script>
 
 //const NODE = 'https://sym-test.opening-line.jp:3001';
-const NODE = 'https://d3rmzi6ltfh1jy.cloudfront.net';
-const SYMBOL_EPOCH = 1573430400000;
+const NODE = 'https://sym-test.opening-line.jp:3001';
+//const SYMBOL_EPOCH = 1573430400000;
 
 //const NODE = 'https://symbol-testnet-node.next-web-technology.com:3001';
 
@@ -77,55 +77,30 @@ const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
 
-const nodeHttp = new nem.NodeHttp(NODE);
-const chainHttp = new nem.ChainHttp(NODE);
-const accountHttp = new nem.AccountHttp(NODE);
-const mosaicHttp = new nem.MosaicHttp(NODE);
-const nsHttp = new nem.NamespaceHttp(NODE);
-const receiptHttp = new nem.ReceiptHttp(NODE);
-const txHttp = new nem.TransactionHttp(NODE);
-const blockHttp = new nem.BlockHttp(NODE);
-const nsService = new nem.NamespaceService(nsHttp);
 
-var transferPageNumber = 1;
-var harvestPageNumber = 1;
+//repo
+repo = new nem.RepositoryFactoryHttp(NODE);
+nsRepo = repo.createNamespaceRepository();
+txRepo = repo.createTransactionRepository();
+nwRepo = repo.createNetworkRepository();
+blockRepo = repo.createBlockRepository();
+receiptRepo = repo.createReceiptRepository();
+accountRepo = repo.createAccountRepository();
+nodeRepo = repo.createNodeRepository();
+tsRepo = repo.createTransactionStatusRepository();
+chainRepo = repo.createChainRepository();
+finRepo = repo.createFinalizationRepository();
+hlRepo = repo.createHashLockRepository();
+metaRepo = repo.createMetadataRepository();
+mosaicRepo = repo.createMosaicRepository();
+msigRepo = repo.createMultisigRepository();
+resAccountRepo = repo.createRestrictionAccountRepository();
+resMosaicRepo = repo.createRestrictionMosaicRepository();
+slRepo = repo.createSecretLockRepository();
 
-
-chainHttp.getChainInfo().subscribe(x=>{
-	console.log(x);
-
-	rxjs.zip(
-		blockHttp.getBlockByHeight(x.height),
-		blockHttp.getBlockByHeight(x.latestFinalizedBlock.height),
-
-	).subscribe(x => {
-
-		$("#chain_height").html(
-			dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH) 
-			+ "<br> [finalized:" + dispTimeStamp(Number(x[1].timestamp.toString()),SYMBOL_EPOCH)  + "]"
-		);
-	})
-
-
-});
-nodeHttp.getNodeInfo().subscribe(x=>{
-	console.log(x);
-	$("#node_host").text(
-		x.host
-	);
-});
-
-$('#transfers_more').click(function(){getTransfers();return false;});
-$('#harvests_more').click(function(){getHarvests();return false;});
 
 var address = "";
-//var address ="TBZ6G6M7Q2BA4H4LPG4FHBXNZHSZX6DCCR2XSYDG";
-//var address ="TBFUPLVLQEZQZGOVIOBS6RPXOJCIDSMJYVNE4MQ";
-//var address ="TBQMNBY7Z3YTT2V7Y32CKSVQPJ3YDAD4RJ665AA";
-//var address ="TB4BIZTP7VKFMF66MQPWEXQOS6HNDO7QH24XYLA";
-//var address ="TA6IK6ZIPN5YD63NJADBKNDDLJYCZ5FJJ2B72DA";
-//var address ="TB5CCNP5W3WOEFJ34SWF3JPLDCS6OQQOA77LQYI";
-var address ="TCBAUSZO3YIS2E3YW5KTSTIQ4VHCLYLL65DANCA";
+var address ="TB2E674ZMZS4XK7VPEISTZ7YVYQ2WZCWLYLNDPA";
 
 	if (1 < document.location.search.length) {
 
@@ -148,7 +123,7 @@ var address ="TCBAUSZO3YIS2E3YW5KTSTIQ4VHCLYLL65DANCA";
 
 		}else if(proaddress === null){
 			alert("サンプル：XEMBookアカウントを表示します");
-			address = "TCFV4TKV6RMN7QPR3PTBXDWIJCLXDVKSIPEEUAQ";
+			address = "TB2E674ZMZS4XK7VPEISTZ7YVYQ2WZCWLYLNDPA";
 		}else{
 
 			proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
@@ -170,37 +145,105 @@ $("#account_address").text(
 
 
 
+//parameter
+(async() =>{
+epochAdjustment = await repo.getEpochAdjustment().toPromise();
+generationHash = await repo.getGenerationHash().toPromise();
+currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
+networkCurrency = (await repo.getCurrencies().toPromise()).currency;
+networkType = await repo.getNetworkType().toPromise();
+transactionFees = await nwRepo.getTransactionFees().toPromise();
+highestFeeMultiplier = transactionFees.highestFeeMultiplier;
+averageFeeMultiplier = transactionFees.averageFeeMultiplier;
+minFeeMultiplier = transactionFees.minFeeMultiplier;
+medianFeeMultiplier = transactionFees.medianFeeMultiplier;
 
-//アカウント情報
-var accountInfo = accountHttp.getAccountInfo(alice);
+currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 
-accountInfo
-.pipe(
-	op.mergeMap(_=>_.mosaics),
-	op.filter(_ => _.id.toHex() === "5B66E76BECAD0860"),
-)
-.subscribe(_=>{
-	$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
-});
+//storageInfo = await nodeRepo.getStorageInfo().toPromise();
+latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
+await blockRepo.getBlockByHeight(latestBlock.height).toPromise()
+await blockRepo.getBlockByHeight(1).toPromise()
 
-accountInfo
-.subscribe(_=>{
+latestConfirmedTx = (await txRepo.search({group:nem.TransactionGroup.Confirmed,order: nem.Order.Desc}).toPromise()).data[0]
+txStatus = await tsRepo.getTransactionStatus(latestConfirmedTx.transactionInfo.hash).toPromise()
 
-	var account_importance = Number(_.importance.toString()) / 100000000;
-	account_importance = Math.round( account_importance );
-	account_importance /= 10000;
 
-	$("#account_importance").append("<dd>" + account_importance + "</dd>");
-	getTransfers();
-	getHarvests();
+	//アカウント情報
+	var accountInfo = accountRepo.getAccountInfo(alice);
 
-});
+	accountInfo
+	.pipe(
+		op.mergeMap(_=>_.mosaics),
+		op.filter(_ => _.id.toHex() === currencyId),
+	)
+	.subscribe(_=>{
+		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+	});
+
+	accountInfo
+	.subscribe(_=>{
+
+		var account_importance = Number(_.importance.toString()) / 100000000;
+		account_importance = Math.round( account_importance );
+		account_importance /= 10000;
+
+		$("#account_importance").append("<dd>" + account_importance + "</dd>");
+		getTransfers();
+		getHarvests();
+
+	});
+
+	chainRepo.getChainInfo().subscribe(x=>{
+		console.log(x);
+
+		rxjs.zip(
+			blockRepo.getBlockByHeight(x.height),
+			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
+
+		).subscribe(x => {
+
+			$("#chain_height").html(
+				dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+				+ "<br> [finalized:" + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)  + "]"
+			);
+		})
+
+
+	});
+	nodeRepo.getNodeInfo().subscribe(x=>{
+		console.log(x);
+		$("#node_host").text(
+			x.host
+		);
+	});
+
+})();
+
+/*
+const nodeHttp = new nem.NodeHttp(NODE);
+const chainHttp = new nem.ChainHttp(NODE);
+const accountHttp = new nem.AccountHttp(NODE);
+const mosaicHttp = new nem.MosaicHttp(NODE);
+const nsHttp = new nem.NamespaceHttp(NODE);
+const receiptHttp = new nem.ReceiptHttp(NODE);
+const txHttp = new nem.TransactionHttp(NODE);
+const blockHttp = new nem.BlockHttp(NODE);
+const nsService = new nem.NamespaceService(nsHttp);
+*/
+var transferPageNumber = 1;
+var harvestPageNumber = 1;
+
+
+
+$('#transfers_more').click(function(){getTransfers();return false;});
+$('#harvests_more').click(function(){getHarvests();return false;});
 
 
 //トランザクション取得
 function getTransfers(){
 
-	txHttp.search({
+	txRepo.search({
 		address:alice,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
@@ -208,13 +251,14 @@ function getTransfers(){
 		order:"desc"})
 	.subscribe(_=>{
 		transferPageNumber++;
-		parseTx(_.data,true);
+		parseTx(_.data);
 	});
 }
 
 function getHarvests(){
 
-	receiptHttp.searchReceipts({
+	harvestPageNumber++;
+	receiptRepo.searchReceipts({
 		targetAddress:alice,
 		receiptTypes:[nem.ReceiptType.Harvest_Fee],
 		pageNumber:harvestPageNumber,
@@ -226,7 +270,6 @@ function getHarvests(){
 	)
 	.subscribe(_=>{
 
-		harvestPageNumber++;
 		var receipt = _.receipts.filter(item=>{
 			if(item.targetAddress){
 				return item.targetAddress.plain() === alice.plain();
@@ -241,29 +284,28 @@ function getHarvests(){
 		);
 
 		rxjs.zip(
-			blockHttp.getBlockByHeight(_.height),
+			blockRepo.getBlockByHeight(_.height),
 			rxjs.of({height:_.height})
 
 		).subscribe(x => {
 
 			$("#harvest_date"+ x[1].height).text(
-				dispTimeStamp(Number(x[0].timestamp.toString()),SYMBOL_EPOCH)
+				dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
 			);
 		})
 	});
 }
 
 //トランザクション一覧
-function parseTx(txs,enableCalcFee){
+function parseTx(txs,parentId){
 
 	for(var tx of txs){
-
 		if([
 			nem.TransactionType.AGGREGATE_COMPLETE,
 			nem.TransactionType.AGGREGATE_BONDED
 		   ].includes(tx.type)){
-			 $("#table").append("<tr>"
-			 + "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
+			 $("#table").append("<tr id='agg" + tx.transactionInfo.id + "'>"
+			 + "<td><a target='_blank' href='http://explorer.testnet.symboldev.network/transactions/"
 			 	+ tx.transactionInfo.hash + "''>"
 				+ dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000,0)
 			+ "</a></td>"
@@ -275,9 +317,9 @@ function parseTx(txs,enableCalcFee){
 			var tranType;
 			if(alice.plain() ===  tx.signer.address.plain()){
  //			if(alice.plain() === tx.recipientAddress.plain()){
-				tranType = "<font color='red'>送信{集約}</font>";
+				tranType = "<font color='red'>送信[集約]</font>";
  				rxjs.zip(
- 					txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+ 					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
  					rxjs.of({tx:tx})
  				).subscribe(x => {
  					$("#amount"+ x[1].tx.transactionInfo.id)
@@ -287,39 +329,38 @@ function parseTx(txs,enableCalcFee){
  				});
 
  			}else{
-				tranType = "<font color='green'>受信{集約}</font>";
+				tranType = "<font color='green'>受信[集約]</font>";
  			}
  			$("#type"+ tx.transactionInfo.id ).html(tranType);
 
- 			txHttp.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
+ 			txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
  			.subscribe(aggTx =>{
 
- 				parseTx(aggTx[0].innerTransactions,false);
+ 				parseTx(aggTx[0].innerTransactions,tx.transactionInfo.id);
  			});
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
-			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE","5B66E76BECAD0860"].includes(item.id.toHex()));
+			console.log(tx);
+//			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE",currencyId].includes(item.id.toHex()));
+			xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 
 			for(mosaic of xym){
-				$("#table").append("<tr>"
-				+ "<td><a target='_blank' href='http://explorer-0.10.0.x-01.symboldev.network/transactions/"
-				   + tx.transactionInfo.hash + "''>"
-				   + dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000,0)
-				+ "</a></td>"
-				+ "<td id='type" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>" //mosaicLabel
-				+ "<td id='amount" + tx.transactionInfo.id  + mosaic.id.toHex() + "'  class='text-right'></td>"
-				+ "</tr>"
-				);
+
+				if(parentId){
+					insTag = "#agg" + parentId
+				}else{
+					insTag = "#table";
+				}
 
 				var tranType;
-
-				if(enableCalcFee && alice.plain() ===  tx.signer.address.plain()){
+				if(!parentId && alice.plain() ===  tx.signer.address.plain()){
 //				if(alice.plain() === tx.recipientAddress.plain()){
 
+					$(insTag).append(getTxTr(tx,mosaic));
 					tranType = "<font color='red'>送信</font>";
 					rxjs.zip(
-						txHttp.getTransactionEffectiveFee(tx.transactionInfo.hash),
+						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
 						rxjs.of({tx:tx,mosaic:mosaic})
 
 					).subscribe(xx => {
@@ -332,8 +373,15 @@ function parseTx(txs,enableCalcFee){
 							)
 						);
 					});
+
+				}else if(alice.plain() ===  tx.signer.address.plain()){
+
+					$(insTag).after(getTxTr(tx,mosaic));
+					tranType = "<font color='red'>送信</font>";
+					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
 				}else{
 
+					$(insTag).after(getTxTr(tx,mosaic));
 					tranType = "<font color='green'>受信</font>";
 					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
 
@@ -342,10 +390,24 @@ function parseTx(txs,enableCalcFee){
 				$("#type"+ tx.transactionInfo.id +mosaic.id.toHex() ).html(tranType);
 			}
 		}else{
-			console.log(tx);
+//			console.log(tx);
 		}
 	}
 }
+function getTxTr(tx,mosaic){
+
+	return "<tr>"
+	+ "<td><a target='_blank' href='http://explorer.testnet.symboldev.network/transactions/"
+	   + tx.transactionInfo.hash + "''>"
+	   + dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000,0)
+	+ "</a></td>"
+	+ "<td id='type" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>" //mosaicLabel
+	+ "<td id='amount" + tx.transactionInfo.id  + mosaic.id.toHex() + "'  class='text-right'></td>"
+	+ "</tr>";
+
+}
+
+
 
 function dispAmount(amount,divisibility){
 
@@ -380,7 +442,7 @@ function paddingAmount0(val,char,n){
 
 function dispTimeStamp(timeStamp,epoch){
 
-	var d = new Date(timeStamp + epoch)
+	var d = new Date(timeStamp + epoch * 1000)
 	var strDate = d.getFullYear()%100
 		+ "-" + paddingDate0( d.getMonth() + 1 )
 		+ '-' + paddingDate0( d.getDate() )
