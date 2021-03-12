@@ -253,6 +253,7 @@ function getTransfers(){
 	});
 }
 
+//出金レシート
 function getRecipets(){
 
 	receiptRepo.searchReceipts({
@@ -269,10 +270,9 @@ function getRecipets(){
 			}
 			return _.data;
 		}),
-	)
-	.subscribe(_=>{
+	).subscribe(_=>{
 
-		var receipt = _.receipts.filter(item=>{
+		var receipt = _.receipts.filter(item => {
 			if(item.senderAddress){
 				return item.senderAddress.plain() === alice.plain();
 			}
@@ -282,6 +282,7 @@ function getRecipets(){
 	});
 }
 
+//入金レシート
 function getHarvests(){
 
 	receiptRepo.searchReceipts({
@@ -298,10 +299,9 @@ function getHarvests(){
 			}
 			return _.data
 		}),
-	)
-	.subscribe(_=>{
+	).subscribe(_=>{
 
-		var receipt = _.receipts.filter(item=>{
+		var receipt = _.receipts.filter(item => {
 			if(item.targetAddress){
 				return item.targetAddress.plain() === alice.plain();
 			}
@@ -315,15 +315,23 @@ function getHarvests(){
 
 function showReceiptInfo(tag,height,receipt){
 
-
-
 	$("#" + tag).append("<tr>"
-	+ "<td id='" + tag + "_date" + height.toString() + "'></td>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + "'></td>"
 	+ "<td id='" + tag + "_type'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "</tr>"
 	);
 
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+
+/*
 	rxjs.zip(
 		blockRepo.getBlockByHeight(height),
 		rxjs.of({height:height})
@@ -334,10 +342,8 @@ function showReceiptInfo(tag,height,receipt){
 			dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
 		);
 	})
+	*/
 }
-
-
-
 
 //トランザクション一覧
 function parseTx(txs,parentId){
@@ -347,21 +353,22 @@ function parseTx(txs,parentId){
 			nem.TransactionType.AGGREGATE_COMPLETE,
 			nem.TransactionType.AGGREGATE_BONDED
 		   ].includes(tx.type)){
-			 $("#table").append("<tr id='agg" + tx.transactionInfo.id + "'>"
-			 + "<td><a target='_blank' href='http://explorer.testnet.symboldev.network/transactions/"
-			 	+ tx.transactionInfo.hash + "''>"
-				+ dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000,0)
-			+ "</a></td>"
-			 + "<td id='type" + tx.transactionInfo.id + "'></td>" //mosaicLabel
-			 + "<td id='amount" + tx.transactionInfo.id + "' class='text-right'></td>"
-			 + "</tr>"
-			 );
 
+			const id = tx.transactionInfo.id;
+			appendAggTx(tx);
 			var tranType;
 			if(alice.plain() ===  tx.signer.address.plain()){
  //			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信[集約]</font>";
- 				rxjs.zip(
+				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+ 				.subscribe(fee => {
+ 					$("#amount"+ id)
+ 					.text(
+ 						dispAmount(nem.UInt64.fromNumericString(fee.toString()),6)
+ 					);
+ 				});
+/*
+				rxjs.zip(
  					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
  					rxjs.of({tx:tx})
  				).subscribe(x => {
@@ -370,16 +377,15 @@ function parseTx(txs,parentId){
  						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
  					);
  				});
-
+*/
  			}else{
 				tranType = "<font color='green'>受信[集約]</font>";
  			}
- 			$("#type"+ tx.transactionInfo.id ).html(tranType);
+ 			$("#type"+ id ).html(tranType);
 
  			txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
  			.subscribe(aggTx =>{
-				console.log(aggTx[0].transactionInfo.id)
- 				parseTx(aggTx[0].innerTransactions,aggTx[0].transactionInfo.id);
+ 				parseTx(aggTx[0].innerTransactions,id);
  			});
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
@@ -389,69 +395,176 @@ function parseTx(txs,parentId){
 
 			for(mosaic of xym){
 
-
-				if(!parentId === undefined){
-					insertTxAfter("#agg" + parentId,tx,mosaic);
+				const id = tx.transactionInfo.id + mosaic.id.toHex();
+				const mosaicAmount = mosaic.amount;
+				if(parentId !== undefined){
+					//インターナルトランザクション
+					insertTxAfter("#agg" + parentId,id);
 				}else{
-					appendTx("#table",tx,mosaic);
+					appendTx("#table",tx,id);
 				}
 
 				var tranType;
 				if(alice.plain() ===  tx.signer.address.plain()){
 					tranType = "<font color='red'>送信</font>";
-					if(!parentId){
+					if(parentId === undefined){
+						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+						.subscribe(fee => {
 
-						rxjs.zip(
-							txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
-							rxjs.of({tx:tx,mosaic:mosaic})
-
-						).subscribe(xx => {
-
-							$("#amount"+ xx[1].tx.transactionInfo.id + xx[1].mosaic.id.toHex()).text(
+							$("#amount"+ id).text(
 								dispAmount(
-									xx[1].mosaic.amount.add(
-										nem.UInt64.fromNumericString(xx[0].toString())
+									mosaicAmount.add(
+										nem.UInt64.fromNumericString(fee.toString())
 									),6
 								)
 							);
 						});
-					}else{
+/*
+						rxjs.zip(
+							txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
+							rxjs.of({tx:tx,mosaic:mosaic})
 
-						$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
+						).subscribe(zip => {
+
+							$("#amount"+ zip[1].tx.transactionInfo.id + zip[1].mosaic.id.toHex()).text(
+								dispAmount(
+									zip[1].mosaic.amount.add(
+										nem.UInt64.fromNumericString(zip[0].toString())
+									),6
+								)
+							);
+						});
+*/
+					}else{
+						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
 					}
 				}else{
-
 					tranType = "<font color='green'>受信</font>";
-					$("#amount"+ tx.transactionInfo.id + mosaic.id.toHex()).text(dispAmount(mosaic.amount,6));
+					$("#amount"+ id).text(dispAmount(mosaicAmount,6));
 				}
-				$("#type"+ tx.transactionInfo.id +mosaic.id.toHex() ).html(tranType);
+				$("#type"+ id ).html(tranType);
 			}
 		}else{
-//			console.log(tx);
+
+			var tranType;
+
+			const id = tx.transactionInfo.id;
+			if(parentId !== undefined){
+				//インターナルトランザクション
+				insertTxAfter("#agg" + parentId,id);
+			}else{
+				appendTx("#table",tx,id);
+			}
+
+			if(alice.plain() ===  tx.signer.address.plain()){
+				tranType = "<font color='red'>送信</font>";
+				if(parentId === undefined){
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+
+						$("#amount"+ id).text(
+							dispAmount(
+								nem.UInt64.fromNumericString(fee.toString())
+								,6
+							)
+						);
+					});
+
+//					$("#amount"+ id).text(dispAmount(0,6));
+
+				}else{
+
+					$("#amount"+ id).text(dispAmount(0,6));
+				}
+			}else{
+//				tranType = "<font color='green'>受信</font>";
+//				$("#amount"+ id).text(dispAmount(0,6));
+			}
+			$("#type"+ id ).html(tranType);
+
+
+
+
 		}
 	}
 }
 
-function appendTx(insTag,tx,mosaic){
+function appendAggTx(tx){
+
+	const id = tx.transactionInfo.id;
+	$("#table").append("<tr id='agg" + id + "'>"
+   + "<td><a target='_blank' href='http://explorer.testnet.symboldev.network/transactions/"
+	  + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+   + "</span></a></td>"
+	+ "<td id='type" + id + "'></td>" //mosaicLabel
+	+ "<td id='amount" + id + "' class='text-right'></td>"
+	+ "</tr>"
+	);
+
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+
+/*
+	rxjs.zip(
+		blockRepo.getBlockByHeight(tx.transactionInfo.height),
+		rxjs.of({id:id})
+
+	).subscribe(zip => {
+
+		$("#date"+ zip[1].id).text(
+			dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
+		);
+	})
+*/
+}
+
+function appendTx(insTag,tx,id){
 
 	$(insTag).append(
 		"<tr>"
 		+ "<td><a target='_blank' href='http://explorer.testnet.symboldev.network/transactions/"
-		   + tx.transactionInfo.hash + "''>"
-		   + dispTimeStamp(parseInt(tx.transactionInfo.id.substring(0, 8), 16) * 1000,0)
-		+ "</a></td>"
-		+ "<td id='type" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>" //mosaicLabel
-		+ "<td id='amount" + tx.transactionInfo.id  + mosaic.id.toHex() + "'  class='text-right'></td>"
+		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+		+ "</span></a></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "' class='text-right'></td>"
 		+ "</tr>"
 	);
+
+
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+
+/*
+	rxjs.zip(
+		blockRepo.getBlockByHeight(tx.transactionInfo.height),
+		rxjs.of({id:tx.transactionInfo.id + mosaic.id.toHex()})
+
+	).subscribe(x => {
+
+		$("#date"+ x[1].id).text(
+			dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+		);
+	})
+*/
 }
-function insertTxAfter(insTag,tx,mosaic){
+function insertTxAfter(insTag,id){
 
 	$(insTag).after(
 		"<tr>"
 		+ "<td></td>"
-		+ "<td id='type" + tx.transactionInfo.id + mosaic.id.toHex() + "'></td>" //mosaicLabel
-		+ "<td id='amount" + tx.transactionInfo.id  + mosaic.id.toHex() + "'  class='text-right'></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "'  class='text-right'></td>"
 		+ "</tr>"
 	);
 }
@@ -471,12 +584,9 @@ function dispAmount(amount,divisibility){
 			var l = strNum.substring(0,strNum.length - divisibility);
 			return comma3(l) + "." + r;
 		}
-
 	}else{
-
 		return comma3(strNum);
 	}
-
 }
 function comma3(strNum){
 	return strNum.replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
