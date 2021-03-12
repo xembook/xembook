@@ -1,6 +1,9 @@
 ### Hi there 👋
 this is XEMBook for Symbol from NEM.
 
+NOW! beta is available!!
+https://xembook.github.io/xembook/beta.html
+
 
 ### ライセンス
 XEMBookという名称と共に秘密鍵やニーモニック入力を求めるフォームを設置しないでください。
