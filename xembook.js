@@ -32,15 +32,13 @@ if (1 < document.location.search.length) {
 if( address == ""){
 
 	var proaddress = window.prompt('NEMアドレスを入力してください','');
-	if(proaddress === ''){
-
-	}else if(proaddress === null){
+	if(proaddress === '' || proaddress === null){
 		alert("サンプルアカウントを表示します");
 		address = "TBNZM7YFPECKVT5QRNFWLBG2QEPGOHSHGPFG7HQ";
 	}else{
 
 		proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
-		location.href = "?address=" + proaddress;
+//		location.href = "?address=" + proaddress;
 	}
 	address = address.replace( /-/g , "" ).toUpperCase();
 
@@ -144,7 +142,7 @@ function connectNode(nodes,d){
 
 			$("#chain_height").html(
 				dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
-				
+
 			);
 			$("#finalized_chain_height").html(
 				dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
