@@ -1,14 +1,7 @@
 const NODES = [
-"https://xym-harvesting.com:3001",
-"https://symbol01.harvestasya.com:3001",
-"https://testnet-01.symbol-nodes.tokyo:3001",
+"https://dual-1.nodes-xym.work:3001",
 "https://symbol-sakura-16.next-web-technology.com:3001",
-"https://symbol-test-1.next-web-technology.com:3001",
-"https://symbol-test-3.next-web-technology.com:3001",
-"https://symbol-main-vultr-16.next-web-technology.com:3001",
-"https://sym-test-01.opening-line.jp:3001",
-"https://sym-test-18.opening-line.jp:3001",
-"https://sym-test.opening-line.jp:3001",
+"https://symbol-harvesting.com:3001",
 ];
 
 var transferPageNumber = 1;
@@ -31,16 +24,16 @@ if (1 < document.location.search.length) {
 
 if( address == ""){
 
-	var proaddress = window.prompt('NEMアドレスを入力してください','');
+	var proaddress = window.prompt('Symbolアドレスを入力してください','');
 	if(proaddress === '' || proaddress === null){
 		alert("サンプルアカウントを表示します");
-		address = "TBNZM7YFPECKVT5QRNFWLBG2QEPGOHSHGPFG7HQ";
-	}else{
+		proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
+//	}else{
 
-		proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
+//		proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
 //		location.href = "?address=" + proaddress;
 	}
-	address = address.replace( /-/g , "" ).toUpperCase();
+	address = proaddress.replace( /-/g , "" ).toUpperCase();
 
 	if(history.replaceState) {
 		history.replaceState(null,null,"?address=" + address)
@@ -235,6 +228,26 @@ function getHarvests(){
 	});
 }
 
+function showReceiptInfo(tag,height,receipt){
+
+		console.log(height)
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + "'>" +height+ "</td>"
+	+ "<td id='" + tag + "_type'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "</tr>"
+	);
+
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+}
 
 //トランザクション一覧
 function parseTx(txs,parentId){
@@ -258,17 +271,6 @@ function parseTx(txs,parentId){
  						dispAmount(nem.UInt64.fromNumericString(fee.toString()),6)
  					);
  				});
-/*
-				rxjs.zip(
- 					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
- 					rxjs.of({tx:tx})
- 				).subscribe(x => {
- 					$("#amount"+ x[1].tx.transactionInfo.id)
- 					.text(
- 						dispAmount(nem.UInt64.fromNumericString(x[0].toString()),6)
- 					);
- 				});
-*/
  			}else{
 				tranType = "<font color='green'>受信[集約]</font>";
  			}
@@ -310,22 +312,6 @@ function parseTx(txs,parentId){
 								)
 							);
 						});
-/*
-						rxjs.zip(
-							txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash),
-							rxjs.of({tx:tx,mosaic:mosaic})
-
-						).subscribe(zip => {
-
-							$("#amount"+ zip[1].tx.transactionInfo.id + zip[1].mosaic.id.toHex()).text(
-								dispAmount(
-									zip[1].mosaic.amount.add(
-										nem.UInt64.fromNumericString(zip[0].toString())
-									),6
-								)
-							);
-						});
-*/
 					}else{
 						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
 					}
