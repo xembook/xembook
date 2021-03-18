@@ -1,4 +1,5 @@
 const NODES = [
+"https://node1.xym-harvesting.com:3001",
 "https://dual-1.nodes-xym.work:3001",
 "https://harvest-01.symbol.farm:3001",
 "https://harvest-02.symbol.farm:3001",
@@ -7,9 +8,6 @@ const NODES = [
 "https://sym-main.opening-line.jp:3001",
 "https://symbol-harvesting.com:3001"
 ];
-
-//"https://node1.xym-harvesting.com:3001",
-
 
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
@@ -54,12 +52,12 @@ const rxjs = require("/node_modules/rxjs");
 
 function connectNode(nodes,d){
 
-	targetNode = nodes[Math.floor(Math.random() * nodes.length)] ;
-	$.ajax({url:  targetNode + "/node/health" ,type: 'GET',timeout: 500})
+	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
+	$.ajax({url:  node + "/node/health" ,type: 'GET',timeout: 500})
 	.then(res => {
 		console.log(res);
 		if(res.status.apiNode == "up" && res.status.db == "up"){
-			return d.resolve(targetNode);
+			return d.resolve(node);
 		}
 		return connectNode(nodes,d);
 	})
@@ -67,14 +65,26 @@ function connectNode(nodes,d){
 	return d.promise();
 }
 
+async function createRepo(d2){
+
+	const d = $.Deferred();
+	const node = await connectNode(NODES,d);
+
+	try{
+		repo = new nem.RepositoryFactoryHttp(node);
+		epochAdjustment = await repo.getEpochAdjustment().toPromise();
+		d2.resolve(repo);
+	}catch{
+		createRepo(d2);
+	}
+	return d2.promise();
+}
 
 (async() =>{
-	const d = $.Deferred();
-	nd = await connectNode(NODES,d);
-	console.log(nd)
 
-	//repo
-	repo = new nem.RepositoryFactoryHttp(nd);
+	const d2 = $.Deferred();
+	repo = await createRepo(d2);
+
 	nsRepo = repo.createNamespaceRepository();
 	txRepo = repo.createTransactionRepository();
 	nwRepo = repo.createNetworkRepository();
@@ -93,7 +103,6 @@ function connectNode(nodes,d){
 	resMosaicRepo = repo.createRestrictionMosaicRepository();
 	slRepo = repo.createSecretLockRepository();
 
-	epochAdjustment = await repo.getEpochAdjustment().toPromise();
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
