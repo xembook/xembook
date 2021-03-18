@@ -5,9 +5,11 @@ const NODES = [
 "https://symbol01.harvestasya.com:3001",
 "https://symbol-sakura-16.next-web-technology.com:3001",
 "https://sym-main.opening-line.jp:3001",
-"https://node1.xym-harvesting.com:3001",
 "https://symbol-harvesting.com:3001"
 ];
+
+//"https://node1.xym-harvesting.com:3001",
+
 
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
