@@ -1,8 +1,12 @@
 const NODES = [
 "https://dual-1.nodes-xym.work:3001",
+"https://harvest-01.symbol.farm:3001",
+"https://harvest-02.symbol.farm:3001",
+"https://symbol01.harvestasya.com:3001",
 "https://symbol-sakura-16.next-web-technology.com:3001",
-"https://symbol-harvesting.com:3001",
-"https://sym-main.opening-line.jp:3001"
+"https://sym-main.opening-line.jp:3001",
+"https://node1.xym-harvesting.com:3001",
+"https://symbol-harvesting.com:3001"
 ];
 
 var transferPageNumber = 1;
