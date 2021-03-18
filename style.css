@@ -55,7 +55,7 @@ hr {
   background:
     linear-gradient(-135deg, #F3B232 5px, transparent 0) 0 5px,
     linear-gradient(135deg,  #F3B232 5px, #fff 0) 0 5px;
-  background-color: f3b232;
+  background-color: #F3B232;
   background-position: left bottom;
   background-repeat: repeat-x;
   background-size: 10px 10px;
