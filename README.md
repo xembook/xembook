@@ -1,8 +1,8 @@
 ### Hi there 👋
 this is XEMBook for Symbol from NEM.
 
-NOW! beta is available!!
-https://xembook.github.io/xembook/beta.html
+
+https://xembook.github.io/xembook/
 
 
 ### ライセンス
