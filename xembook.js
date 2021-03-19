@@ -139,12 +139,13 @@ async function createRepo(d2){
 	)
 	.subscribe(_=>{
 		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+		appendAccountInfo(_.amount);
 	});
 
 	accountInfo
 	.subscribe(_=>{
 
-		var account_importance = Number(_.importance.toString()) / 100000000;
+		var account_importance = Number(_.importance.toString()) / 78429286;
 		account_importance = Math.round( account_importance );
 		account_importance /= 10000;
 
