@@ -35,7 +35,9 @@ if (1 < document.location.search.length) {
 		var val   = decodeURIComponent(elm[1]);
 		item[idx] = decodeURIComponent(val);
 	}
-	address = item["address"];
+	if("address" in item){
+		address = item["address"];
+	}
 }
 
 if( address == ""){
@@ -137,12 +139,13 @@ async function createRepo(d2){
 	)
 	.subscribe(_=>{
 		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+		appendAccountInfo(_.amount);
 	});
 
 	accountInfo
 	.subscribe(_=>{
 
-		var account_importance = Number(_.importance.toString()) / 100000000;
+		var account_importance = Number(_.importance.toString()) / 78429286;
 		account_importance = Math.round( account_importance );
 		account_importance /= 10000;
 
@@ -152,29 +155,7 @@ async function createRepo(d2){
 		getRecipets();
 	});
 
-	chainRepo.getChainInfo().subscribe(x=>{
-
-		rxjs.zip(
-			blockRepo.getBlockByHeight(x.height),
-			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
-
-		).subscribe(x => {
-
-			$("#chain_height").html(
-				dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
-
-			);
-			$("#finalized_chain_height").html(
-				dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
-			);
-
-		})
-	});
-	nodeRepo.getNodeInfo().subscribe(x=>{
-		$("#node_host").text(
-			x.host
-		);
-	});
+	appendInfo();
 })();
 
 //トランザクション取得
