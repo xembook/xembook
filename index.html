@@ -81,6 +81,43 @@
 <script>
 
 
+		$.when(
+			$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+			$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+		)
+		.done(function(blockchain,tickers) {
+			console.log(blockchain);
+			console.log(tickers);
+
+		});
+
+
+function appendInfo(tx){
+
+	chainRepo.getChainInfo().subscribe(x=>{
+
+		rxjs.zip(
+			blockRepo.getBlockByHeight(x.height),
+			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
+
+		).subscribe(x => {
+
+			$("#chain_height").html(
+				"[ " + x[0].height.compact() + " ]　時刻：" + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+
+			);
+			$("#finalized_chain_height").html(
+				"[ " + x[1].height.compact() + " ]　時刻：" + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
+			);
+
+		})
+	});
+	nodeRepo.getNodeInfo().subscribe(x=>{
+		$("#node_host").text(
+			x.host
+		);
+	});
+}
 
 
 function appendAggTx(tx){
