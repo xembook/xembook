@@ -153,6 +153,39 @@ async function createRepo(d2){
 		getTransfers();
 		getHarvests();
 		getRecipets();
+		
+		msigRepo.getMultisigAccountInfo(alice)
+		.subscribe(msig=>{
+		
+			//親キー
+			for(cosignatory of msig.cosignatoryAddresses	){
+				console.log(cosignatory);
+				parentAddress = cosignatory.address.substring(0,6)
+					+ "-" +cosignatory.address.substring(6,12)
+					+ "-" +cosignatory.address.substring(12,18)
+					+"..."
+						
+				$("#account_info").append('<dt>親キー</dt><dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>');
+
+			}	
+
+
+			//子キー
+			for(multisig of msig.multisigAddresses){
+				console.log(multisig);
+				childAddress = multisig.address.substring(0,6)
+					+ "-" +multisig.address.substring(6,12)
+					+ "-" +multisig.address.substring(12,18)
+					+"..."
+						
+				$("#account_info").append('<dt>子キー</dt><dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>');
+
+			}	
+
+			console.log()
+		})
+		
+		
 	});
 
 	appendInfo();
