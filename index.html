@@ -145,11 +145,11 @@ function appendInfo(accountInfo){
 		).subscribe(x => {
 
 			$("#chain_height").html(
-				"[ " + x[0].height.compact() + " ]　日時：" + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+				"[ " + x[0].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
 
 			);
 			$("#finalized_chain_height").html(
-				"[ " + x[1].height.compact() + " ]　日時：" + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
+				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
 			);
 
 		})

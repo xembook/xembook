@@ -170,12 +170,12 @@ async function createRepo(d2){
 			}
 			pHalf = b / 2 / 24;
 
-			while(0.05 < p){
+			while(0.15 < p){
 				p = p * (1 - accountImportance);
 				b += 1;
 			}
 			pSig = b / 2 / 24;
-			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日,5%:" + pSig.toFixed(1) + "日]"
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 15%: " + pSig.toFixed(1) + "日]"
 		}
 
 		$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
