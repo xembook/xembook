@@ -32,14 +32,17 @@
 	<h2>取引所</h2>
 	<dl>
 	<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
+	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 	<dt>ProBit</dt><dd><span id="probit"></span></dd>
 	</dl>
 	
 	<h2>接続ノード</h2>
 	<dl id="node_info">
-		<dt>ノード</dt><dd><p><span id="node_host"></span></p></dd>
+		<dt>接続ノード</dt><dd><p><span id="node_host"></span></p></dd>
 		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
+		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+
 	</dl>
 	</div>
 	<div class="account col-sm-4">
@@ -89,25 +92,49 @@
 
 function appendAccountInfo(amount){
 
-		$.when(
+	$.when(
 //			$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
-			$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
-		)
-		.done(function(tickers) {
-			console.log(tickers);
-			
-			probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
-			gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-			$("#probit").text( probit + "円 / XYM");
-			$("#gateio").text( gateio + "円 / XYM");
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+		console.log(tickers);
+		
+		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
+		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+		hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
+		$("#probit").text( probit + "円 / XYM");
+		$("#gateio").text( gateio + "円 / XYM");
+		$("#hbtc").text( hbtc + "円 / XYM");
 
-			var market_price = amount / 1000000 * gateio;
-			market_price = String(Math.round(market_price)).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
-			$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
-		});
+		var market_price = amount / 1000000 * gateio;
+		market_price = comma3(String(Math.round(market_price)));
+		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+	});
 }
 
-function appendInfo(tx){
+function appendInfo(accountInfo){
+
+	msigRepo.getMultisigAccountInfo(accountInfo.address)
+	.subscribe(msig=>{
+	
+		//親キー
+		for(cosignatory of msig.cosignatoryAddresses){
+			console.log(cosignatory);
+			parentAddress = cosignatory.pretty().slice(0,-25) + "...";
+			$("#account_info").append('<dt>親キー</dt><dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>');
+
+		}	
+
+		//子キー
+		for(multisig of msig.multisigAddresses){
+			console.log(multisig);
+			childAddress = multisig.pretty().slice(0,-25) + "...";
+			$("#account_info").append('<dt>子キー</dt><dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>');
+
+		}	
+		console.log()
+	})
+
 
 	chainRepo.getChainInfo().subscribe(x=>{
 
@@ -132,6 +159,56 @@ function appendInfo(tx){
 			x.host
 		);
 	});
+
+	var delegatedNode = localStorage.getItem('delegated_node' + address);
+	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
+		dnode = delegatedNode + ":3001";
+	}
+	dnode = "https://" +  dnode;
+	console.log(dnode)
+
+	if(delegatedNode !== null){
+
+		drepo = new nem.RepositoryFactoryHttp(dnode);
+		dnodeRepo = drepo.createNodeRepository();
+
+		dnodeRepo.getUnlockedAccount().subscribe(async x=>{
+			console.log(x);
+
+			harvesterKeys = Array();
+			for(unlockedPublicKey of x){
+				console.log(unlockedPublicKey);
+				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
+				unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
+				harvesterKeys.push(unlockedInfo.supplementalPublicKeys.linked.publicKey)
+			}
+
+			var unlockedMark = "";
+			if(harvesterKeys.includes(accountInfo.publicKey)){
+				unlockedMark = "<font color='green'>●</font>"
+			}else{
+				unlockedMark = "<font color='red'>●</font>"
+			}
+			$("#delegated_node").html(
+				unlockedMark + delegatedNode
+			);
+					
+		},err=>{
+			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
+				console.log("removeItem:" + 'delegated_node' + address)
+				localStorage.removeItem('delegated_node' + address)
+			}
+		});	
+	}
+}
+
+function setDelegatedNode(){
+
+	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:ngl-dual-001.symbolblockchain.io)','');
+	if(delegatedNode !== null){
+		localStorage.setItem('delegated_node' + address,delegatedNode);
+		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
+	}
 }
 
 
@@ -154,7 +231,6 @@ function appendAggTx(tx){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 	})
-
 }
 
 function appendTx(insTag,tx,id){
@@ -169,7 +245,6 @@ function appendTx(insTag,tx,id){
 		+ "</tr>"
 	);
 
-
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
 	.subscribe(b => {
 
@@ -177,7 +252,6 @@ function appendTx(insTag,tx,id){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 	})
-
 }
 
 function insertTxAfter(insTag,id){
@@ -191,10 +265,10 @@ function insertTxAfter(insTag,id){
 	);
 }
 
-
 $('#transfers_more').click(function(){getTransfers();return false;});
 $('#harvests_more').click(function(){getHarvests();return false;});
-$('#receipts_more').click(function(){getHarvests();return false;});
+$('#receipts_more').click(function(){getRecipets();return false;});
+$('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 </script>
 </body>
 </html>
