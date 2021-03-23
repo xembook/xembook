@@ -38,7 +38,7 @@
 	
 	<h2>接続ノード</h2>
 	<dl id="node_info">
-		<dt>接続ノード</dt><dd><p><span id="node_host"></span></p></dd>
+		<dt>接続ノード</dt><dd><span id="node_host"></span></dd>
 		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
@@ -120,7 +120,7 @@ function appendInfo(accountInfo){
 		//親キー
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
-			parentAddress = cosignatory.pretty().slice(0,-25) + "...";
+			parentAddress = cosignatory.pretty().slice(0,-25) + "..." + cosignatory.pretty().slice( -3 );
 			$("#account_info").append('<dt>親キー</dt><dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>');
 
 		}	
@@ -128,7 +128,7 @@ function appendInfo(accountInfo){
 		//子キー
 		for(multisig of msig.multisigAddresses){
 			console.log(multisig);
-			childAddress = multisig.pretty().slice(0,-25) + "...";
+			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );;
 			$("#account_info").append('<dt>子キー</dt><dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>');
 
 		}	

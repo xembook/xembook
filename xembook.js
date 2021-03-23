@@ -131,7 +131,7 @@ async function createRepo(d2){
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
 	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(alice.pretty().slice(0,-25) + "...");
+	$("#account_address").text(alice.pretty().slice(0,-25) + "..." + alice.pretty().slice(-3));
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
@@ -150,14 +150,32 @@ async function createRepo(d2){
 	.subscribe(_=>{
 
 		var accountImportance = Number(_.importance.toString()) / totalChainImportance;
-		accountImportance = Math.round( accountImportance );
-		accountImportance /= 1000000;
+		var provabilityHarvest = "";
+		if(accountImportance > 0){
 
-		$("#account_importance").append("<dd>" + accountImportance + "</dd>");
+			accountImportance = Math.round( accountImportance );
+			accountImportance /= 1000000;
+
+			p = 1 - accountImportance;
+			b = 1
+			while(0.5 < p){
+				p = p * (1 - accountImportance);
+				b += 1;
+			}
+			pHalf = b / 2 / 24;
+
+			while(0.05 < p){
+				p = p * (1 - accountImportance);
+				b += 1;
+			}
+			pSig = b / 2 / 24;
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日,5%:" + pSig.toFixed(1) + "日]"
+		}
+
+		$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
 		getTransfers();
 		getHarvests();
 		getRecipets();
-				
 		appendInfo(_);
 	});
 
