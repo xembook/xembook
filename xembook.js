@@ -24,6 +24,12 @@ const NODES = [
 "https://sym-main.opening-line.jp:3001",
 "https://symbol-imog.tk:3001",
 "https://d3rmzi6ltfh1jy.cloudfront.net",
+"https://a.symbol.lcnem.net",
+];
+
+const NO_3001_NODES = [
+"d3rmzi6ltfh1jy.cloudfront.net",
+"a.symbol.lcnem.net",
 ];
 
 var transferPageNumber = 1;

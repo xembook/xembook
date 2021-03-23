@@ -160,11 +160,13 @@ function appendInfo(accountInfo){
 		);
 	});
 
+
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
-	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
-		dnode = delegatedNode + ":3001";
+	var dnode ="https://" + delegatedNode;
+//	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
+	if(!NO_3001_NODES.includes(delegatedNode)){
+		dnode = dnode + ":3001";
 	}
-	dnode = "https://" +  dnode;
 	console.log(dnode)
 
 	if(delegatedNode !== null){
@@ -179,8 +181,12 @@ function appendInfo(accountInfo){
 			for(unlockedPublicKey of x){
 				console.log(unlockedPublicKey);
 				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
-				unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
-				harvesterKeys.push(unlockedInfo.supplementalPublicKeys.linked.publicKey)
+				try{
+					unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
+					harvesterKeys.push(unlockedInfo.supplementalPublicKeys.linked.publicKey)
+				}catch{
+					console.log("no unlockedInfo:" + unlockedAddress.plain());
+				}
 			}
 
 			var unlockedMark = "";
