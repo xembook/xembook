@@ -114,28 +114,63 @@ function appendAccountInfo(amount){
 
 function appendInfo(accountInfo){
 
+	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
 	.subscribe(msig=>{
 	
 		//親キー
+		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
 			parentAddress = cosignatory.pretty().slice(0,-25) + "..." + cosignatory.pretty().slice( -3 );
-			$("#account_info").append('<dt>親キー</dt><dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>');
-
+			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}	
+		if(msig.cosignatoryAddresses.length > 0){
+			$("#account_info").append('<dt>親アカウント</dt>' + parentKeys);
+		
+		}
 
 		//子キー
+		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
 			console.log(multisig);
-			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );;
-			$("#account_info").append('<dt>子キー</dt><dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>');
-
+			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );
+			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}	
-		console.log()
+		if(msig.multisigAddresses.length > 0){
+			$("#account_info").append('<dt>子アカウント</dt>' + childKeys);
+		
+		}
+
 	})
 
+	//ネームスペース
+	nsRepo.search({ownerAddress:accountInfo.address})
+	.subscribe(async ns=>{
 
+		ddNamespace = "";
+		for(nsInfo of ns.data){
+
+			if(nsInfo.levels.length == 1){
+				names = await nsRepo.getNamespacesNames([nsInfo.levels[nsInfo.levels.length - 1]]).toPromise();
+
+				namespace = "";
+				for(namespaceName of names){
+					if(namespace != ""){
+						namespace = "." + namespace;
+					}
+					namespace = namespaceName.name + namespace
+				}
+				t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
+				ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
+			}
+		}
+		if(ddNamespace !== ""){
+			$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+		}
+	});
+
+	//ブロック
 	chainRepo.getChainInfo().subscribe(x=>{
 
 		rxjs.zip(
@@ -154,13 +189,15 @@ function appendInfo(accountInfo){
 
 		})
 	});
+
+	//ノード
 	nodeRepo.getNodeInfo().subscribe(x=>{
 		$("#node_host").text(
 			x.host
 		);
 	});
 
-
+	//委任ノード
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
 	var dnode ="https://" + delegatedNode;
 //	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){

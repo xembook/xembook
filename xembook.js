@@ -32,6 +32,8 @@ const NO_3001_NODES = [
 "a.symbol.lcnem.net",
 ];
 
+const ACTIVE_IMPORTANCE_MULTIPLIER = 25;
+
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
 var reciptPageNumber = 1;
@@ -155,27 +157,30 @@ async function createRepo(d2){
 	accountInfo
 	.subscribe(_=>{
 
-		var accountImportance = Number(_.importance.toString()) / totalChainImportance;
+		var accountImportance = Number(_.importance.toString()) / totalChainImportance ;
 		var provabilityHarvest = "";
 		if(accountImportance > 0){
 
 			accountImportance = Math.round( accountImportance );
 			accountImportance /= 1000000;
+			var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
 
-			p = 1 - accountImportance;
+			p = 1 - activeImportance;
 			b = 1
 			while(0.5 < p){
-				p = p * (1 - accountImportance);
+				p = p * (1 - activeImportance);
 				b += 1;
 			}
-			pHalf = b / 2 / 24;
+			pHalf = b / 2880 ;
 
 			while(0.15 < p){
-				p = p * (1 - accountImportance);
+				p = p * (1 - activeImportance);
 				b += 1;
 			}
-			pSig = b / 2 / 24;
-			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 15%: " + pSig.toFixed(1) + "日]"
+			pSig = b / 2880;
+			if(pHalf > 1){
+				provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
+			}
 		}
 
 		$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
