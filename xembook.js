@@ -1,24 +1,78 @@
 const NODES = [
-"https://symbol-imog.tk:3001",
+"https://0-0symbol-node1.trivill.com:3001",
+"https://00.symsym.info:3001",
+"https://01.symsym.info:3001",
+"https://02.symsym.info:3001",
+"https://03.symsym.info:3001",
+"https://04.symsym.info:3001",
 "https://sym-main.opening-line.jp:3001",
-"https://sym-main-10.opening-line.jp:3001",
-"https://sym-main-09.opening-line.jp:3001",
-"https://sym-main-08.opening-line.jp:3001",
-"https://sym-main-07.opening-line.jp:3001",
-"https://sym-main-06.opening-line.jp:3001",
-"https://sym-main-05.opening-line.jp:3001",
-"https://sym-main-04.opening-line.jp:3001",
-"https://sym-main-03.opening-line.jp:3001",
-"https://sym-main-02.opening-line.jp:3001",
-"https://sym-main-01.opening-line.jp:3001",
-"https://symbol-sakura-16.next-web-technology.com:3001",
-"https://symbol-harvesting.com:3001",
-"https://symbol01.harvestasya.com:3001",
+"https://888.symsym.info:3001",
+"https://symbol.nagoya:3001",
+"https://age01.kitsutsuki.tokyo:3001",
+"https://age02.kitsutsuki.tokyo:3001",
+"https://02.symbol-node.net:3001",
+"https://00.symbol-node.net:3001",
+"https://symbol03.node.oe-jpy.com:3001",
+"https://07.symbol-node.net:3001",
 "https://node1.xym-harvesting.com:3001",
+"https://node2.xym-harvesting.com:3001",
+"https://xym.idol-library.jp:3001",
+"https://08.symbol-node.net:3001",
+"https://00.harvester.earth:3001",
+"https://09.symbol-node.net:3001",
+"https://symbol-harvesting.com:3001",
+"https://05.symbol-node.net:3001",
+"https://03.symbol-node.net:3001",
+"https://symbol02.node.oe-jpy.com:3001",
+"https://06.symbol-node.net:3001",
+"https://04.symbol-node.net:3001",
+"https://symbol-node.net:3001",
+"https://ik1-449-56512.vs.sakura.ne.jp:3001",
+"https://sym-node-102.sakurairo.tokyo:3001",
+"https://shikinami.starlight.tokyo:3001",
+"https://01.symbol-node.net:3001",
+"https://ik1-421-42893.vs.sakura.ne.jp:3001",
+"https://xym.harvester.earth:3001",
+"https://ik1-432-48497.vs.sakura.ne.jp:3001",
+"https://symbol01.harvestasya.com:3001",
+"https://symbol-node.bakobox.net:3001",
+"https://cryptocat-xym-node.com:3001",
+"https://01.symbol.enoki-do.com:3001",
+"https://harvest-01.symbol.farm:3001",
+"https://harvest-02.symbol.farm:3001",
+"https://harvest-03.symbol.farm:3001",
+"https://symbol.harvest-monitor.com:3001",
+"https://nemauthn.harvestfield.tokyo:3001",
+"https://hideyoshi-node.net:3001",
+"https://symbol.from.nagoya:3001",
+"https://symbol-sakura-16.next-web-technology.com:3001",
+"https://ik1-438-51340.vs.sakura.ne.jp:3001",
+"https://super-harvester.com:3001",
+"https://sym-main-01.opening-line.jp:3001",
+"https://sym-main-02.opening-line.jp:3001",
+"https://sym-main-03.opening-line.jp:3001",
+"https://sym-main-04.opening-line.jp:3001",
+"https://sym-main-05.opening-line.jp:3001",
+"https://sym-main-06.opening-line.jp:3001",
+"https://sym-main-07.opening-line.jp:3001",
+"https://sym-main-08.opening-line.jp:3001",
+"https://sym-main-09.opening-line.jp:3001",
+"https://sym-main-10.opening-line.jp:3001",
+"https://sym-main-11.opening-line.jp:3001",
+"https://symbol-harvest-node.com:3001",
+"https://symbol-imog.tk:3001",
+"https://symbol-node-01.kokichi.tokyo:3001",
+"https://symbol01.master-ryzen00.trade:3001",
 "https://d3rmzi6ltfh1jy.cloudfront.net",
+"https://a.symbol.lcnem.net",
 ];
 
-//"https://sym-main-11.opening-line.jp:3001",
+const NO_3001_NODES = [
+"d3rmzi6ltfh1jy.cloudfront.net",
+"a.symbol.lcnem.net",
+];
+
+const ACTIVE_IMPORTANCE_MULTIPLIER = 25;
 
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
@@ -117,17 +171,15 @@ async function createRepo(d2){
 	slRepo = repo.createSecretLockRepository();
 
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
+	networkType = await repo.getNetworkType().toPromise();
+	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
+	console.log(totalChainImportance)
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
 	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(
-		alice.address.substring(0,6)
-		+ "-" +alice.address.substring(6,12)
-		+ "-" + alice.address.substring(12,18)
-		+"..."
-	);
+	$("#account_address").text(alice.pretty().slice(0,-25) + "..." + alice.pretty().slice(-3));
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
@@ -144,51 +196,13 @@ async function createRepo(d2){
 
 	accountInfo
 	.subscribe(_=>{
-
-		var account_importance = Number(_.importance.toString()) / 78429286;
-		account_importance = Math.round( account_importance );
-		account_importance /= 10000;
-
-		$("#account_importance").append("<dd>" + account_importance + "</dd>");
 		getTransfers();
 		getHarvests();
 		getRecipets();
-		
-		msigRepo.getMultisigAccountInfo(alice)
-		.subscribe(msig=>{
-		
-			//親キー
-			for(cosignatory of msig.cosignatoryAddresses	){
-				console.log(cosignatory);
-				parentAddress = cosignatory.address.substring(0,6)
-					+ "-" +cosignatory.address.substring(6,12)
-					+ "-" +cosignatory.address.substring(12,18)
-					+"..."
-						
-				$("#account_info").append('<dt>親キー</dt><dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>');
 
-			}	
-
-
-			//子キー
-			for(multisig of msig.multisigAddresses){
-				console.log(multisig);
-				childAddress = multisig.address.substring(0,6)
-					+ "-" +multisig.address.substring(6,12)
-					+ "-" +multisig.address.substring(12,18)
-					+"..."
-						
-				$("#account_info").append('<dt>子キー</dt><dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>');
-
-			}	
-
-			console.log()
-		})
-		
-		
+		appendInfo(_);
 	});
 
-	appendInfo();
 })();
 
 //トランザクション取得
@@ -229,13 +243,19 @@ function getRecipets(){
 		}),
 	).subscribe(_=>{
 
-		var receipt = _.receipts.filter(item => {
+		var statement = _.receipts.filter(item => {
 			if(item.senderAddress){
 				return item.senderAddress.plain() === alice.plain();
 			}
 			return false;
 		});
-		showReceiptInfo("receipt",_.height,receipt[0]);
+
+		cnt = 0 
+		for(receipt of statement){
+			
+			showReceiptInfo("receipt",_.height,receipt,cnt);
+			cnt++;
+		}
 	});
 }
 
@@ -258,28 +278,34 @@ function getHarvests(){
 		}),
 	).subscribe(_=>{
 
-		var receipt = _.receipts.filter(item => {
+		var statement = _.receipts.filter(item => {
 			if(item.targetAddress){
 				return item.targetAddress.plain() === alice.plain();
 			}
 			return false;
 		});
-//		console.log(_.height)
-		showReceiptInfo("harvest",_.height,receipt[0]);
+
+		cnt = 0 
+		for(receipt of statement){
+			
+			showReceiptInfo("harvest",_.height,receipt,cnt);
+			cnt++;
+		}
 	});
 }
 
-function showReceiptInfo(tag,height,receipt){
+function showReceiptInfo(tag,height,receipt,cnt){
 
-		console.log(height)
+	if(cnt === 0){
+		cnt = "";
+	}
 
 	$("#" + tag).append("<tr>"
-	+ "<td id='" + tag + "_date" + height + receipt.type + "'>" +height+ "</td>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
 	+ "<td id='" + tag + "_type'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "</tr>"
 	);
-
 
 	blockRepo.getBlockByHeight(height)
 	.subscribe(b => {

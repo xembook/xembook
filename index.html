@@ -24,7 +24,7 @@
 	<div class="account col-sm-4">
 	<h2>アカウント</h2>
 	<dl id="account_info">
-		<dt>口座名</dt><dd><span id="account_address"></span></dd>
+		<dt>アドレス</dt><dd><span id="account_address"></span></dd>
 		<dt>残高</dt><dd><span id="account_balance"></span></dd>
 		<dt>時価総額</dt><dd><span id="market_price"></span></dd>
 		<dt>重要度</dt><dd><span id="account_importance"></span></dd>
@@ -32,20 +32,23 @@
 	<h2>取引所</h2>
 	<dl>
 	<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
+	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 	<dt>ProBit</dt><dd><span id="probit"></span></dd>
 	</dl>
 	
 	<h2>接続ノード</h2>
 	<dl id="node_info">
-		<dt>ノード</dt><dd><p><span id="node_host"></span></p></dd>
+		<dt>接続ノード</dt><dd><span id="node_host"></span></dd>
 		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
+		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+
 	</dl>
 	</div>
 	<div class="account col-sm-4">
 	<h2>レシート</h2>
 	<dl>
-	<dt>ターゲット</dt>
+	<dt>対象アカウント</dt>
 	<table id="harvest"  class="table">
 		<thead><tr>
 			<th>日時</th>
@@ -56,7 +59,7 @@
 	<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 	</dl>
 	<dl>
-	<dt>送信</dt>
+	<dt>送信元アカウント</dt>
 	<table id="receipt"  class="table">
 		<thead><tr>
 			<th>日時</th>
@@ -89,26 +92,86 @@
 
 function appendAccountInfo(amount){
 
-		$.when(
+	$.when(
 //			$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
-			$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
-		)
-		.done(function(tickers) {
-			console.log(tickers);
-			
-			probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
-			gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-			$("#probit").text( probit + "円 / XYM");
-			$("#gateio").text( gateio + "円 / XYM");
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+		console.log(tickers);
+		
+		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
+		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+		hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
+		$("#probit").text( probit + "円 / XYM");
+		$("#gateio").text( gateio + "円 / XYM");
+		$("#hbtc").text( hbtc + "円 / XYM");
 
-			var market_price = amount / 1000000 * gateio;
-			market_price = String(Math.round(market_price)).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
-			$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
-		});
+		var market_price = amount / 1000000 * gateio;
+		market_price = comma3(String(Math.round(market_price)));
+		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+	});
 }
 
-function appendInfo(tx){
+function appendInfo(accountInfo){
 
+
+	//マルチシグ
+	msigRepo.getMultisigAccountInfo(accountInfo.address)
+	.subscribe(msig=>{
+	
+		//親キー
+		var parentKeys = "";
+		for(cosignatory of msig.cosignatoryAddresses){
+			console.log(cosignatory);
+			parentAddress = cosignatory.pretty().slice(0,-25) + "..." + cosignatory.pretty().slice( -3 );
+			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
+		}	
+		if(msig.cosignatoryAddresses.length > 0){
+			$("#account_info").append('<dt>親アカウント</dt>' + parentKeys);
+		
+		}
+
+		//子キー
+		var childKeys = "";
+		for(multisig of msig.multisigAddresses){
+			console.log(multisig);
+			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );
+			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
+		}	
+		if(msig.multisigAddresses.length > 0){
+			$("#account_info").append('<dt>子アカウント</dt>' + childKeys);
+		
+		}
+
+	})
+
+	//ネームスペース
+	nsRepo.search({ownerAddress:accountInfo.address})
+	.subscribe(async ns=>{
+
+		ddNamespace = "";
+		for(nsInfo of ns.data){
+
+			if(nsInfo.levels.length == 1){
+				names = await nsRepo.getNamespacesNames([nsInfo.levels[nsInfo.levels.length - 1]]).toPromise();
+
+				namespace = "";
+				for(namespaceName of names){
+					if(namespace != ""){
+						namespace = "." + namespace;
+					}
+					namespace = namespaceName.name + namespace
+				}
+				t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
+				ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
+			}
+		}
+		if(ddNamespace !== ""){
+			$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+		}
+	});
+
+	//ブロック
 	chainRepo.getChainInfo().subscribe(x=>{
 
 		rxjs.zip(
@@ -118,20 +181,108 @@ function appendInfo(tx){
 		).subscribe(x => {
 
 			$("#chain_height").html(
-				"[ " + x[0].height.compact() + " ]　日時：" + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+				"[ " + x[0].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
 
 			);
 			$("#finalized_chain_height").html(
-				"[ " + x[1].height.compact() + " ]　日時：" + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
+				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
 			);
 
 		})
 	});
+
+	//ノード
 	nodeRepo.getNodeInfo().subscribe(x=>{
 		$("#node_host").text(
 			x.host
 		);
 	});
+
+	//委任ノード
+	var delegatedNode = localStorage.getItem('delegated_node' + address);
+	var dnode ="https://" + delegatedNode;
+//	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
+	if(!NO_3001_NODES.includes(delegatedNode)){
+		dnode = dnode + ":3001";
+	}
+	console.log(dnode)
+
+	if(delegatedNode !== null){
+
+		drepo = new nem.RepositoryFactoryHttp(dnode);
+		dnodeRepo = drepo.createNodeRepository();
+
+		dnodeRepo.getUnlockedAccount().subscribe(async x=>{
+			console.log(x);
+
+			harvesterKeys = Array();
+			for(unlockedPublicKey of x){
+				console.log(unlockedPublicKey);
+				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
+				try{
+					unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
+					harvesterKeys.push(unlockedInfo.supplementalPublicKeys.linked.publicKey)
+				}catch{
+					console.log("no unlockedInfo:" + unlockedAddress.plain());
+				}
+			}
+
+			var unlockedMark = "";
+			if(harvesterKeys.includes(accountInfo.publicKey)){
+				unlockedMark = "<font color='green'>●</font>"
+			}else{
+				unlockedMark = "<font color='red'>●</font>"
+			}
+			$("#delegated_node").html(
+				unlockedMark + delegatedNode
+			);
+					
+		},err=>{
+			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
+				console.log("removeItem:" + 'delegated_node' + address)
+				localStorage.removeItem('delegated_node' + address)
+			}
+		});	
+	}
+	
+
+	//重要度
+	var accountImportance = Number(accountInfo.importance.toString()) / totalChainImportance ;
+	var provabilityHarvest = "";
+	if(accountImportance > 0){
+
+		accountImportance = Math.round( accountImportance );
+		accountImportance /= 1000000;
+		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
+
+		p = 1 - activeImportance;
+		b = 1
+		while(0.5 < p){
+			p = p * (1 - activeImportance);
+			b += 1;
+		}
+		pHalf = b / 2880 ;
+
+		while(0.15 < p){
+			p = p * (1 - activeImportance);
+			b += 1;
+		}
+		pSig = b / 2880;
+		if(pHalf > 1){
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
+		}
+	}
+
+	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");	
+}
+
+function setDelegatedNode(){
+
+	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:ngl-dual-001.symbolblockchain.io)','');
+	if(delegatedNode !== null){
+		localStorage.setItem('delegated_node' + address,delegatedNode);
+		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
+	}
 }
 
 
@@ -154,7 +305,6 @@ function appendAggTx(tx){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 	})
-
 }
 
 function appendTx(insTag,tx,id){
@@ -169,7 +319,6 @@ function appendTx(insTag,tx,id){
 		+ "</tr>"
 	);
 
-
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
 	.subscribe(b => {
 
@@ -177,7 +326,6 @@ function appendTx(insTag,tx,id){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 	})
-
 }
 
 function insertTxAfter(insTag,id){
@@ -191,10 +339,10 @@ function insertTxAfter(insTag,id){
 	);
 }
 
-
 $('#transfers_more').click(function(){getTransfers();return false;});
 $('#harvests_more').click(function(){getHarvests();return false;});
-$('#receipts_more').click(function(){getHarvests();return false;});
+$('#receipts_more').click(function(){getRecipets();return false;});
+$('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 </script>
 </body>
 </html>
