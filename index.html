@@ -48,7 +48,7 @@
 	<div class="account col-sm-4">
 	<h2>レシート</h2>
 	<dl>
-	<dt>ターゲット</dt>
+	<dt>対象アカウント</dt>
 	<table id="harvest"  class="table">
 		<thead><tr>
 			<th>日時</th>
@@ -59,7 +59,7 @@
 	<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 	</dl>
 	<dl>
-	<dt>送信</dt>
+	<dt>送信元アカウント</dt>
 	<table id="receipt"  class="table">
 		<thead><tr>
 			<th>日時</th>
@@ -113,6 +113,7 @@ function appendAccountInfo(amount){
 }
 
 function appendInfo(accountInfo){
+
 
 	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
@@ -243,6 +244,36 @@ function appendInfo(accountInfo){
 			}
 		});	
 	}
+	
+
+	//重要度
+	var accountImportance = Number(accountInfo.importance.toString()) / totalChainImportance ;
+	var provabilityHarvest = "";
+	if(accountImportance > 0){
+
+		accountImportance = Math.round( accountImportance );
+		accountImportance /= 1000000;
+		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
+
+		p = 1 - activeImportance;
+		b = 1
+		while(0.5 < p){
+			p = p * (1 - activeImportance);
+			b += 1;
+		}
+		pHalf = b / 2880 ;
+
+		while(0.15 < p){
+			p = p * (1 - activeImportance);
+			b += 1;
+		}
+		pSig = b / 2880;
+		if(pHalf > 1){
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
+		}
+	}
+
+	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");	
 }
 
 function setDelegatedNode(){
