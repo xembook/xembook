@@ -138,7 +138,6 @@ function appendAccountInfo(amount){
 
 function appendInfo(accountInfo){
 
-
 	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
 	.subscribe(msig=>{
@@ -152,7 +151,6 @@ function appendInfo(accountInfo){
 		}
 		if(msig.cosignatoryAddresses.length > 0){
 			$("#account_info").append('<dt>親アカウント</dt>' + parentKeys);
-
 		}
 
 		//子キー
@@ -164,9 +162,7 @@ function appendInfo(accountInfo){
 		}
 		if(msig.multisigAddresses.length > 0){
 			$("#account_info").append('<dt>子アカウント</dt>' + childKeys);
-
 		}
-
 	})
 
 	//ネームスペース
@@ -206,12 +202,10 @@ function appendInfo(accountInfo){
 
 			$("#chain_height").html(
 				"[ " + x[0].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
-
 			);
 			$("#finalized_chain_height").html(
 				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
 			);
-
 		})
 	});
 
@@ -229,7 +223,6 @@ function appendInfo(accountInfo){
 	if(!NO_3001_NODES.includes(delegatedNode)){
 		dnode = dnode + ":3001";
 	}
-	console.log(dnode)
 
 	if(delegatedNode !== null){
 
@@ -269,7 +262,6 @@ function appendInfo(accountInfo){
 		});
 	}
 
-
 	//重要度
 	var accountImportance = Number(accountInfo.importance.toString()) / totalChainImportance ;
 	var provabilityHarvest = "";
@@ -300,9 +292,7 @@ function appendInfo(accountInfo){
 			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
 		}
 	}
-
 	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
-
 
 	//アグリゲートトランザクション検知
 	const bondedListener = listener.aggregateBondedAdded(accountInfo.address)
@@ -333,21 +323,16 @@ function appendInfo(accountInfo){
 					ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>"
 					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>"
 					$("#tx_info").append(dtTx + ddTx);
-
-
 				}
  			});
 
 			console.log(_);
 			$('#modal-notice').modal('show');
-
 		});
 	}
 
 	bondedSubscribe(bondedListener);
 	bondedSubscribe(bondedHttp);
-
-
 }
 
 function setDelegatedNode(){
@@ -358,7 +343,6 @@ function setDelegatedNode(){
 		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
 	}
 }
-
 
 function appendAggTx(tx){
 
@@ -413,22 +397,19 @@ function insertTxAfter(insTag,id){
 	);
 }
 
-var currentBlockHash = "";
 var lastBlockHash = "";
 setInterval(function(){
 
-	var na = "";
-	if(lastBlockHash === currentBlockHash){
-		na = "<font color='red'>●</font>"
+	var nodeActivity = "";
+	if(lastBlockHash === newBlockHash){
+		nodeActivity = "<font color='red'>●</font>"
 	}else{
-		na = "<font color='blue'>●</font>"
+		nodeActivity = "<font color='green'>●</font>"
 	}
 
-	$("#node_activity").html(
-		na
-	);
-	lastBlockHash = currentBlockHash;
-		
+	$("#node_activity").html(nodeActivity);
+	lastBlockHash = newBlockHash;
+
 }, 60000);
 
 

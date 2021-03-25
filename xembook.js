@@ -145,12 +145,9 @@ async function createRepo(d2){
 	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	try{
-
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
 		await listenerKeepOpening();
-
 		d2.resolve(repo);
-
 
 	}catch{
 		createRepo(d2);
@@ -158,9 +155,26 @@ async function createRepo(d2){
 	return d2.promise();
 }
 
+var newBlockHash;
+async function listenerKeepOpening(){
 
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+	await listener.open();
 
+	listener.webSocket.onclose = async function(){
+		console.log("listener onclose");
+		await listenerKeepOpening();
+	}
 
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash;
+
+		r = await receiptRepo.searchReceipts({targetAddress:alice,height:block.height}).toPromise();
+		console.log(r);
+		t = await txRepo.search({address:alice,height:block.height,group:nem.TransactionGroup.Confirmed}).toPromise();
+		console.log(t);
+	});
+}
 
 (async() =>{
 
@@ -213,30 +227,12 @@ async function createRepo(d2){
 		getTransfers();
 		getHarvests();
 		getRecipets();
-
 		appendInfo(_);
 	});
 
 })();
 
-async function listenerKeepOpening(){
 
-	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
-
-	await listener.open();
-
-	listener.webSocket.onclose = async function(){
-		console.log("listener onclose");
-		await listenerKeepOpening();
-	}
-
-	listener.newBlock().subscribe(nb=>{
-		currentBlockHash = nb.hash;
-		console.log(nb);
-	})
-
-
-}
 
 //トランザクション取得
 function getTransfers(){
