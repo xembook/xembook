@@ -33,6 +33,7 @@
 	<dl>
 	<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
 	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
+	<dt>KUCOIN</dt><dd><span id="kucoin"></span></dd>
 	<dt>ProBit</dt><dd><span id="probit"></span></dd>
 	</dl>
 
@@ -123,9 +124,11 @@ function appendAccountInfo(amount){
 		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
 		hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
+		kucoin = Math.round(tickers.USDJPY * tickers.kucoin * 1000) / 1000;
 		$("#probit").text( probit + "円 / XYM");
 		$("#gateio").text( gateio + "円 / XYM");
 		$("#hbtc").text( hbtc + "円 / XYM");
+		$("#kucoin").text( kucoin + "円 / XYM");
 
 		var market_price = amount / 1000000 * gateio;
 		market_price = comma3(String(Math.round(market_price)));
