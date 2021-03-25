@@ -35,7 +35,7 @@
 	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 	<dt>ProBit</dt><dd><span id="probit"></span></dd>
 	</dl>
-	
+
 	<h2>接続ノード</h2>
 	<dl id="node_info">
 		<dt>接続ノード</dt><dd><span id="node_host"></span></dd>
@@ -83,11 +83,35 @@
 	</div>
 	</div>
 </div>
+
+<!-- 通知モーダル -->
+<div class="modal fade" id="modal-notice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">通知</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div id="list-msig" class="list-group text-break" style="max-width: 400px;"><ul></ul></div>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook.js"></script>
 <script>
+
+
+
+
+
+
 
 
 function appendAccountInfo(amount){
@@ -98,7 +122,7 @@ function appendAccountInfo(amount){
 	)
 	.done(function(tickers) {
 		console.log(tickers);
-		
+
 		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
 		hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
@@ -118,17 +142,17 @@ function appendInfo(accountInfo){
 	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
 	.subscribe(msig=>{
-	
+
 		//親キー
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
 			parentAddress = cosignatory.pretty().slice(0,-25) + "..." + cosignatory.pretty().slice( -3 );
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
-		}	
+		}
 		if(msig.cosignatoryAddresses.length > 0){
 			$("#account_info").append('<dt>親アカウント</dt>' + parentKeys);
-		
+
 		}
 
 		//子キー
@@ -137,10 +161,10 @@ function appendInfo(accountInfo){
 			console.log(multisig);
 			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
-		}	
+		}
 		if(msig.multisigAddresses.length > 0){
 			$("#account_info").append('<dt>子アカウント</dt>' + childKeys);
-		
+
 		}
 
 	})
@@ -236,15 +260,15 @@ function appendInfo(accountInfo){
 			$("#delegated_node").html(
 				unlockedMark + delegatedNode
 			);
-					
+
 		},err=>{
 			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
 				console.log("removeItem:" + 'delegated_node' + address)
 				localStorage.removeItem('delegated_node' + address)
 			}
-		});	
+		});
 	}
-	
+
 
 	//重要度
 	var accountImportance = Number(accountInfo.importance.toString()) / totalChainImportance ;
@@ -253,7 +277,11 @@ function appendInfo(accountInfo){
 
 		accountImportance = Math.round( accountImportance );
 		accountImportance /= 1000000;
-		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
+//		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
+//accountImportance = 0.002426;
+//accountImportance = 0.009;
+		var ACTIVE_IMPORTANCE = 0.35;
+		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE  //       / 100 ; //25->45 / 100 * 5
 
 		p = 1 - activeImportance;
 		b = 1
@@ -273,7 +301,7 @@ function appendInfo(accountInfo){
 		}
 	}
 
-	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");	
+	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
 }
 
 function setDelegatedNode(){

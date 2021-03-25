@@ -1,13 +1,18 @@
 const NODES = [
-"https://0-0symbol-node1.trivill.com:3001",
+//"https://xym.harvester.earth:3001",
+//"https://0-0symbol-node1.trivill.com:3001",
+//"https://ik1-438-51340.vs.sakura.ne.jp:3001",
+
+"https://02.symsym.info:3001",
 "https://00.symsym.info:3001",
 "https://01.symsym.info:3001",
-"https://02.symsym.info:3001",
 "https://03.symsym.info:3001",
 "https://04.symsym.info:3001",
+"https://symbol.nagoya:3001",
+"https://harvest-festa.com:3001",
+"https://symbol.harvest-monitor.com:3001",
 "https://sym-main.opening-line.jp:3001",
 "https://888.symsym.info:3001",
-"https://symbol.nagoya:3001",
 "https://age01.kitsutsuki.tokyo:3001",
 "https://age02.kitsutsuki.tokyo:3001",
 "https://02.symbol-node.net:3001",
@@ -28,11 +33,9 @@ const NODES = [
 "https://04.symbol-node.net:3001",
 "https://symbol-node.net:3001",
 "https://ik1-449-56512.vs.sakura.ne.jp:3001",
-"https://sym-node-102.sakurairo.tokyo:3001",
 "https://shikinami.starlight.tokyo:3001",
 "https://01.symbol-node.net:3001",
 "https://ik1-421-42893.vs.sakura.ne.jp:3001",
-"https://xym.harvester.earth:3001",
 "https://ik1-432-48497.vs.sakura.ne.jp:3001",
 "https://symbol01.harvestasya.com:3001",
 "https://symbol-node.bakobox.net:3001",
@@ -41,12 +44,10 @@ const NODES = [
 "https://harvest-01.symbol.farm:3001",
 "https://harvest-02.symbol.farm:3001",
 "https://harvest-03.symbol.farm:3001",
-"https://symbol.harvest-monitor.com:3001",
 "https://nemauthn.harvestfield.tokyo:3001",
 "https://hideyoshi-node.net:3001",
 "https://symbol.from.nagoya:3001",
 "https://symbol-sakura-16.next-web-technology.com:3001",
-"https://ik1-438-51340.vs.sakura.ne.jp:3001",
 "https://super-harvester.com:3001",
 "https://sym-main-01.opening-line.jp:3001",
 "https://sym-main-02.opening-line.jp:3001",
@@ -63,8 +64,10 @@ const NODES = [
 "https://symbol-imog.tk:3001",
 "https://symbol-node-01.kokichi.tokyo:3001",
 "https://symbol01.master-ryzen00.trade:3001",
+"https://sym-node-102.sakurairo.tokyo:3001",
 "https://d3rmzi6ltfh1jy.cloudfront.net",
-"https://a.symbol.lcnem.net",
+//"https://a.symbol.lcnem.net",
+
 ];
 
 const NO_3001_NODES = [
@@ -116,6 +119,7 @@ address = address.replace( /-/g , "" ).toUpperCase();
 const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
+var listener;
 
 function connectNode(nodes,d){
 
@@ -136,23 +140,34 @@ async function createRepo(d2){
 
 	const d = $.Deferred();
 	const node = await connectNode(NODES,d);
+	repo = new nem.RepositoryFactoryHttp(node);
+	nsRepo = repo.createNamespaceRepository();
+	wsEndpoint = node.replace('http', 'ws') + "/ws";
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	try{
-		repo = new nem.RepositoryFactoryHttp(node);
+
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
+		await listenerOpen(listener);
+
 		d2.resolve(repo);
+
+
 	}catch{
 		createRepo(d2);
 	}
 	return d2.promise();
 }
 
+
+
+
+
 (async() =>{
 
 	const d2 = $.Deferred();
 	repo = await createRepo(d2);
 
-	nsRepo = repo.createNamespaceRepository();
 	txRepo = repo.createTransactionRepository();
 	nwRepo = repo.createNetworkRepository();
 	blockRepo = repo.createBlockRepository();
@@ -181,6 +196,39 @@ async function createRepo(d2){
 	alice = nem.Address.createFromRawAddress(address);
 	$("#account_address").text(alice.pretty().slice(0,-25) + "..." + alice.pretty().slice(-3));
 
+
+//wss://xym.harvester.earth:3001/ws'
+
+	//アグリゲートトランザクション検知
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+	await listenerOpen(listener);
+	listener.webSocket.onclose = async function(){
+		console.log("listener onclose");
+		await listenerOpen(listener);
+	}
+	const bondedListener = listener.aggregateBondedAdded(alice)
+	const bondedHttp = txRepo.search({address:alice,group:nem.TransactionGroup.Partial})
+	.pipe(
+		op.delay(2000),
+		op.mergeMap(page => page.data)
+	);
+
+	var bondedSubscribe = function(observer){
+		observer.pipe(
+
+			op.filter(_ => !_.signedByAccount(alice))
+		).subscribe(_=>{
+
+			console.log("署名の要求があります。");
+			console.log(_);
+		});
+	}
+
+	bondedSubscribe(bondedListener);
+	bondedSubscribe(bondedHttp);
+
+
+
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
 
@@ -204,6 +252,21 @@ async function createRepo(d2){
 	});
 
 })();
+
+async function listenerOpen(listener){
+
+	await listener.open();
+	setInterval(function(){
+		listener.newBlock();
+	}, 30000);
+/*
+	listener.open().then(() => {
+		setInterval(function(){
+			listener.newBlock();
+		}, 30000);
+	});
+	*/
+}
 
 //トランザクション取得
 function getTransfers(){
@@ -250,9 +313,9 @@ function getRecipets(){
 			return false;
 		});
 
-		cnt = 0 
+		cnt = 0
 		for(receipt of statement){
-			
+
 			showReceiptInfo("receipt",_.height,receipt,cnt);
 			cnt++;
 		}
@@ -285,9 +348,9 @@ function getHarvests(){
 			return false;
 		});
 
-		cnt = 0 
+		cnt = 0
 		for(receipt of statement){
-			
+
 			showReceiptInfo("harvest",_.height,receipt,cnt);
 			cnt++;
 		}
