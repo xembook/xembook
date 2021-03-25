@@ -148,7 +148,7 @@ async function createRepo(d2){
 	try{
 
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
-		await listenerOpen(listener);
+		await listenerKeepOpening();
 
 		d2.resolve(repo);
 
@@ -220,18 +220,21 @@ async function createRepo(d2){
 
 })();
 
-async function listenerOpen(listener){
+async function listenerKeepOpening(){
+
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	await listener.open();
+
+	listener.webSocket.onclose = async function(){
+		console.log("listener onclose");
+		await listenerKeepOpening();
+	}
 
 	listener.newBlock().subscribe(nb=>{
 		console.log(nb);
 	})
 
-	listener.webSocket.onclose = async function(){
-		console.log("listener onclose");
-		await listenerOpen(listener);
-	}
 
 }
 

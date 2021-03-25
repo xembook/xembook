@@ -278,7 +278,7 @@ function appendInfo(accountInfo){
 //accountImportance = 0.002426;
 //accountImportance = 0.009;
 		var ACTIVE_IMPORTANCE_RATE = 0.35;
-		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE  
+		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE
 
 		p = 1 - activeImportance;
 		b = 1
@@ -330,14 +330,14 @@ function appendInfo(accountInfo){
 					ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>"
 					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>"
 					$("#tx_info").append(dtTx + ddTx);
-					
+
 
 				}
  			});
 
 			console.log(_);
 			$('#modal-notice').modal('show');
-			
+
 		});
 	}
 
