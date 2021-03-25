@@ -39,7 +39,7 @@
 
 	<h2>接続ノード</h2>
 	<dl id="node_info">
-		<dt>接続ノード</dt><dd><span id="node_host"></span></dd>
+		<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
@@ -412,6 +412,25 @@ function insertTxAfter(insTag,id){
 		+ "</tr>"
 	);
 }
+
+var currentBlockHash = "";
+var lastBlockHash = "";
+setInterval(function(){
+
+	var na = "";
+	if(lastBlockHash === currentBlockHash){
+		na = "<font color='red'>●</font>"
+	}else{
+		na = "<font color='blue'>●</font>"
+	}
+
+	$("#node_activity").html(
+		na
+	);
+	lastBlockHash = currentBlockHash;
+		
+}, 60000);
+
 
 $('#transfers_more').click(function(){getTransfers();return false;});
 $('#harvests_more').click(function(){getHarvests();return false;});

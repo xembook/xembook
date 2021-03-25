@@ -120,7 +120,6 @@ const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
 var listener;
-
 function connectNode(nodes,d){
 
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
@@ -232,6 +231,7 @@ async function listenerKeepOpening(){
 	}
 
 	listener.newBlock().subscribe(nb=>{
+		currentBlockHash = nb.hash;
 		console.log(nb);
 	})
 
