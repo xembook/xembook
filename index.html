@@ -89,14 +89,18 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">通知</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
-					<span aria-hidden="true">&times;</span>
-				</button>
+				<h5 class="modal-title" id="exampleModalLabel2">お知らせ</h5>
 			</div>
 			<div class="modal-body">
-				<div id="list-msig" class="list-group text-break" style="max-width: 400px;"><ul></ul></div>
+				<label id="modal-label">未承認のトランザクションがあります。<br>ウォレットで詳細を確認してください。</label>
+
+				<dl id="tx_info"></dl>
+
 			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">閉じる</button>
+
+			</div><!-- /.modal-footer -->
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
@@ -106,13 +110,6 @@
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook.js"></script>
 <script>
-
-
-
-
-
-
-
 
 function appendAccountInfo(amount){
 
@@ -147,7 +144,7 @@ function appendInfo(accountInfo){
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
-			parentAddress = cosignatory.pretty().slice(0,-25) + "..." + cosignatory.pretty().slice( -3 );
+			parentAddress = cosignatory.pretty().slice(0,20) + "..." + cosignatory.pretty().slice( -3 );
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}
 		if(msig.cosignatoryAddresses.length > 0){
@@ -159,7 +156,7 @@ function appendInfo(accountInfo){
 		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
 			console.log(multisig);
-			childAddress = multisig.pretty().slice(0,-25) + "..."+ multisig.pretty().slice( -3 );
+			childAddress = multisig.pretty().slice(0,20) + "..."+ multisig.pretty().slice( -3 );
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}
 		if(msig.multisigAddresses.length > 0){
@@ -280,8 +277,8 @@ function appendInfo(accountInfo){
 //		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
 //accountImportance = 0.002426;
 //accountImportance = 0.009;
-		var ACTIVE_IMPORTANCE = 0.35;
-		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE  //       / 100 ; //25->45 / 100 * 5
+		var ACTIVE_IMPORTANCE_RATE = 0.35;
+		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE  
 
 		p = 1 - activeImportance;
 		b = 1
@@ -302,6 +299,52 @@ function appendInfo(accountInfo){
 	}
 
 	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
+
+
+	//アグリゲートトランザクション検知
+	const bondedListener = listener.aggregateBondedAdded(accountInfo.address)
+	const bondedHttp = txRepo.search({address:accountInfo.address,group:nem.TransactionGroup.Partial})
+	.pipe(
+		op.delay(2000),
+		op.mergeMap(page => page.data)
+	);
+
+	var bondedSubscribe = function(observer){
+		observer.pipe(
+
+			op.filter(_ => !_.signedByAccount(accountInfo.address))
+		).subscribe(_=>{
+
+			console.log("署名の要求があります。");
+
+ 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
+ 			.subscribe(aggTx =>{
+ 				console.log(aggTx[0].innerTransactions);
+ 				txs = aggTx[0].innerTransactions;
+ 				for(tx of txs){
+					console.log(nem.TransactionType[tx.type]);
+					console.log(tx.recipientAddress.plain());
+					console.log(tx.signer.address.plain());
+
+					dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
+					ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>"
+					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>"
+					$("#tx_info").append(dtTx + ddTx);
+					
+
+				}
+ 			});
+
+			console.log(_);
+			$('#modal-notice').modal('show');
+			
+		});
+	}
+
+	bondedSubscribe(bondedListener);
+	bondedSubscribe(bondedHttp);
+
+
 }
 
 function setDelegatedNode(){

@@ -65,9 +65,9 @@ const NODES = [
 "https://symbol-node-01.kokichi.tokyo:3001",
 "https://symbol01.master-ryzen00.trade:3001",
 "https://sym-node-102.sakurairo.tokyo:3001",
+"https://01.symbol-gentoo.tokyo:3001",
 "https://d3rmzi6ltfh1jy.cloudfront.net",
-//"https://a.symbol.lcnem.net",
-
+"https://a.symbol.lcnem.net",
 ];
 
 const NO_3001_NODES = [
@@ -194,40 +194,7 @@ async function createRepo(d2){
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
 	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(alice.pretty().slice(0,-25) + "..." + alice.pretty().slice(-3));
-
-
-//wss://xym.harvester.earth:3001/ws'
-
-	//アグリゲートトランザクション検知
-	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
-	await listenerOpen(listener);
-	listener.webSocket.onclose = async function(){
-		console.log("listener onclose");
-		await listenerOpen(listener);
-	}
-	const bondedListener = listener.aggregateBondedAdded(alice)
-	const bondedHttp = txRepo.search({address:alice,group:nem.TransactionGroup.Partial})
-	.pipe(
-		op.delay(2000),
-		op.mergeMap(page => page.data)
-	);
-
-	var bondedSubscribe = function(observer){
-		observer.pipe(
-
-			op.filter(_ => !_.signedByAccount(alice))
-		).subscribe(_=>{
-
-			console.log("署名の要求があります。");
-			console.log(_);
-		});
-	}
-
-	bondedSubscribe(bondedListener);
-	bondedSubscribe(bondedHttp);
-
-
+	$("#account_address").text(alice.pretty().slice(0,20) + "..." + alice.pretty().slice(-3));
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
@@ -256,16 +223,16 @@ async function createRepo(d2){
 async function listenerOpen(listener){
 
 	await listener.open();
-	setInterval(function(){
-		listener.newBlock();
-	}, 30000);
-/*
-	listener.open().then(() => {
-		setInterval(function(){
-			listener.newBlock();
-		}, 30000);
-	});
-	*/
+
+	listener.newBlock().subscribe(nb=>{
+		console.log(nb);
+	})
+
+	listener.webSocket.onclose = async function(){
+		console.log("listener onclose");
+		await listenerOpen(listener);
+	}
+
 }
 
 //トランザクション取得
