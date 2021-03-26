@@ -412,8 +412,15 @@ function parseTx(txs,parentId){
 				const id = tx.transactionInfo.id + mosaic.id.toHex();
 				const mosaicAmount = mosaic.amount;
 				if(parentId !== undefined){
+
 					//インターナルトランザクション
-					insertTxAfter("#agg" + parentId,id);
+					if(alice.plain() === tx.recipientAddress.plain() || alice.plain() ===  tx.signer.address.plain()){
+						insertTxAfter("#agg" + parentId,id);
+						
+					}else{
+						//自分が送信も受信もしていないインナートランザクションは表示しない。
+						continue;	
+					}
 				}else{
 					appendTx("#table",tx,id);
 				}
