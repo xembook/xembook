@@ -1,16 +1,90 @@
+const ACTIVE_IMPORTANCE_RATE = 0.1999;
+const NO_3001_NODES = [
+"d3rmzi6ltfh1jy.cloudfront.net",
+"a.symbol.lcnem.net",
+];
 const NODES = [
-"https://symbol-harvest-node.com:3001",
+//"https://xym.harvester.earth:3001",
+
+"https://d3rmzi6ltfh1jy.cloudfront.net",
+"https://a.symbol.lcnem.net",
+
+"https://ik1-432-48199.vs.sakura.ne.jp:3001",
+"https://raharu-symbol-node-01.com:3001",
+"https://sn2.msus-symbol.com:3001",
+"https://0-0symbol-node1.trivill.com:3001",
+"https://00.symsym.info:3001",
+"https://01.symsym.info:3001",
+"https://02.symsym.info:3001",
+"https://03.symsym.info:3001",
+"https://04.symsym.info:3001",
+"https://0.symsym.info:3001",
+"https://00.high-performance.symbol-nodes.com:3001",
+"https://super-harvester.com:3001",
+"https://symbol02.spdysgr.net:3001",
+"https://sym-main.opening-line.jp:3001",
 "https://node1.xym-harvesting.com:3001",
 "https://node2.xym-harvesting.com:3001",
-"https://symbol01.harvestasya.com:3001",
+"https://888.symsym.info:3001",
+"https://ls1.rellc.jp:3001",
+"https://symbol.nagoya:3001",
+"https://xym.idol-library.jp:3001",
+"https://age01.kitsutsuki.tokyo:3001",
+"https://age02.kitsutsuki.tokyo:3001",
+"https://cryptocat-xym-node2.com:3001",
+"https://02.symbol-node.net:3001",
+"https://00.symbol-node.net:3001",
+"https://symbol03.node.oe-jpy.com:3001",
+"https://07.symbol-node.net:3001",
+"https://sym-main.daoka.tk:3001",
+"https://01.symbol-gentoo.tokyo:3001",
+"https://08.symbol-node.net:3001",
+"https://symbol01.node.oe-jpy.com:3001",
+"https://harvest-festa.com:3001",
 "https://00.harvester.earth:3001",
+"https://xym.jp1.node.leywapool.com:3001",
+"https://xym.jp2.node.leywapool.com:3001",
+"https://09.symbol-node.net:3001",
 "https://symbol-harvesting.com:3001",
+"https://05.symbol-node.net:3001",
+"https://03.symbol-node.net:3001",
+"https://symbol02.node.oe-jpy.com:3001",
+"https://puipui.iizukak.com:3001",
+"https://06.symbol-node.net:3001",
+"https://04.symbol-node.net:3001",
 "https://symbol-node.net:3001",
+"https://node-01.rruby.org:3001",
+"https://ik1-449-56512.vs.sakura.ne.jp:3001",
+"https://sushi.sakurairo.tokyo:3001",
 "https://shikinami.starlight.tokyo:3001",
-"https://xym.harvester.earth:3001",
+"https://00A06705.xym.stir-hosyu.com:3001",
+"https://00ffd768.xym.stir-hosyu.com:3001",
+"https://01.symbol-node.net:3001",
+"https://umbriel.uranus-satellite.net:3001",
+"https://ik1-426-45178.vs.sakura.ne.jp:3001",
+"https://ik1-421-42893.vs.sakura.ne.jp:3001",
+"https://ik1-432-48497.vs.sakura.ne.jp:3001",
+"https://symbol01.harvestasya.com:3001",
+"https://aiteruyo.jp:3001",
+"https://amaterasu-01.kamigami.jp:3001",
+"https://amaterasu-02.kamigami.jp:3001",
+"https://symbol-node.bakobox.net:3001",
+"https://cryptocat-xym-node.com:3001",
+"https://0-0-xym.cubkab-crypto.tokyo:3001",
+"https://0-0-axym.cubkab-crypto.tokyo:3001",
+"https://01.symbol.enoki-do.com:3001",
 "https://harvest-01.symbol.farm:3001",
+"https://harvest-02.symbol.farm:3001",
+"https://harvest-03.symbol.farm:3001",
+"https://symbol.harvest-monitor.com:3001",
+"https://nemauthn.harvestfield.tokyo:3001",
 "https://hideyoshi-node.net:3001",
+"https://symbol.kazgb.net:3001",
+"https://symbol.from.nagoya:3001",
+"https://sn.newecosym.com:3001",
+"https://41506.xym.stir-hosyu.com:3001",
 "https://symbol-sakura-16.next-web-technology.com:3001",
+"https://ik1-438-51340.vs.sakura.ne.jp:3001",
 "https://sym-main-01.opening-line.jp:3001",
 "https://sym-main-02.opening-line.jp:3001",
 "https://sym-main-03.opening-line.jp:3001",
@@ -21,15 +95,12 @@ const NODES = [
 "https://sym-main-08.opening-line.jp:3001",
 "https://sym-main-09.opening-line.jp:3001",
 "https://sym-main-10.opening-line.jp:3001",
-"https://sym-main.opening-line.jp:3001",
+"https://sym-main-11.opening-line.jp:3001",
+"https://symbol-harvest-node.com:3001",
 "https://symbol-imog.tk:3001",
-"https://d3rmzi6ltfh1jy.cloudfront.net",
-"https://a.symbol.lcnem.net",
-];
-
-const NO_3001_NODES = [
-"d3rmzi6ltfh1jy.cloudfront.net",
-"a.symbol.lcnem.net",
+"https://symbol-node-01.kokichi.tokyo:3001",
+"https://symbol01.master-ryzen00.trade:3001",
+"https://00-symbol-node.yagiyoshi.com:3001",
 ];
 
 var transferPageNumber = 1;
@@ -58,10 +129,6 @@ if( address == ""){
 	if(proaddress === '' || proaddress === null){
 		alert("サンプルアカウントを表示します");
 		proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
-//	}else{
-
-//		proaddress = proaddress.replace( /-/g , "" ).toUpperCase();
-//		location.href = "?address=" + proaddress;
 	}
 	address = proaddress.replace( /-/g , "" ).toUpperCase();
 
@@ -74,7 +141,7 @@ address = address.replace( /-/g , "" ).toUpperCase();
 const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
-
+var listener;
 function connectNode(nodes,d){
 
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
@@ -94,15 +161,44 @@ async function createRepo(d2){
 
 	const d = $.Deferred();
 	const node = await connectNode(NODES,d);
+	repo = new nem.RepositoryFactoryHttp(node);
+	nsRepo = repo.createNamespaceRepository();
+	wsEndpoint = node.replace('http', 'ws') + "/ws";
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	try{
-		repo = new nem.RepositoryFactoryHttp(node);
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
+		await listenerKeepOpening();
 		d2.resolve(repo);
+
 	}catch{
 		createRepo(d2);
 	}
 	return d2.promise();
+}
+
+var newBlockHash;
+async function listenerKeepOpening(){
+
+	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+	await listener.open();
+
+	listener.webSocket.onclose = async function(){
+		console.log("listener onclose");
+		await listenerKeepOpening();
+
+		//リスナーに関係する情報をリロード
+		accountRepo.getAccountInfo(alice)
+		.subscribe(accountInfo => {
+			appendInfo(accountInfo);
+		});
+	}
+
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block.height);
+	});
+
 }
 
 (async() =>{
@@ -110,7 +206,6 @@ async function createRepo(d2){
 	const d2 = $.Deferred();
 	repo = await createRepo(d2);
 
-	nsRepo = repo.createNamespaceRepository();
 	txRepo = repo.createTransactionRepository();
 	nwRepo = repo.createNetworkRepository();
 	blockRepo = repo.createBlockRepository();
@@ -137,7 +232,7 @@ async function createRepo(d2){
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
 	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(alice.pretty().slice(0,-25) + "...");
+	$("#account_address").text(alice.pretty().slice(0,20) + "..." + alice.pretty().slice(-3));
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
@@ -154,20 +249,15 @@ async function createRepo(d2){
 
 	accountInfo
 	.subscribe(_=>{
-
-		var accountImportance = Number(_.importance.toString()) / totalChainImportance;
-		accountImportance = Math.round( accountImportance );
-		accountImportance /= 1000000;
-
-		$("#account_importance").append("<dd>" + accountImportance + "</dd>");
 		getTransfers();
 		getHarvests();
 		getRecipets();
-				
 		appendInfo(_);
 	});
 
 })();
+
+
 
 //トランザクション取得
 function getTransfers(){
@@ -214,9 +304,9 @@ function getRecipets(){
 			return false;
 		});
 
-		cnt = 0 
+		cnt = 0
 		for(receipt of statement){
-			
+
 			showReceiptInfo("receipt",_.height,receipt,cnt);
 			cnt++;
 		}
@@ -249,9 +339,9 @@ function getHarvests(){
 			return false;
 		});
 
-		cnt = 0 
+		cnt = 0
 		for(receipt of statement){
-			
+
 			showReceiptInfo("harvest",_.height,receipt,cnt);
 			cnt++;
 		}
@@ -293,24 +383,24 @@ function parseTx(txs,parentId){
 			appendAggTx(tx);
 			var tranType;
 			if(alice.plain() ===  tx.signer.address.plain()){
- //			if(alice.plain() === tx.recipientAddress.plain()){
+//			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信[集約]</font>";
 				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
- 				.subscribe(fee => {
- 					$("#amount"+ id)
- 					.text(
- 						dispAmount(nem.UInt64.fromNumericString(fee.toString()),6)
- 					);
- 				});
- 			}else{
+				.subscribe(fee => {
+					$("#amount"+ id)
+					.text(
+						dispAmount(nem.UInt64.fromNumericString(fee.toString()),6)
+					);
+				});
+			}else{
 				tranType = "<font color='green'>受信[集約]</font>";
- 			}
- 			$("#type"+ id ).html(tranType);
+			}
+			$("#type"+ id ).html(tranType);
 
- 			txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
- 			.subscribe(aggTx =>{
- 				parseTx(aggTx[0].innerTransactions,id);
- 			});
+			txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
+			.subscribe(aggTx =>{
+				parseTx(aggTx[0].innerTransactions,id);
+			});
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
@@ -354,12 +444,11 @@ function parseTx(txs,parentId){
 			}
 		}else{
 
+/* 非表示
 			var tranType;
-
 			const id = tx.transactionInfo.id;
 			if(parentId !== undefined){
 				//インターナルトランザクション
-//				insertTxAfter("#agg" + parentId,id);
 			}else{
 				appendTx("#table",tx,id);
 			}
@@ -367,7 +456,6 @@ function parseTx(txs,parentId){
 			if(alice.plain() ===  tx.signer.address.plain()){
 				tranType = "<font color='red'>送信</font>";
 				if(parentId === undefined){
-
 
 					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 					.subscribe(fee => {
@@ -379,18 +467,10 @@ function parseTx(txs,parentId){
 							)
 						);
 					});
-
-//					$("#amount"+ id).text(dispAmount(0,6));
-
-				}else{
-
-//					$("#amount"+ id).text(dispAmount(0,6));
 				}
-			}else{
-//				tranType = "<font color='green'>受信</font>";
-//				$("#amount"+ id).text(dispAmount(0,6));
 			}
 			$("#type"+ id ).html(tranType);
+*/
 		}
 	}
 }
