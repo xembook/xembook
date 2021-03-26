@@ -115,7 +115,7 @@
 function appendAccountInfo(amount){
 
 	$.when(
-//			$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+//		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
 		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
 	)
 	.done(function(tickers) {
@@ -272,7 +272,7 @@ function appendInfo(accountInfo){
 //		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
 //accountImportance = 0.002426;
 //accountImportance = 0.009;
-		var ACTIVE_IMPORTANCE_RATE = 0.35;
+//		var ACTIVE_IMPORTANCE_RATE = 0.35;
 		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE
 
 		p = 1 - activeImportance;
@@ -295,7 +295,7 @@ function appendInfo(accountInfo){
 	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
 
 	//アグリゲートトランザクション検知
-	const bondedListener = listener.aggregateBondedAdded(accountInfo.address)
+	const bondedListener = listener.aggregateBondedAdded(accountInfo.address);
 	const bondedHttp = txRepo.search({address:accountInfo.address,group:nem.TransactionGroup.Partial})
 	.pipe(
 		op.delay(2000),
@@ -411,6 +411,24 @@ setInterval(function(){
 	lastBlockHash = newBlockHash;
 
 }, 60000);
+
+//impl
+function getNewInfo(height){
+
+	receiptRepo.searchReceipts({targetAddress:alice,height:height})
+	.subscribe(_ =>{
+		if(_.data.length > 0){
+			alert("レシート情報が追加されました。再表示してください。");
+		}
+	})
+
+	txRepo.search({address:alice,height:height,group:nem.TransactionGroup.Confirmed})
+	.subscribe(_ =>{
+		if(_.data.length > 0){
+			alert("トランザクションが追加されました。再表示してください。");
+		}
+	})
+}
 
 
 $('#transfers_more').click(function(){getTransfers();return false;});
