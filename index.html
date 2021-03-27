@@ -165,31 +165,7 @@ function appendInfo(accountInfo){
 		}
 	})
 
-	//ネームスペース
-	nsRepo.search({ownerAddress:accountInfo.address})
-	.subscribe(async ns=>{
 
-		ddNamespace = "";
-		for(nsInfo of ns.data){
-
-			if(nsInfo.levels.length == 1){
-				names = await nsRepo.getNamespacesNames([nsInfo.levels[nsInfo.levels.length - 1]]).toPromise();
-
-				namespace = "";
-				for(namespaceName of names){
-					if(namespace != ""){
-						namespace = "." + namespace;
-					}
-					namespace = namespaceName.name + namespace
-				}
-				t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
-				ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
-			}
-		}
-		if(ddNamespace !== ""){
-			$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
-		}
-	});
 
 	//ブロック
 	chainRepo.getChainInfo().subscribe(x=>{
@@ -197,7 +173,6 @@ function appendInfo(accountInfo){
 		rxjs.zip(
 			blockRepo.getBlockByHeight(x.height),
 			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
-
 		).subscribe(x => {
 
 			$("#chain_height").html(
@@ -206,6 +181,37 @@ function appendInfo(accountInfo){
 			$("#finalized_chain_height").html(
 				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
 			);
+
+
+			//ネームスペース
+			nsRepo.search({ownerAddress:accountInfo.address})
+			.subscribe(async ns=>{
+
+				ddNamespace = "";
+				for(nsInfo of ns.data){
+
+					if(nsInfo.levels.length == 1){
+						names = await nsRepo.getNamespacesNames([nsInfo.levels[nsInfo.levels.length - 1]]).toPromise();
+
+						namespace = "";
+						for(namespaceName of names){
+							if(namespace != ""){
+								namespace = "." + namespace;
+							}
+							namespace = namespaceName.name + namespace
+						}
+
+						var remainHeight = nsInfo.endHeight.compact() - x[0].height.compact();
+//						t = dispTimeStamp(x[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
+						t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
+						ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
+					}
+				}
+				if(ddNamespace !== ""){
+					$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+				}
+			});
+
 		})
 	});
 
