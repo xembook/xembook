@@ -247,6 +247,9 @@ async function listenerKeepOpening(){
 		appendAccountInfo(_.amount);
 	});
 
+	dispInfo(accountInfo);
+
+/*
 	accountInfo
 	.subscribe(_=>{
 		getTransfers();
@@ -254,7 +257,7 @@ async function listenerKeepOpening(){
 		getRecipets();
 		appendInfo(_);
 	});
-
+*/
 })();
 
 

@@ -113,6 +113,16 @@
 <script src="xembook.js"></script>
 <script>
 
+function dispInfo(accountInfo){
+	accountInfo.subscribe(_=>{
+		getTransfers();
+		getHarvests();
+		getRecipets();
+		appendInfo(_);
+	});
+}
+
+
 function appendAccountInfo(amount){
 
 	$.when(
