@@ -165,8 +165,6 @@ function appendInfo(accountInfo){
 		}
 	})
 
-
-
 	//ブロック
 	chainRepo.getChainInfo().subscribe(x=>{
 
@@ -181,7 +179,6 @@ function appendInfo(accountInfo){
 			$("#finalized_chain_height").html(
 				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
 			);
-
 
 			//ネームスペース
 			nsRepo.search({ownerAddress:accountInfo.address})
@@ -211,16 +208,11 @@ function appendInfo(accountInfo){
 					$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
 				}
 			});
-
 		})
 	});
 
 	//ノード
-	nodeRepo.getNodeInfo().subscribe(x=>{
-		$("#node_host").text(
-			x.host
-		);
-	});
+	nodeRepo.getNodeInfo().subscribe(x=>{$("#node_host").text(x.host)});
 
 	//委任ノード
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
@@ -424,7 +416,7 @@ function getNewInfo(height){
 	receiptRepo.searchReceipts({targetAddress:alice,height:height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
-			alert("レシート情報が追加されました。再表示してください。");
+			alert("レシートが追加されました。再表示してください。");
 		}
 	})
 
