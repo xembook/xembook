@@ -117,9 +117,9 @@
 
 function dispInfo(accountInfo){
 	accountInfo.subscribe(_=>{
-		getTransfers();
-		getHarvests();
-		getRecipets();
+		getTransfers(30);
+		getHarvests(15);
+		getRecipets(15);
 		appendInfo(_);
 	});
 }

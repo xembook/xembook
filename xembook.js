@@ -7,6 +7,9 @@ const NODES = [
 //"https://xym.harvester.earth:3001",
 //"https://xym.jp1.node.leywapool.com:3001",
 //"https://xym.jp2.node.leywapool.com:3001",
+//"https://umbriel.uranus-satellite.net:3001",
+//"https://symbol.kazgb.net:3001",
+//"https://symbol-node-01.kokichi.tokyo:3001",
 
 "https://d3rmzi6ltfh1jy.cloudfront.net",
 "https://a.symbol.lcnem.net",
@@ -60,7 +63,6 @@ const NODES = [
 "https://00A06705.xym.stir-hosyu.com:3001",
 "https://00ffd768.xym.stir-hosyu.com:3001",
 "https://01.symbol-node.net:3001",
-"https://umbriel.uranus-satellite.net:3001",
 "https://ik1-426-45178.vs.sakura.ne.jp:3001",
 "https://ik1-421-42893.vs.sakura.ne.jp:3001",
 "https://ik1-432-48497.vs.sakura.ne.jp:3001",
@@ -79,7 +81,6 @@ const NODES = [
 "https://symbol.harvest-monitor.com:3001",
 "https://nemauthn.harvestfield.tokyo:3001",
 "https://hideyoshi-node.net:3001",
-"https://symbol.kazgb.net:3001",
 "https://symbol.from.nagoya:3001",
 "https://sn.newecosym.com:3001",
 "https://41506.xym.stir-hosyu.com:3001",
@@ -98,7 +99,6 @@ const NODES = [
 "https://sym-main-11.opening-line.jp:3001",
 "https://symbol-harvest-node.com:3001",
 "https://symbol-imog.tk:3001",
-"https://symbol-node-01.kokichi.tokyo:3001",
 "https://symbol01.master-ryzen00.trade:3001",
 "https://00-symbol-node.yagiyoshi.com:3001",
 ];
@@ -270,13 +270,13 @@ timestampCache = {};
 
 
 //トランザクション取得
-function getTransfers(){
+function getTransfers(pageSize){
 
 	txRepo.search({
 		address:alice,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
-		pageSize:15,
+		pageSize:pageSize,
 		pageNumber:transferPageNumber,
 		order:"desc"})
 	.subscribe(_=>{
@@ -289,12 +289,12 @@ function getTransfers(){
 }
 
 //出金レシート
-function getRecipets(){
+function getRecipets(pageSize){
 
 	receiptRepo.searchReceipts({
 		senderAddress:alice,
 		pageNumber:reciptPageNumber,
-		pageSize:10,
+		pageSize:pageSize,
 		order:"desc"
 	})
 	.pipe(
@@ -324,12 +324,12 @@ function getRecipets(){
 }
 
 //入金レシート
-function getHarvests(){
+function getHarvests(pageSize){
 	console.log(harvestPageNumber);
 	receiptRepo.searchReceipts({
 		targetAddress:alice,
 		pageNumber:harvestPageNumber,
-		pageSize:10,
+		pageSize:pageSize,
 		order:"desc"
 	})
 	.pipe(
@@ -366,7 +366,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 
 	$("#" + tag).append("<tr>"
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
-	+ "<td id='" + tag + "_type'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_type' style='font-size:92%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "</tr>"
 	);
