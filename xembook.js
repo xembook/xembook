@@ -5,6 +5,8 @@ const NO_3001_NODES = [
 ];
 const NODES = [
 //"https://xym.harvester.earth:3001",
+//"https://xym.jp1.node.leywapool.com:3001",
+//"https://xym.jp2.node.leywapool.com:3001",
 
 "https://d3rmzi6ltfh1jy.cloudfront.net",
 "https://a.symbol.lcnem.net",
@@ -42,8 +44,6 @@ const NODES = [
 "https://symbol01.node.oe-jpy.com:3001",
 "https://harvest-festa.com:3001",
 "https://00.harvester.earth:3001",
-"https://xym.jp1.node.leywapool.com:3001",
-"https://xym.jp2.node.leywapool.com:3001",
 "https://09.symbol-node.net:3001",
 "https://symbol-harvesting.com:3001",
 "https://05.symbol-node.net:3001",
@@ -147,8 +147,8 @@ function connectNode(nodes,d){
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
 	$.ajax({url:  node + "/node/health" ,type: 'GET',timeout: 500})
 	.then(res => {
-		console.log(res);
 		if(res.status.apiNode == "up" && res.status.db == "up"){
+			console.log(node);
 			return d.resolve(node);
 		}
 		return connectNode(nodes,d);
@@ -201,14 +201,20 @@ async function listenerKeepOpening(){
 
 }
 
+timestampCache = {};
+
 (async() =>{
 
 	const d2 = $.Deferred();
 	repo = await createRepo(d2);
+	const d3 = $.Deferred();
+	repo2 = await createRepo(d3);
+	
 
 	txRepo = repo.createTransactionRepository();
 	nwRepo = repo.createNetworkRepository();
-	blockRepo = repo.createBlockRepository();
+//	blockRepo = repo.createBlockRepository();
+	blockRepo = repo2.createBlockRepository();
 	receiptRepo = repo.createReceiptRepository();
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
