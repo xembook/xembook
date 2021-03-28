@@ -350,7 +350,7 @@ function appendInfo(accountInfo){
 
 function setDelegatedNode(){
 
-	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:ngl-dual-001.symbolblockchain.io)','');
+	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
 	if(delegatedNode !== null){
 		localStorage.setItem('delegated_node' + address,delegatedNode);
 		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
