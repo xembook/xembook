@@ -239,6 +239,7 @@ timestampCache = {};
 
 	alice = nem.Address.createFromRawAddress(address);
 	$("#account_address").text(alice.pretty().slice(0,20) + "..." + alice.pretty().slice(-3));
+	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + alice.plain());
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(alice);
@@ -424,7 +425,7 @@ function parseTx(txs,parentId){
 
 					//インターナルトランザクション
 					if(alice.plain() === tx.recipientAddress.plain() || alice.plain() ===  tx.signer.address.plain()){
-						insertTxAfter("#agg" + parentId,id);
+						insertTxAfter("#agg" + parentId,id,tx);
 						
 					}else{
 						//自分が送信も受信もしていないインナートランザクションは表示しない。

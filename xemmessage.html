@@ -22,15 +22,19 @@
 <div class="container">
 	<div class="row">
 		<div>
+
 		<h2>トランザクション</h2>
 		<table id="table"  class="table">
 			<thead><tr>
-				<th>日時</th>
-				<th>区分</th>
+				<th width="120">日時</th>
+				<th width="90">区分</th>
 				<th>数量</th>
+				<th>メッセージ</th>
 			</tr></thead>
 		</table>
-		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		<dl>
+			<dd><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</dl>		
 		</div>
 	</div>
 	<div class="row">
@@ -82,6 +86,8 @@ function appendAggTx(tx){
 	+ "</span></a></td>"
 	+ "<td id='type" + id + "'></td>" //mosaicLabel
 	+ "<td id='amount" + id + "' class='text-right'></td>"
+	+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+
 	+ "</tr>"
 	);
 
@@ -103,6 +109,7 @@ function appendTx(insTag,tx,id){
 		+ "</span></a></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
 		+ "<td id='amount" + id + "' class='text-right'></td>"
+		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
 		+ "</tr>"
 	);
 
@@ -115,13 +122,63 @@ function appendTx(insTag,tx,id){
 	})
 }
 
-function insertTxAfter(insTag,id){
+function getMessage(tx){
+
+	message = "";
+	if(tx.message){
+		if(tx.message.type === nem.MessageType.EncryptedMessage){
+
+			message = "[EncryptedMessage]";
+		
+		}else if(tx.message.type === nem.MessageType.PersistentHarvestingDelegationMessage){
+
+			message = "[PersistentHarvestingDelegationMessage]";
+
+		}else if(tx.message.type === nem.MessageType.PlainMessage){
+
+			message = tx.message.payload;
+
+		}else if(tx.message.type === nem.MessageType.RawMessage){
+		
+			message = tx.message.payload;
+		}
+	}
+	return escape_html(message);
+
+}
+
+function escape_html (string) {
+	if(typeof string !== 'string') {
+		return string;
+	}
+	return string.replace(/[&'`"<>]/g, function(match) { //'
+		return {
+			'&': '&amp;',
+			"'": '&#x27;',
+			'`': '&#x60;',
+			'"': '&quot;',
+			'<': '&lt;',
+			'>': '&gt;',
+		}[match]
+	});
+}
+
+
+function insertTxAfter(insTag,id,tx){
+
+	console.log(tx);
+	console.log(tx.message);
+
+	
+
+
 
 	$(insTag).after(
 		"<tr>"
 		+ "<td></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
 		+ "<td id='amount" + id + "'  class='text-right'></td>"
+		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
 		+ "</tr>"
 	);
 }

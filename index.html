@@ -21,68 +21,70 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
-	<div class="account col-sm-4">
-	<h2>アカウント</h2>
-	<dl id="account_info">
-		<dt>アドレス</dt><dd><span id="account_address"></span></dd>
-		<dt>残高</dt><dd><span id="account_balance"></span></dd>
-		<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-		<dt>重要度</dt><dd><span id="account_importance"></span></dd>
-	</dl>
-	<dl id="account_append_info"></dl>
-	<h2>取引所</h2>
-	<dl>
-	<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
-	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
-	<dt>KUCOIN</dt><dd><span id="kucoin"></span></dd>
-	<dt>ProBit</dt><dd><span id="probit"></span></dd>
-	</dl>
+		<div class="account col-sm-4">
+		<h2>アカウント</h2>
+		<dl id="account_info">
+			<dt>アドレス</dt><dd><span id="account_address"></span>　<a target="_blank" id="account_explorer">explorer</a></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span></dd>
+			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
+			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+		</dl>
+		<dl id="account_append_info"></dl>
+		<h2>取引所</h2>
+		<dl>
+		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
+		<dt>KUCOIN</dt><dd><span id="kucoin"></span></dd>
+		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
+		<dt>ProBit</dt><dd><span id="probit"></span></dd>
+		</dl>
 
-	<h2>接続ノード</h2>
-	<dl id="node_info">
-		<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
-		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
-		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
-		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+		<h2>接続ノード</h2>
+		<dl id="node_info">
+			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
+			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
+			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
 
-	</dl>
-	</div>
-	<div class="account col-sm-4">
-	<h2>レシート</h2>
-	<dl>
-	<dt>対象アカウント</dt>
-	<table id="harvest"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
-	<dl>
-	<dt>送信元アカウント</dt>
-	<table id="receipt"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
-	</div>
-	<div class="account col-sm-4">
-	<h2>トランザクション</h2>
-	<table id="table"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</div>
+		</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>レシート</h2>
+			<h5>対象アカウント</h5>
+			<table id="harvest"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+			<h5>送信元アカウント</h5>
+			<table id="receipt"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>トランザクション</h2>
+			<table id="table"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
 	</div>
 </div>
 
@@ -399,7 +401,7 @@ function appendTx(insTag,tx,id){
 	})
 }
 
-function insertTxAfter(insTag,id){
+function insertTxAfter(insTag,id,tx){
 
 	$(insTag).after(
 		"<tr>"
