@@ -21,52 +21,67 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
-	<div class="account col-sm-4">
-	<h2>アカウント</h2>
-	<dl id="account_info">
-		<dt>アドレス</dt><dd><span id="account_address"></span></dd>
-		<dt>残高</dt><dd><span id="account_balance"></span></dd>
-		<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-	</dl>
+		<div class="account col-sm-4">
+		<h2>アカウント</h2>
+		<dl id="account_info">
+			<dt>アドレス</dt><dd><span id="account_address"></span></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span></dd>
+			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
+		</dl>
 
+		</div>
+		<div class="account col-sm-4">
+		<h2>レシート</h2>
+		<dl>
+		<dt>対象アカウント</dt>
+		<table id="harvest"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+			</tr></thead>
+		</table>
+		<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</dl>
+		<dl>
+		<dt>送信元アカウント</dt>
+		<table id="receipt"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+			</tr></thead>
+		</table>
+		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</dl>
+		</div>
+		<div class="account col-sm-4">
+		<h2>トランザクション</h2>
+		<table id="table"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+			</tr></thead>
+		</table>
+		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</div>
 	</div>
-	<div class="account col-sm-4">
-	<h2>レシート</h2>
-	<dl>
-	<dt>対象アカウント</dt>
-	<table id="harvest"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
-	<dl>
-	<dt>送信元アカウント</dt>
-	<table id="receipt"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
+	<div>
+
+
+		<div class="account col-sm-4">
+			<div class="faucet">
+				<h2>リンク</h2>
+				<dl>
+					<dd><a id="xembook" href="">XEMBook</a></dd>
+					<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+				</dl>
+			</div>
+		</div>
 	</div>
-	<div class="account col-sm-4">
-	<h2>トランザクション</h2>
-	<table id="table"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</div>
-	</div>
+
+
 </div>
 
 
