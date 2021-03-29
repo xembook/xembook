@@ -70,10 +70,26 @@
 function getNewInfo(height){}
 function appendAccountInfo(amount){}
 function dispInfo(accountInfo){
-	accountInfo.subscribe(_=>{
-		getTransfers(25);
-	});
+	getBatchOfTransfers(1);
 }
+
+function getBatchOfTransfers(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval(async function(){
+		console.log('hi!')
+		count++;
+		isLastPage = await getTransfers(25);
+		if (isLastPage || count >= maxCount){
+
+			console.log("clearInterval")
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+
 
 
 
@@ -184,7 +200,7 @@ function insertTxAfter(insTag,id,tx){
 }
 
 
-$('#transfers_more').click(function(){getTransfers();return false;});
+$('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 </script>
 </body>
 </html>

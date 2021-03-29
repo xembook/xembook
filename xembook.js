@@ -270,7 +270,29 @@ timestampCache = {};
 
 
 //トランザクション取得
-function getTransfers(pageSize){
+async function getTransfers(pageSize){
+
+	txs = await txRepo.search({
+		address:alice,
+		group:nem.TransactionGroup.Confirmed,
+		embedded:true,
+		pageSize:pageSize,
+		pageNumber:transferPageNumber,
+		order:"desc"}).toPromise();
+
+	transferPageNumber++;
+	parseTx(txs.data);
+
+	if(txs.isLastPage){
+		$('#transfers_footer').hide();
+	}
+	return txs.isLastPage;
+}
+
+
+
+
+function _getTransfers(pageSize){
 
 	txRepo.search({
 		address:alice,
