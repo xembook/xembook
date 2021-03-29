@@ -116,10 +116,10 @@
 <script>
 
 function dispInfo(accountInfo){
-	accountInfo.subscribe(_=>{
-		getTransfers(30);
-		getHarvests(15);
-		getRecipets(15);
+	accountInfo.subscribe(async _=>{
+		await getTransfers(20);
+		await getHarvests(15);
+		await getRecipets(15);
 		appendInfo(_);
 	});
 }

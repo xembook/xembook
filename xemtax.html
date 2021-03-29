@@ -39,6 +39,8 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
+				<th>円換算値(小数4桁まで)</th>
+				<th>円平均</th>
 			</tr></thead>
 		</table>
 		<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -50,6 +52,8 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
+				<th>円換算値(小数4桁まで)</th>
+				<th>円平均</th>
 			</tr></thead>
 		</table>
 		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -62,6 +66,9 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
+				<th>円換算値(小数4桁まで)</th>
+				<th>円平均</th>
+				<th>負担手数料</th>
 			</tr></thead>
 		</table>
 		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -95,13 +102,67 @@
 
 function getNewInfo(height){}
 function dispInfo(accountInfo){
-	accountInfo.subscribe(_=>{
-		getTransfers();
+
+	getBatchOfTransfers(1);
+	getBatchOfHarvests(1);
+	getBatchOfRecipets(1);
+
+//	getHarvests();
+//	getRecipets();
+
+
+/*
+	accountInfo.subscribe(async _=>{
+		await getTransfers();
 		getHarvests();
 		getRecipets();
 	});
-
+*/
 }
+
+function getBatchOfTransfers(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getTransfers(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+
+function getBatchOfHarvests(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getHarvests(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+function getBatchOfRecipets(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getRecipets(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
 
 function appendAccountInfo(amount){
 
@@ -118,8 +179,6 @@ function appendAccountInfo(amount){
 		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 	});
 }
-
-
 
 function appendAggTx(tx){
 
@@ -177,9 +236,9 @@ function insertTxAfter(insTag,id){
 
 
 
-$('#transfers_more').click(function(){getTransfers();return false;});
-$('#harvests_more').click(function(){getHarvests();return false;});
-$('#receipts_more').click(function(){getRecipets();return false;});
+$('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
+$('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
+$('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
 </script>
 </body>
 </html>

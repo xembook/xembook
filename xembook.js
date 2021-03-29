@@ -291,7 +291,7 @@ async function getTransfers(pageSize){
 
 
 
-
+/*
 function _getTransfers(pageSize){
 
 	txRepo.search({
@@ -311,7 +311,7 @@ function _getTransfers(pageSize){
 }
 
 //出金レシート
-function getRecipets(pageSize){
+function _getRecipets(pageSize){
 
 	receiptRepo.searchReceipts({
 		senderAddress:alice,
@@ -344,9 +344,85 @@ function getRecipets(pageSize){
 		}
 	});
 }
+*/
+
+async function getRecipets(pageSize){
+	console.log(reciptPageNumber);
+
+
+	var res = await receiptRepo.searchReceipts({
+		senderAddress:alice,
+		pageNumber:reciptPageNumber,
+		pageSize:pageSize,
+		order:"desc"
+	}).toPromise();
+
+	reciptPageNumber++;
+
+	for(statements  of res.data){
+
+		var filterdReceipts = statements.receipts.filter(item => {
+			if(item.senderAddress){
+				return item.senderAddress.plain() === alice.plain();
+			}
+			return false;
+		});
+
+		cnt = 0
+		for(receipt of filterdReceipts){
+
+			showReceiptInfo("receipt",statements.height,receipt,cnt);
+			cnt++;
+		}
+	}
+
+	if(res.isLastPage){
+		$('#receipts_footer').hide();
+	}
+	return res.isLastPage;
+}
+
+
 
 //入金レシート
-function getHarvests(pageSize){
+async function getHarvests(pageSize){
+	console.log(harvestPageNumber);
+
+
+	var res = await receiptRepo.searchReceipts({
+		targetAddress:alice,
+		pageNumber:harvestPageNumber,
+		pageSize:pageSize,
+		order:"desc"
+	}).toPromise();
+
+	harvestPageNumber++;
+
+	for(statements  of res.data){
+
+		var filterdReceipts = statements.receipts.filter(item => {
+			if(item.targetAddress){
+				return item.targetAddress.plain() === alice.plain();
+			}
+			return false;
+		});
+
+		cnt = 0
+		for(receipt of filterdReceipts){
+
+			showReceiptInfo("harvest",statements.height,receipt,cnt);
+			cnt++;
+		}
+	}
+
+	if(res.isLastPage){
+		$('#harvests_footer').hide();
+	}
+	return res.isLastPage;
+}
+
+/*
+function _getHarvests(pageSize){
 	console.log(harvestPageNumber);
 	receiptRepo.searchReceipts({
 		targetAddress:alice,
@@ -379,7 +455,7 @@ function getHarvests(pageSize){
 		}
 	});
 }
-
+*/
 function showReceiptInfo(tag,height,receipt,cnt){
 
 	if(cnt === 0){
