@@ -216,7 +216,6 @@ async function listenerKeepOpening(){
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block.height);
 	});
-
 }
 
 (async() =>{
@@ -468,35 +467,6 @@ function parseTx(txs,parentId){
 				}
 				$("#type"+ id ).html(tranType);
 			}
-		}else{
-
-/* 非表示
-			var tranType;
-			const id = tx.transactionInfo.id;
-			if(parentId !== undefined){
-				//インターナルトランザクション
-			}else{
-				appendTx("#table",tx,id);
-			}
-
-			if(alice.plain() ===  tx.signer.address.plain()){
-				tranType = "<font color='red'>送信</font>";
-				if(parentId === undefined){
-
-					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
-					.subscribe(fee => {
-
-						$("#amount"+ id).text(
-							dispAmount(
-								nem.UInt64.fromNumericString(fee.toString())
-								,6
-							)
-						);
-					});
-				}
-			}
-			$("#type"+ id ).html(tranType);
-*/
 		}
 	}
 }
@@ -504,7 +474,7 @@ function parseTx(txs,parentId){
 
 function dispAmount(amount,divisibility){
 
-	var strNum = amount.toString();
+	const strNum = amount.toString();
 	if(divisibility > 0){
 
 		if(amount < Math.pow(10, divisibility)){
@@ -513,8 +483,8 @@ function dispAmount(amount,divisibility){
 
 		}else{
 
-			var r = strNum.slice(-divisibility);
-			var l = strNum.substring(0,strNum.length - divisibility);
+			const r = strNum.slice(-divisibility);
+			const l = strNum.substring(0,strNum.length - divisibility);
 			return comma3(l) + "." + r;
 		}
 	}else{
@@ -532,8 +502,8 @@ function paddingAmount0(val,char,n){
 
 function dispTimeStamp(timeStamp,epoch){
 
-	var d = new Date(timeStamp + epoch * 1000)
-	var strDate = d.getFullYear()%100
+	const d = new Date(timeStamp + epoch * 1000)
+	const strDate = d.getFullYear()%100
 		+ "-" + paddingDate0( d.getMonth() + 1 )
 		+ '-' + paddingDate0( d.getDate() )
 		+ ' ' + paddingDate0( d.getHours() )
