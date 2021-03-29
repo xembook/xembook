@@ -115,17 +115,16 @@
 <script src="xembook.js"></script>
 <script>
 
-function dispInfo(accountInfo){
+function showInfo(accountInfo){
 	accountInfo.subscribe(async _=>{
 		await getTransfers(20);
 		await getHarvests(15);
 		await getRecipets(15);
-		appendInfo(_);
+		showAccountInfo(_);
 	});
 }
 
-
-function appendAccountInfo(amount){
+function showAmountInfo(amount){
 
 	$.when(
 //		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
@@ -149,17 +148,16 @@ function appendAccountInfo(amount){
 	});
 }
 
-function appendInfo(accountInfo){
+function showAccountInfo(accountInfo){
 
 	$("#account_append_info").empty();
 	$("#account_importance").empty();
-
 
 	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
 	.subscribe(msig=>{
 
-		//親キー
+		//親アカウント
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
@@ -170,7 +168,7 @@ function appendInfo(accountInfo){
 			$("#account_append_info").append('<dt>親アカウント</dt>' + parentKeys);
 		}
 
-		//子キー
+		//子アカウント
 		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
 			console.log(multisig);
@@ -183,18 +181,18 @@ function appendInfo(accountInfo){
 	})
 
 	//ブロック
-	chainRepo.getChainInfo().subscribe(x=>{
+	chainRepo.getChainInfo().subscribe(chain=>{
 
 		rxjs.zip(
-			blockRepo.getBlockByHeight(x.height),
-			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
-		).subscribe(x => {
+			blockRepo.getBlockByHeight(chain.height),
+			blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height),
+		).subscribe(zip => {
 
-			$("#chain_height").text(
-				"[ " + x[0].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+			$("#chain_height").html(
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
 			);
-			$("#finalized_chain_height").text(
-				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
+			$("#finalized_chain_height").html(
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
 			);
 
 			//ネームスペース
@@ -215,8 +213,8 @@ function appendInfo(accountInfo){
 							namespace = namespaceName.name + namespace
 						}
 
-						var remainHeight = nsInfo.endHeight.compact() - x[0].height.compact();
-//						t = dispTimeStamp(x[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
+						var remainHeight = nsInfo.endHeight.compact() - zip[0].height.compact();
+//						t = dispTimeStamp(zip[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
 						t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
 						ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
 					}
@@ -229,7 +227,7 @@ function appendInfo(accountInfo){
 	});
 
 	//ノード
-	nodeRepo.getNodeInfo().subscribe(x=>{$("#node_host").text(x.host)});
+	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
 
 	//委任ノード
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
@@ -244,11 +242,11 @@ function appendInfo(accountInfo){
 		drepo = new nem.RepositoryFactoryHttp(dnode);
 		dnodeRepo = drepo.createNodeRepository();
 
-		dnodeRepo.getUnlockedAccount().subscribe(async x=>{
-			console.log(x);
+		dnodeRepo.getUnlockedAccount().subscribe(async ukeys=>{
+			console.log(ukeys);
 
 			harvesterKeys = Array();
-			for(unlockedPublicKey of x){
+			for(unlockedPublicKey of ukeys){
 				console.log(unlockedPublicKey);
 				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
 				try{
@@ -284,26 +282,22 @@ function appendInfo(accountInfo){
 
 		accountImportance = Math.round( accountImportance );
 		accountImportance /= 1000000;
-//		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
-//accountImportance = 0.002426;
-//accountImportance = 0.009;
-//		var ACTIVE_IMPORTANCE_RATE = 0.35;
 		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE
-
+		pFalse = 1 - activeImportance;
 		p = 1 - activeImportance;
 		b = 1
 		while(0.5 < p){
-			p = p * (1 - activeImportance);
+			p = p * pFalse;
 			b += 1;
 		}
 		pHalf = b / 2880 ;
-
-		while(0.15 < p){
-			p = p * (1 - activeImportance);
-			b += 1;
-		}
-		pSig = b / 2880;
 		if(pHalf > 1){
+
+			while(0.15 < p){
+				p = p * pFalse;
+				b += 1;
+			}
+			pSig = b / 2880;
 			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
 		}
 	}
@@ -372,10 +366,10 @@ function appendAggTx(tx){
 	);
 
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	.subscribe(block => {
 
 		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
 }
@@ -393,10 +387,10 @@ function appendTx(insTag,tx,id){
 	);
 
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	.subscribe(block => {
 
 		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
 }
@@ -446,9 +440,9 @@ function getNewInfo(height){
 }
 
 
-$('#transfers_more').click(function(){getTransfers();return false;});
-$('#harvests_more').click(function(){getHarvests();return false;});
-$('#receipts_more').click(function(){getRecipets();return false;});
+$('#transfers_more').click(function(){getTransfers(20);return false;});
+$('#harvests_more' ).click(function(){getHarvests(15); return false;});
+$('#receipts_more' ).click(function(){getRecipets(15); return false;});
 $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 </script>
 </body>

@@ -68,8 +68,8 @@
 <script>
 
 function getNewInfo(height){}
-function appendAccountInfo(amount){}
-function dispInfo(accountInfo){
+function showAmountInfo(amount){}
+function showInfo(accountInfo){
 	getBatchOfTransfers(1);
 }
 
@@ -132,6 +132,18 @@ function appendTx(insTag,tx,id){
 	})
 }
 
+function insertTxAfter(insTag,id,tx){
+
+	$(insTag).after(
+		"<tr>"
+		+ "<td></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "'  class='text-right'></td>"
+		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+		+ "</tr>"
+	);
+}
+
 function getMessage(tx){
 
 	message = "";
@@ -154,7 +166,6 @@ function getMessage(tx){
 		}
 	}
 	return escape_html(message);
-
 }
 
 function escape_html (string) {
@@ -171,26 +182,6 @@ function escape_html (string) {
 			'>': '&gt;',
 		}[match]
 	});
-}
-
-
-function insertTxAfter(insTag,id,tx){
-
-	console.log(tx);
-	console.log(tx.message);
-
-	
-
-
-
-	$(insTag).after(
-		"<tr>"
-		+ "<td></td>"
-		+ "<td id='type" + id + "'></td>" //mosaicLabel
-		+ "<td id='amount" + id + "'  class='text-right'></td>"
-		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
-		+ "</tr>"
-	);
 }
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});

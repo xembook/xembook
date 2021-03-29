@@ -101,23 +101,11 @@
 
 
 function getNewInfo(height){}
-function dispInfo(accountInfo){
+function showInfo(accountInfo){
 
 	getBatchOfTransfers(1);
 	getBatchOfHarvests(1);
 	getBatchOfRecipets(1);
-
-//	getHarvests();
-//	getRecipets();
-
-
-/*
-	accountInfo.subscribe(async _=>{
-		await getTransfers();
-		getHarvests();
-		getRecipets();
-	});
-*/
 }
 
 function getBatchOfTransfers(maxCount){
@@ -164,7 +152,7 @@ function getBatchOfRecipets(maxCount){
 }
 
 
-function appendAccountInfo(amount){
+function showAmountInfo(amount){
 
 	$.when(
 //		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
