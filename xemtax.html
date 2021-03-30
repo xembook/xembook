@@ -21,7 +21,6 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
-		<div class="account col-sm-4">
 		<h2>アカウント</h2>
 		<dl id="account_info">
 			<dt>アドレス</dt><dd><span id="account_address"></span></dd>
@@ -29,8 +28,6 @@
 			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
 		</dl>
 
-		</div>
-		<div class="account col-sm-4">
 		<h2>レシート</h2>
 		<dl>
 		<dt>対象アカウント</dt>
@@ -58,8 +55,8 @@
 		</table>
 		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 		</dl>
-		</div>
-		<div class="account col-sm-4">
+
+
 		<h2>トランザクション</h2>
 		<table id="table"  class="table">
 			<thead><tr>
@@ -72,19 +69,17 @@
 			</tr></thead>
 		</table>
 		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-		</div>
+
 	</div>
 	<div>
 
 
-		<div class="account col-sm-4">
-			<div class="faucet">
-				<h2>リンク</h2>
-				<dl>
-					<dd><a id="xembook" href="">XEMBook</a></dd>
-					<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
-				</dl>
-			</div>
+		<div class="faucet">
+			<h2>リンク</h2>
+			<dl>
+				<dd><a id="xembook" href="">XEMBook</a></dd>
+				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+			</dl>
 		</div>
 	</div>
 
@@ -99,13 +94,20 @@
 <script src="xembook.js"></script>
 <script>
 
-
+var xym_jpy;
+var avgXymJpyDaily = Array();
 function getNewInfo(height){}
 function showInfo(accountInfo){
 
-	getBatchOfTransfers(1);
-	getBatchOfHarvests(1);
-	getBatchOfRecipets(1);
+	$.ajax({url: "http://xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
+	.done(x=>{
+		console.log(x)
+		xym_jpy = x;
+		getBatchOfTransfers(1);
+		getBatchOfHarvests(1);
+		getBatchOfRecipets(1);
+
+	})
 }
 
 function getBatchOfTransfers(maxCount){
@@ -168,7 +170,7 @@ function showAmountInfo(amount){
 	});
 }
 
-function appendAggTx(tx){
+async function appendAggTx(tx){
 
 	const id = tx.transactionInfo.id;
 	$("#table").append("<tr id='agg" + id + "'>"
@@ -176,20 +178,40 @@ function appendAggTx(tx){
 	+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 	+ "</span></a></td>"
 	+ "<td id='type" + id + "'></td>" //mosaicLabel
-	+ "<td id='amount" + id + "' class='text-right'></td>"
+	+ "<td id='amount" + id + "'          class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
 	+ "</tr>"
 	);
 
+
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+/*
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
 	.subscribe(b => {
 
 		$("#date"+ id).text(
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
+
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
 	})
+*/
 }
 
-function appendTx(insTag,tx,id){
+async function appendTx(insTag,id,tx){
 
 	$(insTag).append(
 		"<tr>"
@@ -197,30 +219,133 @@ function appendTx(insTag,tx,id){
 		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 		+ "</span></a></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
-		+ "<td id='amount" + id + "' class='text-right'></td>"
+		+ "<td id='amount" + id + "'          class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
 		+ "</tr>"
 	);
 
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+/*
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
 	.subscribe(b => {
 
 		$("#date"+ id).text(
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
+
 	})
+*/
 }
 
-function insertTxAfter(insTag,id){
+async function insertTxAfter(insTag,id,tx){
 
 	$(insTag).after(
 		"<tr>"
 		+ "<td></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
-		+ "<td id='amount" + id + "'  class='text-right'></td>"
+		+ "<td id='amount" + id + "'          class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
 		+ "</tr>"
 	);
+
+/*
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
+
+	})
+*/
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+
+	
 }
 
+function showReceiptInfo(tag,height,receipt,cnt){
+
+	if(cnt === 0){
+		cnt = "";
+	}
+
+
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
+	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "</tr>"
+	);
+
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			console.log(xym_jpy[indexDate]);
+		
+		}
+
+
+
+	})
+}
+
+function showTxAmountInfo(id,amount,fee){
+
+	totalAmount = amount.add(nem.UInt64.fromNumericString(fee.toString()));
+	$("#amount" + id).text(
+		dispAmount(totalAmount,6)
+	);
+
+
+console.log(avgXymJpyDaily);
+console.log(id);
+	if(avgXymJpyDaily[id] in xym_jpy){
+
+		console.log(xym_jpy[avgXymJpyDaily[id]]);
+
+		avgJPY = Number(xym_jpy[avgXymJpyDaily[id]]);
+		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
+	
+		$("#amount"+ id + "_jpy_avg").text(avgJPY.toFixed(4));
+		$("#amount"+ id + "_jpy").text(totalJPY);
+	}
+}
 
 
 

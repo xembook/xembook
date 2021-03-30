@@ -366,30 +366,9 @@ async function getHarvests(pageSize){
 	return res.isLastPage;
 }
 
-function showReceiptInfo(tag,height,receipt,cnt){
-
-	if(cnt === 0){
-		cnt = "";
-	}
-
-	$("#" + tag).append("<tr>"
-	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
-	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
-	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
-	+ "</tr>"
-	);
-
-	blockRepo.getBlockByHeight(height)
-	.subscribe(b => {
-
-		$("#" + tag + "_date"+ height + receipt.type).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-	})
-}
 
 //トランザクション一覧
-function parseTx(txs,parentId){
+async function parseTx(txs,parentId){
 	for(var tx of txs){
 
 		if([
@@ -398,17 +377,22 @@ function parseTx(txs,parentId){
 		].includes(tx.type)){
 
 			const id = tx.transactionInfo.id;
-			appendAggTx(tx);
+			await appendAggTx(tx);
 			var tranType;
 			if(alice.plain() ===  tx.signer.address.plain()){
 //			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信[集約]</font>";
 				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 				.subscribe(fee => {
+
+//					showTxAmountInfo("#amount"+ id,nem.UInt64.fromNumericString(fee.toString()) );
+					showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+/*
 					$("#amount"+ id)
 					.text(
 						dispAmount(nem.UInt64.fromNumericString(fee.toString()),6)
 					);
+*/
 				});
 			}else{
 				tranType = "<font color='green'>受信[集約]</font>";
@@ -433,14 +417,14 @@ function parseTx(txs,parentId){
 
 					//インターナルトランザクション
 					if(alice.plain() === tx.recipientAddress.plain() || alice.plain() ===  tx.signer.address.plain()){
-						insertTxAfter("#agg" + parentId,id,tx);
+						await insertTxAfter("#agg" + parentId,id,tx);
 						
 					}else{
-						//自分が送信も受信もしていないインナートランザクションは表示しない。
+						//自分が送信・受信していないインナートランザクションは表示しない。
 						continue;	
 					}
 				}else{
-					appendTx("#table",tx,id);
+					await appendTx("#table",id,tx);
 				}
 
 				var tranType;
@@ -450,6 +434,9 @@ function parseTx(txs,parentId){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 						.subscribe(fee => {
 
+//							showTxAmountInfo("#amount"+ id,mosaicAmount.add(nem.UInt64.fromNumericString(fee.toString() ) ));
+							showTxAmountInfo(id,mosaicAmount,fee);
+/*
 							$("#amount"+ id).text(
 								dispAmount(
 									mosaicAmount.add(
@@ -457,13 +444,18 @@ function parseTx(txs,parentId){
 									),6
 								)
 							);
+*/
 						});
 					}else{
-						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
+//						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
+//						showTxAmountInfo("#amount"+ id,mosaicAmount);
+						showTxAmountInfo(id,mosaicAmount,0);
 					}
 				}else{
 					tranType = "<font color='green'>受信</font>";
-					$("#amount"+ id).text(dispAmount(mosaicAmount,6));
+					showTxAmountInfo(id,mosaicAmount,0);
+//					showTxAmountInfo("#amount"+ id,mosaicAmount);
+					
 				}
 				$("#type"+ id ).html(tranType);
 			}
@@ -511,6 +503,16 @@ function dispTimeStamp(timeStamp,epoch){
 	return 	strDate;
 }
 
+function indexTimeStamp(timeStamp,epoch){
+	const d = new Date(timeStamp + epoch * 1000)
+	const strDate = d.getFullYear()
+		+ paddingDate0( d.getMonth() + 1 )
+		+ paddingDate0( d.getDate() );
+	return 	strDate;
+	
+}
+	
+	
 function paddingDate0(num) {
 	return ( num < 10 ) ? '0' + num  : num;
 };

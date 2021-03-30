@@ -374,7 +374,7 @@ function appendAggTx(tx){
 	})
 }
 
-function appendTx(insTag,tx,id){
+function appendTx(insTag,id,tx){
 
 	$(insTag).append(
 		"<tr>"
@@ -403,6 +403,38 @@ function insertTxAfter(insTag,id,tx){
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
 		+ "<td id='amount" + id + "'  class='text-right'></td>"
 		+ "</tr>"
+	);
+}
+
+function showReceiptInfo(tag,height,receipt,cnt){
+
+	if(cnt === 0){
+		cnt = "";
+	}
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
+	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "</tr>"
+	);
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+}
+
+function showTxAmountInfo(id,amount,fee){
+
+	$("#amount" + id).text(
+		dispAmount(
+			amount.add(nem.UInt64.fromNumericString(fee.toString()))
+			,6
+		)
 	);
 }
 
