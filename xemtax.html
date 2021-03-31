@@ -36,7 +36,7 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
-				<th>円換算値(小数4桁まで)</th>
+				<th>円換算値</th>
 				<th>円平均</th>
 			</tr></thead>
 		</table>
@@ -49,7 +49,7 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
-				<th>円換算値(小数4桁まで)</th>
+				<th>円換算値</th>
 				<th>円平均</th>
 			</tr></thead>
 		</table>
@@ -63,7 +63,7 @@
 				<th>日時</th>
 				<th>区分</th>
 				<th>数量</th>
-				<th>円換算値(小数4桁まで)</th>
+				<th>円換算値</th>
 				<th>円平均</th>
 				<th>負担手数料</th>
 			</tr></thead>
@@ -181,6 +181,7 @@ async function appendAggTx(tx){
 	+ "<td id='amount" + id + "'          class='text-right'></td>"
 	+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
 	+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
 	+ "</tr>"
 	);
 
@@ -222,6 +223,7 @@ async function appendTx(insTag,id,tx){
 		+ "<td id='amount" + id + "'          class='text-right'></td>"
 		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
 		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
 		+ "</tr>"
 	);
 
@@ -260,6 +262,7 @@ async function insertTxAfter(insTag,id,tx){
 		+ "<td id='amount" + id + "'          class='text-right'></td>"
 		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
 		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
 		+ "</tr>"
 	);
 
@@ -303,6 +306,9 @@ function showReceiptInfo(tag,height,receipt,cnt){
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
 	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
+
 	+ "</tr>"
 	);
 
@@ -317,11 +323,14 @@ function showReceiptInfo(tag,height,receipt,cnt){
 		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		if(indexDate in xym_jpy){
 			console.log(xym_jpy[indexDate]);
-		
+
+			avgJPY   = Number(xym_jpy[indexDate]);
+			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
+			
+			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
+			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
+
 		}
-
-
-
 	})
 }
 
@@ -332,18 +341,20 @@ function showTxAmountInfo(id,amount,fee){
 		dispAmount(totalAmount,6)
 	);
 
-
-console.log(avgXymJpyDaily);
-console.log(id);
 	if(avgXymJpyDaily[id] in xym_jpy){
 
 		console.log(xym_jpy[avgXymJpyDaily[id]]);
 
-		avgJPY = Number(xym_jpy[avgXymJpyDaily[id]]);
+		avgJPY   = Number(xym_jpy[avgXymJpyDaily[id]]);
 		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
-	
+		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
+
 		$("#amount"+ id + "_jpy_avg").text(avgJPY.toFixed(4));
-		$("#amount"+ id + "_jpy").text(totalJPY);
+		$("#amount"+ id + "_jpy"    ).text(totalJPY);
+		$("#amount"+ id + "_jpy_fee").text(feeJPY);
+	}else{
+		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
+
 	}
 }
 
