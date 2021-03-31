@@ -67,6 +67,7 @@
 <script src="xembook.js"></script>
 <script>
 
+
 function getNewInfo(height){}
 function showAmountInfo(amount){}
 function showInfo(accountInfo){
@@ -144,6 +145,17 @@ function insertTxAfter(insTag,id,tx){
 	);
 }
 
+function showTxAmountInfo(id,amount,fee){
+
+	$("#amount" + id).text(
+		dispAmount(
+			amount.add(nem.UInt64.fromNumericString(fee.toString()))
+			,6
+		)
+	);
+}
+
+
 function getMessage(tx){
 
 	message = "";
@@ -185,6 +197,9 @@ function escape_html (string) {
 }
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
+$("#xembook"          ).attr("href", "index.html?address=" + address);
+$("#xemtax"       ).attr("href", "xemtax.html?address=" + address);
+
 </script>
 </body>
 </html>

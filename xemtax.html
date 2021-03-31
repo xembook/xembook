@@ -94,6 +94,7 @@
 <script src="xembook.js"></script>
 <script>
 
+
 var xym_jpy;
 var avgXymJpyDaily = Array();
 function getNewInfo(height){}
@@ -363,6 +364,9 @@ function showTxAmountInfo(id,amount,fee){
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 $('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
 $('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
+$("#xembook"          ).attr("href", "index.html?address=" + address);
+$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + address);
+
 </script>
 </body>
 </html>
