@@ -21,68 +21,81 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
-	<div class="account col-sm-4">
-	<h2>アカウント</h2>
-	<dl id="account_info">
-		<dt>アドレス</dt><dd><span id="account_address"></span></dd>
-		<dt>残高</dt><dd><span id="account_balance"></span></dd>
-		<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-		<dt>重要度</dt><dd><span id="account_importance"></span></dd>
-	</dl>
-	<h2>取引所</h2>
-	<dl>
-	<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
-	<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
-	<dt>KUCOIN</dt><dd><span id="kucoin"></span></dd>
-	<dt>ProBit</dt><dd><span id="probit"></span></dd>
-	</dl>
+		<div class="account col-sm-4">
+		<h2>アカウント</h2>
+		<dl id="account_info">
+			<dt>アドレス</dt><dd><span id="account_address"></span>　<a target="_blank" id="account_explorer">explorer</a></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span></dd>
+			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
+			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+		</dl>
+		<dl id="account_append_info"></dl>
+		<h2>取引所</h2>
+		<dl>
+		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
+		<dt>KUCOIN</dt><dd><span id="kucoin"></span></dd>
+		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
+		<dt>ProBit</dt><dd><span id="probit"></span></dd>
+		</dl>
 
-	<h2>接続ノード</h2>
-	<dl id="node_info">
-		<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
-		<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
-		<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
-		<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+		<h2>接続ノード</h2>
+		<dl id="node_info">
+			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
+			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
+			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
 
-	</dl>
+		</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>レシート</h2>
+			<h5>対象アカウント</h5>
+			<table id="harvest"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+			<h5>送信元アカウント</h5>
+			<table id="receipt"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>トランザクション</h2>
+			<table id="table"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
 	</div>
-	<div class="account col-sm-4">
-	<h2>レシート</h2>
-	<dl>
-	<dt>対象アカウント</dt>
-	<table id="harvest"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
-	<dl>
-	<dt>送信元アカウント</dt>
-	<table id="receipt"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</dl>
+	<div>
+		<div class="faucet">
+			<h2>リンク</h2>
+			<dl>
+				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+				<dd><a id="xemtax" href="">XEMTax</a></dd>
+			</dl>
+		</div>
 	</div>
-	<div class="account col-sm-4">
-	<h2>トランザクション</h2>
-	<table id="table"  class="table">
-		<thead><tr>
-			<th>日時</th>
-			<th>区分</th>
-			<th>数量</th>
-		</tr></thead>
-	</table>
-	<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-	</div>
-	</div>
+
 </div>
 
 <!-- 通知モーダル -->
@@ -112,7 +125,16 @@
 <script src="xembook.js"></script>
 <script>
 
-function appendAccountInfo(amount){
+function showInfo(accountInfo){
+	accountInfo.subscribe(async _=>{
+		await getTransfers(20);
+		await getHarvests(15);
+		await getRecipets(15);
+		showAccountInfo(_);
+	});
+}
+
+function showAmountInfo(amount){
 
 	$.when(
 //		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
@@ -136,13 +158,16 @@ function appendAccountInfo(amount){
 	});
 }
 
-function appendInfo(accountInfo){
+function showAccountInfo(accountInfo){
+
+	$("#account_append_info").empty();
+	$("#account_importance").empty();
 
 	//マルチシグ
 	msigRepo.getMultisigAccountInfo(accountInfo.address)
 	.subscribe(msig=>{
 
-		//親キー
+		//親アカウント
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
 			console.log(cosignatory);
@@ -150,10 +175,10 @@ function appendInfo(accountInfo){
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}
 		if(msig.cosignatoryAddresses.length > 0){
-			$("#account_info").append('<dt>親アカウント</dt>' + parentKeys);
+			$("#account_append_info").append('<dt>親アカウント</dt>' + parentKeys);
 		}
 
-		//子キー
+		//子アカウント
 		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
 			console.log(multisig);
@@ -161,23 +186,23 @@ function appendInfo(accountInfo){
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}
 		if(msig.multisigAddresses.length > 0){
-			$("#account_info").append('<dt>子アカウント</dt>' + childKeys);
+			$("#account_append_info").append('<dt>子アカウント</dt>' + childKeys);
 		}
 	})
 
 	//ブロック
-	chainRepo.getChainInfo().subscribe(x=>{
+	chainRepo.getChainInfo().subscribe(chain=>{
 
 		rxjs.zip(
-			blockRepo.getBlockByHeight(x.height),
-			blockRepo.getBlockByHeight(x.latestFinalizedBlock.height),
-		).subscribe(x => {
+			blockRepo.getBlockByHeight(chain.height),
+			blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height),
+		).subscribe(zip => {
 
 			$("#chain_height").html(
-				"[ " + x[0].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[0].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
 			);
 			$("#finalized_chain_height").html(
-				"[ " + x[1].height.compact() + " ]　日時: " + dispTimeStamp(Number(x[1].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
 			);
 
 			//ネームスペース
@@ -198,21 +223,21 @@ function appendInfo(accountInfo){
 							namespace = namespaceName.name + namespace
 						}
 
-						var remainHeight = nsInfo.endHeight.compact() - x[0].height.compact();
-//						t = dispTimeStamp(x[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
+						var remainHeight = nsInfo.endHeight.compact() - zip[0].height.compact();
+//						t = dispTimeStamp(zip[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
 						t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment)
 						ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
 					}
 				}
 				if(ddNamespace !== ""){
-					$("#account_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+					$("#account_append_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
 				}
 			});
 		})
 	});
 
 	//ノード
-	nodeRepo.getNodeInfo().subscribe(x=>{$("#node_host").text(x.host)});
+	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
 
 	//委任ノード
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
@@ -227,11 +252,11 @@ function appendInfo(accountInfo){
 		drepo = new nem.RepositoryFactoryHttp(dnode);
 		dnodeRepo = drepo.createNodeRepository();
 
-		dnodeRepo.getUnlockedAccount().subscribe(async x=>{
-			console.log(x);
+		dnodeRepo.getUnlockedAccount().subscribe(async ukeys=>{
+			console.log(ukeys);
 
 			harvesterKeys = Array();
-			for(unlockedPublicKey of x){
+			for(unlockedPublicKey of ukeys){
 				console.log(unlockedPublicKey);
 				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
 				try{
@@ -267,30 +292,26 @@ function appendInfo(accountInfo){
 
 		accountImportance = Math.round( accountImportance );
 		accountImportance /= 1000000;
-//		var activeImportance = accountImportance / ACTIVE_IMPORTANCE_MULTIPLIER;
-//accountImportance = 0.002426;
-//accountImportance = 0.009;
-//		var ACTIVE_IMPORTANCE_RATE = 0.35;
 		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE
-
+		pFalse = 1 - activeImportance;
 		p = 1 - activeImportance;
 		b = 1
 		while(0.5 < p){
-			p = p * (1 - activeImportance);
+			p = p * pFalse;
 			b += 1;
 		}
 		pHalf = b / 2880 ;
-
-		while(0.15 < p){
-			p = p * (1 - activeImportance);
-			b += 1;
-		}
-		pSig = b / 2880;
 		if(pHalf > 1){
+
+			while(0.15 < p){
+				p = p * pFalse;
+				b += 1;
+			}
+			pSig = b / 2880;
 			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]"
 		}
 	}
-	$("#account_importance").append("<dd>" + accountImportance + " " + provabilityHarvest + "</dd>");
+	$("#account_importance").text(accountImportance + " " + provabilityHarvest);
 
 	//アグリゲートトランザクション検知
 	const bondedListener = listener.aggregateBondedAdded(accountInfo.address);
@@ -335,7 +356,7 @@ function appendInfo(accountInfo){
 
 function setDelegatedNode(){
 
-	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:ngl-dual-001.symbolblockchain.io)','');
+	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
 	if(delegatedNode !== null){
 		localStorage.setItem('delegated_node' + address,delegatedNode);
 		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
@@ -355,15 +376,15 @@ function appendAggTx(tx){
 	);
 
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	.subscribe(block => {
 
 		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
 }
 
-function appendTx(insTag,tx,id){
+function appendTx(insTag,id,tx){
 
 	$(insTag).append(
 		"<tr>"
@@ -376,15 +397,15 @@ function appendTx(insTag,tx,id){
 	);
 
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	.subscribe(block => {
 
 		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
 }
 
-function insertTxAfter(insTag,id){
+function insertTxAfter(insTag,id,tx){
 
 	$(insTag).after(
 		"<tr>"
@@ -392,6 +413,38 @@ function insertTxAfter(insTag,id){
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
 		+ "<td id='amount" + id + "'  class='text-right'></td>"
 		+ "</tr>"
+	);
+}
+
+function showReceiptInfo(tag,height,receipt,cnt){
+
+	if(cnt === 0){
+		cnt = "";
+	}
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
+	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "</tr>"
+	);
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+	})
+}
+
+function showTxAmountInfo(id,amount,fee){
+
+	$("#amount" + id).text(
+		dispAmount(
+			amount.add(nem.UInt64.fromNumericString(fee.toString()))
+			,6
+		)
 	);
 }
 
@@ -429,10 +482,14 @@ function getNewInfo(height){
 }
 
 
-$('#transfers_more').click(function(){getTransfers();return false;});
-$('#harvests_more').click(function(){getHarvests();return false;});
-$('#receipts_more').click(function(){getRecipets();return false;});
+$('#transfers_more').click(function(){getTransfers(20);return false;});
+$('#harvests_more' ).click(function(){getHarvests(15); return false;});
+$('#receipts_more' ).click(function(){getRecipets(15); return false;});
 $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
+
+$("#xemmessage"          ).attr("href", "xemmessage.html?address=" + address);
+$("#xemtax"       ).attr("href", "xemtax.html?address=" + address);
+
 </script>
 </body>
 </html>

@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMTax(β)</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-100421513-1', 'auto');
+	ga('send', 'pageview');
+	</script>
+</head>
+<body>
+	<h1>XEMTax(β)</h1>
+	<hr class="zigzag-orange-white">
+<div class="container">
+	<div class="row">
+		<div class="col-sm-12">
+		<h2>アカウント</h2>
+		<dl id="account_info">
+			<dt>アドレス</dt><dd><span id="account_address"></span></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span></dd>
+			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
+		</dl>
+
+		<h2>レシート</h2>
+		<dl>
+		<dt>対象アカウント</dt>
+		<table id="harvest"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+				<th>円換算値</th>
+				<th>円平均</th>
+			</tr></thead>
+		</table>
+		<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</dl>
+		<dl>
+		<dt>送信元アカウント</dt>
+		<table id="receipt"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+				<th>円換算値</th>
+				<th>円平均</th>
+			</tr></thead>
+		</table>
+		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</dl>
+
+
+		<h2>トランザクション</h2>
+		<table id="table"  class="table">
+			<thead><tr>
+				<th>日時</th>
+				<th>区分</th>
+				<th>数量</th>
+				<th>円換算値</th>
+				<th>円平均</th>
+				<th>負担手数料</th>
+			</tr></thead>
+		</table>
+		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-4">
+			<h2>リンク</h2>
+			<dl>
+				<dd><a id="xembook" href="">XEMBook</a></dd>
+				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+			</dl>
+		</div>
+	</div>
+
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="xembook.js"></script>
+<script>
+
+
+var xym_jpy;
+var avgXymJpyDaily = Array();
+function getNewInfo(height){}
+function showInfo(accountInfo){
+
+	$.ajax({url: "http://xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
+	.done(x=>{
+		console.log(x)
+		xym_jpy = x;
+		getBatchOfTransfers(1);
+		getBatchOfHarvests(1);
+		getBatchOfRecipets(1);
+
+	})
+}
+
+function getBatchOfTransfers(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getTransfers(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+
+function getBatchOfHarvests(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getHarvests(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+function getBatchOfRecipets(maxCount){
+
+	var count = 0;
+	var timer;
+	timer = setInterval( async function(){
+		console.log(count)
+		count++;
+		isLastPage = await getRecipets(25);
+		if (isLastPage || count >= maxCount){
+			clearInterval(timer);
+		}
+	},2500)
+}
+
+
+function showAmountInfo(amount){
+
+	$.when(
+//		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+		console.log(tickers);
+
+		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+		var market_price = amount / 1000000 * gateio;
+		market_price = comma3(String(Math.round(market_price)));
+		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+	});
+}
+
+async function appendAggTx(tx){
+
+	const id = tx.transactionInfo.id;
+	$("#table").append("<tr id='agg" + id + "'>"
+	+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+	+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+	+ "</span></a></td>"
+	+ "<td id='type" + id + "'></td>" //mosaicLabel
+	+ "<td id='amount" + id + "'          class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+	+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
+	+ "</tr>"
+	);
+
+
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+/*
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
+	})
+*/
+}
+
+async function appendTx(insTag,id,tx){
+
+	$(insTag).append(
+		"<tr>"
+		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+		+ "</span></a></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "'          class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
+		+ "</tr>"
+	);
+
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+/*
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
+
+	})
+*/
+}
+
+async function insertTxAfter(insTag,id,tx){
+
+	$(insTag).after(
+		"<tr>"
+		+ "<td></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "'          class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy'      class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_avg'  class='text-right'></td>"
+		+ "<td id='amount" + id + "_jpy_fee'  class='text-right'></td>"
+		+ "</tr>"
+	);
+
+/*
+	blockRepo.getBlockByHeight(tx.transactionInfo.height)
+	.subscribe(b => {
+
+		$("#date"+ id).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			avgXymJpyDaily[id] = indexDate 
+		}		
+
+	})
+*/
+	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+
+	$("#date"+ id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	if(indexDate in xym_jpy){
+		avgXymJpyDaily[id] = indexDate 
+	}		
+
+
+	
+}
+
+function showReceiptInfo(tag,height,receipt,cnt){
+
+	if(cnt === 0){
+		cnt = "";
+	}
+
+
+
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
+	+ "<td id='" + tag + "_type' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
+
+	+ "</tr>"
+	);
+
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(b => {
+
+		$("#" + tag + "_date"+ height + receipt.type).text(
+			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		);
+
+		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(indexDate in xym_jpy){
+			console.log(xym_jpy[indexDate]);
+
+			avgJPY   = Number(xym_jpy[indexDate]);
+			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
+			
+			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
+			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
+
+
+
+
+		}else{
+				$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+				$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
+
+		}
+	})
+}
+
+function showTxAmountInfo(id,amount,fee){
+
+	totalAmount = amount.add(nem.UInt64.fromNumericString(fee.toString()));
+	$("#amount" + id).text(
+		dispAmount(totalAmount,6)
+	);
+
+	if(avgXymJpyDaily[id] in xym_jpy){
+
+		console.log(xym_jpy[avgXymJpyDaily[id]]);
+
+		avgJPY   = Number(xym_jpy[avgXymJpyDaily[id]]);
+		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
+		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
+
+		$("#amount"+ id + "_jpy_avg").text(avgJPY.toFixed(4));
+		$("#amount"+ id + "_jpy"    ).text(totalJPY);
+		$("#amount"+ id + "_jpy_fee").text(feeJPY);
+	}else{
+		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
+		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
+
+	}
+}
+
+
+
+$('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
+$('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
+$('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
+$("#xembook"          ).attr("href", "index.html?address=" + address);
+$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + address);
+
+</script>
+</body>
+</html>
