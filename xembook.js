@@ -396,6 +396,8 @@ async function parseTx(txs,parentId){
 				});
 			}else{
 				tranType = "<font color='green'>受信[集約]</font>";
+//				showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),0);
+
 			}
 			$("#type"+ id ).html(tranType);
 

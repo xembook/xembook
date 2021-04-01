@@ -21,6 +21,7 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
+		<div class="col-sm-12">
 		<h2>アカウント</h2>
 		<dl id="account_info">
 			<dt>アドレス</dt><dd><span id="account_address"></span></dd>
@@ -69,12 +70,11 @@
 			</tr></thead>
 		</table>
 		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-
+		</div>
 	</div>
-	<div>
 
-
-		<div class="faucet">
+	<div class="row">
+		<div class="col-sm-4">
 			<h2>リンク</h2>
 			<dl>
 				<dd><a id="xembook" href="">XEMBook</a></dd>
@@ -303,9 +303,10 @@ function showReceiptInfo(tag,height,receipt,cnt){
 
 
 
+
 	$("#" + tag).append("<tr>"
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
-	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_type' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
@@ -331,6 +332,13 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
 
+
+
+
+		}else{
+				$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+				$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
+
 		}
 	})
 }
@@ -355,6 +363,7 @@ function showTxAmountInfo(id,amount,fee){
 		$("#amount"+ id + "_jpy_fee").text(feeJPY);
 	}else{
 		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
+		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
 
 	}
 }
