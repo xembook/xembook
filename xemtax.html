@@ -100,7 +100,7 @@ var avgXymJpyDaily = Array();
 function getNewInfo(height){}
 function showInfo(accountInfo){
 
-	$.ajax({url: "http://xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
+	$.ajax({url: "https://xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
 	.done(x=>{
 		console.log(x)
 		xym_jpy = x;
@@ -194,8 +194,8 @@ async function appendAggTx(tx){
 	);
 	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate 
-	}		
+		avgXymJpyDaily[id] = indexDate
+	}
 
 /*
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
@@ -207,8 +207,8 @@ async function appendAggTx(tx){
 
 		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate 
-		}		
+			avgXymJpyDaily[id] = indexDate
+		}
 	})
 */
 }
@@ -235,8 +235,8 @@ async function appendTx(insTag,id,tx){
 	);
 	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate 
-	}		
+		avgXymJpyDaily[id] = indexDate
+	}
 
 /*
 	blockRepo.getBlockByHeight(tx.transactionInfo.height)
@@ -247,8 +247,8 @@ async function appendTx(insTag,id,tx){
 		);
 		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate 
-		}		
+			avgXymJpyDaily[id] = indexDate
+		}
 
 	})
 */
@@ -276,8 +276,8 @@ async function insertTxAfter(insTag,id,tx){
 		);
 		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate 
-		}		
+			avgXymJpyDaily[id] = indexDate
+		}
 
 	})
 */
@@ -288,11 +288,11 @@ async function insertTxAfter(insTag,id,tx){
 	);
 	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate 
-	}		
+		avgXymJpyDaily[id] = indexDate
+	}
 
 
-	
+
 }
 
 function showReceiptInfo(tag,height,receipt,cnt){
@@ -328,7 +328,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 
 			avgJPY   = Number(xym_jpy[indexDate]);
 			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
-			
+
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
 
