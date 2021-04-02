@@ -82,24 +82,20 @@
 		</div>
 	</div>
 </div>
-
-
-
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook.js"></script>
 <script>
 
-
-var xym_jpy;
-var avgXymJpyDaily = Array();
+var dateId2price;
+var dateIds = Array();
 function getNewInfo(height){}
 function showInfo(accountInfo){
 
 	$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
 	.done(x=>{
-		xym_jpy = x;
+		dateId2price = x;
 		getBatchOfTransfers(1);
 		getBatchOfHarvests(1);
 		getBatchOfRecipets(1);
@@ -163,6 +159,19 @@ function showAmountInfo(amount){
 	});
 }
 
+async function dispBlockTimeStamp(id,height){
+
+	var block = await blockRepo.getBlockByHeight(height).toPromise();
+
+	$("#date" + id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	dateId = getDateId(Number(block.timestamp.toString()),epochAdjustment)
+	if(dateId in dateId2price){
+		dateIds[id] = dateId
+	}
+}
+
 async function appendAggTx(tx){
 
 	const id = tx.transactionInfo.id;
@@ -178,16 +187,8 @@ async function appendAggTx(tx){
 	+ "</tr>"
 	);
 
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
-
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
 }
 
 async function appendTx(insTag,id,tx){
@@ -205,15 +206,8 @@ async function appendTx(insTag,id,tx){
 		+ "</tr>"
 	);
 
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
 }
 
 async function insertTxAfter(insTag,id,tx){
@@ -229,15 +223,8 @@ async function insertTxAfter(insTag,id,tx){
 		+ "</tr>"
 	);
 
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
 }
 
 function showReceiptInfo(tag,height,receipt,cnt){
@@ -262,10 +249,10 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
+		dateId = getDateId(Number(b.timestamp.toString()),epochAdjustment)
+		if(dateId in dateId2price){
 
-			avgJPY   = Number(xym_jpy[indexDate]);
+			avgJPY   = Number(dateId2price[dateId]);
 			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
 
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
@@ -285,9 +272,9 @@ function showTxAmountInfo(id,amount,fee){
 		dispAmount(totalAmount,6)
 	);
 
-	if(avgXymJpyDaily[id] in xym_jpy){
+	if(dateIds[id] in dateId2price){
 
-		avgJPY   = Number(xym_jpy[avgXymJpyDaily[id]]);
+		avgJPY   = Number(dateId2price[dateIds[id]]);
 		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
 		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
 
@@ -303,8 +290,8 @@ function showTxAmountInfo(id,amount,fee){
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 $('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
 $('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
-$("#xembook"          ).attr("href", "index.html?address=" + address);
-$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + address);
+$("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
+$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + rawAddress);
 
 </script>
 </body>

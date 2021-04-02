@@ -166,7 +166,7 @@ const NODES = [
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
 var reciptPageNumber = 1;
-var address = "";
+var rawAddress = "";
 if (1 < document.location.search.length) {
 
 	var query = document.location.search.substring(1);
@@ -179,24 +179,24 @@ if (1 < document.location.search.length) {
 		item[idx] = decodeURIComponent(val);
 	}
 	if("address" in item){
-		address = item["address"];
+		rawAddress = item["address"];
 	}
 }
 
-if( address == ""){
+if( rawAddress == ""){
 
 	var proaddress = window.prompt('Symbolアドレスを入力してください','');
 	if(proaddress === '' || proaddress === null){
 		alert("サンプルアカウントを表示します");
 		proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
 	}
-	address = proaddress.replace( /-/g , "" ).toUpperCase();
+	rawAddress = proaddress.replace( /-/g , "" ).toUpperCase();
 
 	if(history.replaceState) {
-		history.replaceState(null,null,"?address=" + address)
+		history.replaceState(null,null,"?address=" + rawAddress)
 	}
 }
-address = address.replace( /-/g , "" ).toUpperCase();
+rawAddress = rawAddress.replace( /-/g , "" ).toUpperCase();
 
 const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
@@ -248,7 +248,7 @@ async function listenerKeepOpening(){
 		await listenerKeepOpening();
 
 		//リスナーに関係する情報をリロード
-		accountRepo.getAccountInfo(alice)
+		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
 		});
@@ -293,12 +293,12 @@ async function listenerKeepOpening(){
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
-	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(alice.pretty().slice(0,20) + "..." + alice.pretty().slice(-3));
-	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + alice.plain());
+	address = nem.Address.createFromRawAddress(rawAddress);
+	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
+	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
 
 	//アカウント情報
-	var accountInfo = accountRepo.getAccountInfo(alice);
+	var accountInfo = accountRepo.getAccountInfo(address);
 
 	accountInfo
 	.pipe(
@@ -319,7 +319,7 @@ async function listenerKeepOpening(){
 async function getTransfers(pageSize){
 
 	txs = await txRepo.search({
-		address:alice,
+		address:address,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
 		pageSize:pageSize,
@@ -339,7 +339,7 @@ async function getTransfers(pageSize){
 async function getRecipets(pageSize){
 
 	var res = await receiptRepo.searchReceipts({
-		senderAddress:alice,
+		senderAddress:address,
 		pageNumber:reciptPageNumber,
 		pageSize:pageSize,
 		order:"desc"
@@ -351,7 +351,7 @@ async function getRecipets(pageSize){
 
 		var filterdReceipts = statements.receipts.filter(item => {
 			if(item.senderAddress){
-				return item.senderAddress.plain() === alice.plain();
+				return item.senderAddress.plain() === address.plain();
 			}
 			return false;
 		});
@@ -374,7 +374,7 @@ async function getRecipets(pageSize){
 async function getHarvests(pageSize){
 
 	var res = await receiptRepo.searchReceipts({
-		targetAddress:alice,
+		targetAddress:address,
 		pageNumber:harvestPageNumber,
 		pageSize:pageSize,
 		order:"desc"
@@ -386,7 +386,7 @@ async function getHarvests(pageSize){
 
 		var filterdReceipts = statements.receipts.filter(item => {
 			if(item.targetAddress){
-				return item.targetAddress.plain() === alice.plain();
+				return item.targetAddress.plain() === address.plain();
 			}
 			return false;
 		});
@@ -418,7 +418,7 @@ async function parseTx(txs,parentId){
 			const id = tx.transactionInfo.id;
 			await appendAggTx(tx);
 			var tranType;
-			if(alice.plain() ===  tx.signer.address.plain()){
+			if(address.plain() ===  tx.signer.address.plain()){
 //			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信[集約]</font>";
 				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
@@ -457,7 +457,7 @@ async function parseTx(txs,parentId){
 				if(parentId !== undefined){
 
 					//インターナルトランザクション
-					if(alice.plain() === tx.recipientAddress.plain() || alice.plain() ===  tx.signer.address.plain()){
+					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
 						await insertTxAfter("#agg" + parentId,id,tx);
 						
 					}else{
@@ -469,7 +469,7 @@ async function parseTx(txs,parentId){
 				}
 
 				var tranType;
-				if(alice.plain() ===  tx.signer.address.plain()){
+				if(address.plain() ===  tx.signer.address.plain()){
 					tranType = "<font color='red'>送信</font>";
 					if(parentId === undefined){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
@@ -544,12 +544,12 @@ function dispTimeStamp(timeStamp,epoch){
 	return 	strDate;
 }
 
-function indexTimeStamp(timeStamp,epoch){
+function getDateId(timeStamp,epoch){
 	const d = new Date(timeStamp + epoch * 1000)
-	const strDate = d.getFullYear()
+	const dateId = d.getFullYear()
 		+ paddingDate0( d.getMonth() + 1 )
 		+ paddingDate0( d.getDate() );
-	return 	strDate;
+	return 	dateId;
 	
 }
 	

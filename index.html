@@ -200,7 +200,7 @@ function showAccountInfo(accountInfo){
 		if(msig.multisigAddresses.length > 0){
 			$("#account_append_info").append('<dt>子アカウント</dt>' + childKeys);
 		}
-	})
+	},err=>console.log("no multisig"))
 
 	//ブロック
 	chainRepo.getChainInfo().subscribe(chain=>{
@@ -263,7 +263,7 @@ function showAccountInfo(accountInfo){
 	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
 
 	//委任ノード
-	var delegatedNode = localStorage.getItem('delegated_node' + address);
+	var delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
 	var dnode ="https://" + delegatedNode;
 	if(!NO_3001_NODES.includes(delegatedNode)){
 		dnode = dnode + ":3001";
@@ -299,7 +299,7 @@ function showAccountInfo(accountInfo){
 
 		},err=>{
 			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
-				localStorage.removeItem('delegated_node' + address)
+				localStorage.removeItem('delegated_node' + rawAddress)
 			}
 		});
 	}
@@ -370,7 +370,7 @@ function setDelegatedNode(){
 
 	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
 	if(delegatedNode !== null){
-		localStorage.setItem('delegated_node' + address,delegatedNode);
+		localStorage.setItem('delegated_node' + rawAddress,delegatedNode);
 		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
 	}
 }
@@ -470,14 +470,14 @@ setInterval(function(){
 
 function getNewInfo(height){
 
-	receiptRepo.searchReceipts({targetAddress:alice,height:height})
+	receiptRepo.searchReceipts({targetAddress:address,height:height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("レシートが追加されました。再表示してください。");
 		}
 	})
 
-	txRepo.search({address:alice,height:height,group:nem.TransactionGroup.Confirmed})
+	txRepo.search({address:address,height:height,group:nem.TransactionGroup.Confirmed})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("トランザクションが追加されました。再表示してください。");
@@ -491,8 +491,8 @@ $('#harvests_more' ).click(function(){getHarvests(15); return false;});
 $('#receipts_more' ).click(function(){getRecipets(15); return false;});
 $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 
-$("#xemmessage"          ).attr("href", "xemmessage.html?address=" + address);
-$("#xemtax"       ).attr("href", "xemtax.html?address=" + address);
+$("#xemmessage"          ).attr("href", "xemmessage.html?address=" + rawAddress);
+$("#xemtax"       ).attr("href", "xemtax.html?address=" + rawAddress);
 
 </script>
 </body>
