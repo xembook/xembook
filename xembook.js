@@ -289,7 +289,6 @@ async function listenerKeepOpening(){
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 	networkType = await repo.getNetworkType().toPromise();
 	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
-	console.log(totalChainImportance)
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
@@ -338,8 +337,6 @@ async function getTransfers(pageSize){
 
 
 async function getRecipets(pageSize){
-	console.log(reciptPageNumber);
-
 
 	var res = await receiptRepo.searchReceipts({
 		senderAddress:alice,

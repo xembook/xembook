@@ -44,11 +44,6 @@
 			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
-
-<!--
-			<dt>手数料相場</dt><dd><span id="fee_median"></span>XYM</dd>
-			<dt>レンタル相場</dt><dd>ネームスペース[年額]:<span id="fee_namespace"></span>XYM, モザイク:<span id="fee_mosaic"></span>XYM</dd>
--->
 			<dt>手数料相場</dt>
 			<dd>
 			<table id="fees"  class="table">
@@ -161,7 +156,6 @@ function showAmountInfo(amount){
 		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
 	)
 	.done(function(tickers) {
-		console.log(tickers);
 
 		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
@@ -190,7 +184,6 @@ function showAccountInfo(accountInfo){
 		//親アカウント
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
-			console.log(cosignatory);
 			parentAddress = cosignatory.pretty().slice(0,20) + "..." + cosignatory.pretty().slice( -3 );
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}
@@ -201,7 +194,6 @@ function showAccountInfo(accountInfo){
 		//子アカウント
 		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
-			console.log(multisig);
 			childAddress = multisig.pretty().slice(0,20) + "..."+ multisig.pretty().slice( -3 );
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}
@@ -257,20 +249,15 @@ function showAccountInfo(accountInfo){
 	});
 
 	nwRepo.getTransactionFees().subscribe(fees=>{
-		medianFeeMultiplier = fees.medianFeeMultiplier;
-		medianTxFee = 176 * fees.medianFeeMultiplier;
+		const medianTxFee = 176 * fees.medianFeeMultiplier;
 		$("#fee_median").text(dispAmount(medianTxFee,6).slice(0,-4));
 	})
 
 	nwRepo.getRentalFees().subscribe(fees=>{
-		effectiveRootNamespaceRentalFeePerBlock = fees.effectiveRootNamespaceRentalFeePerBlock;
-		monthRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
-		$("#fee_namespace").text(dispAmount(monthRentalNamespaceFee,6).slice(0,-7));
+		const yearRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
+		$("#fee_namespace").text(dispAmount(yearRentalNamespaceFee,6).slice(0,-7));
 		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
-
 	})
-
-
 
 	//ノード
 	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
@@ -278,7 +265,6 @@ function showAccountInfo(accountInfo){
 	//委任ノード
 	var delegatedNode = localStorage.getItem('delegated_node' + address);
 	var dnode ="https://" + delegatedNode;
-//	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
 	if(!NO_3001_NODES.includes(delegatedNode)){
 		dnode = dnode + ":3001";
 	}
@@ -289,11 +275,9 @@ function showAccountInfo(accountInfo){
 		dnodeRepo = drepo.createNodeRepository();
 
 		dnodeRepo.getUnlockedAccount().subscribe(async ukeys=>{
-			console.log(ukeys);
 
 			harvesterKeys = Array();
 			for(unlockedPublicKey of ukeys){
-				console.log(unlockedPublicKey);
 				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
 				try{
 					unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
@@ -315,7 +299,6 @@ function showAccountInfo(accountInfo){
 
 		},err=>{
 			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
-				console.log("removeItem:" + 'delegated_node' + address)
 				localStorage.removeItem('delegated_node' + address)
 			}
 		});
@@ -363,25 +346,18 @@ function showAccountInfo(accountInfo){
 			op.filter(_ => !_.signedByAccount(accountInfo.address))
 		).subscribe(_=>{
 
-			console.log("署名の要求があります。");
-
- 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
- 			.subscribe(aggTx =>{
- 				console.log(aggTx[0].innerTransactions);
- 				txs = aggTx[0].innerTransactions;
- 				for(tx of txs){
-					console.log(nem.TransactionType[tx.type]);
-					console.log(tx.recipientAddress.plain());
-					console.log(tx.signer.address.plain());
+			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
+			.subscribe(aggTx =>{
+				txs = aggTx[0].innerTransactions;
+				for(tx of txs){
 
 					dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
 					ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>"
 					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>"
 					$("#tx_info").append(dtTx + ddTx);
 				}
- 			});
+			});
 
-			console.log(_);
 			$('#modal-notice').modal('show');
 		});
 	}
@@ -399,6 +375,17 @@ function setDelegatedNode(){
 	}
 }
 
+function dispBlockTimeStamp(id,height){
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(block => {
+
+		$(id).text(
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		);
+	})
+}
+
 function appendAggTx(tx){
 
 	const id = tx.transactionInfo.id;
@@ -411,13 +398,7 @@ function appendAggTx(tx){
 	+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(block => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
 }
 
 function appendTx(insTag,id,tx){
@@ -432,13 +413,7 @@ function appendTx(insTag,id,tx){
 		+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(block => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
 }
 
 function insertTxAfter(insTag,id,tx){
@@ -465,13 +440,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 	+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(height)
-	.subscribe(b => {
-
-		$("#" + tag + "_date"+ height + receipt.type).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#" + tag + "_date"+ height + receipt.type,height);
 }
 
 function showTxAmountInfo(id,amount,fee){
@@ -499,7 +468,6 @@ setInterval(function(){
 
 }, 60000);
 
-//impl
 function getNewInfo(height){
 
 	receiptRepo.searchReceipts({targetAddress:alice,height:height})

@@ -57,7 +57,6 @@
 		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 		</dl>
 
-
 		<h2>トランザクション</h2>
 		<table id="table"  class="table">
 			<thead><tr>
@@ -82,8 +81,6 @@
 			</dl>
 		</div>
 	</div>
-
-
 </div>
 
 
@@ -102,7 +99,6 @@ function showInfo(accountInfo){
 
 	$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
 	.done(x=>{
-		console.log(x)
 		xym_jpy = x;
 		getBatchOfTransfers(1);
 		getBatchOfHarvests(1);
@@ -116,7 +112,6 @@ function getBatchOfTransfers(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getTransfers(25);
 		if (isLastPage || count >= maxCount){
@@ -131,7 +126,6 @@ function getBatchOfHarvests(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getHarvests(25);
 		if (isLastPage || count >= maxCount){
@@ -145,7 +139,6 @@ function getBatchOfRecipets(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getRecipets(25);
 		if (isLastPage || count >= maxCount){
@@ -162,7 +155,6 @@ function showAmountInfo(amount){
 		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
 	)
 	.done(function(tickers) {
-		console.log(tickers);
 
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
 		var market_price = amount / 1000000 * gateio;
@@ -196,21 +188,6 @@ async function appendAggTx(tx){
 	if(indexDate in xym_jpy){
 		avgXymJpyDaily[id] = indexDate
 	}
-
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-	})
-*/
 }
 
 async function appendTx(insTag,id,tx){
@@ -237,21 +214,6 @@ async function appendTx(insTag,id,tx){
 	if(indexDate in xym_jpy){
 		avgXymJpyDaily[id] = indexDate
 	}
-
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-
-	})
-*/
 }
 
 async function insertTxAfter(insTag,id,tx){
@@ -267,20 +229,6 @@ async function insertTxAfter(insTag,id,tx){
 		+ "</tr>"
 	);
 
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-
-	})
-*/
 	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
 
 	$("#date"+ id).text(
@@ -290,9 +238,6 @@ async function insertTxAfter(insTag,id,tx){
 	if(indexDate in xym_jpy){
 		avgXymJpyDaily[id] = indexDate
 	}
-
-
-
 }
 
 function showReceiptInfo(tag,height,receipt,cnt){
@@ -301,19 +246,14 @@ function showReceiptInfo(tag,height,receipt,cnt){
 		cnt = "";
 	}
 
-
-
-
 	$("#" + tag).append("<tr>"
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
 	+ "<td id='" + tag + "_type' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
-
 	+ "</tr>"
 	);
-
 
 	blockRepo.getBlockByHeight(height)
 	.subscribe(b => {
@@ -324,7 +264,6 @@ function showReceiptInfo(tag,height,receipt,cnt){
 
 		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		if(indexDate in xym_jpy){
-			console.log(xym_jpy[indexDate]);
 
 			avgJPY   = Number(xym_jpy[indexDate]);
 			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
@@ -332,13 +271,9 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
 
-
-
-
 		}else{
-				$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
-				$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
-
+			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
 		}
 	})
 }
@@ -352,8 +287,6 @@ function showTxAmountInfo(id,amount,fee){
 
 	if(avgXymJpyDaily[id] in xym_jpy){
 
-		console.log(xym_jpy[avgXymJpyDaily[id]]);
-
 		avgJPY   = Number(xym_jpy[avgXymJpyDaily[id]]);
 		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
 		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
@@ -364,11 +297,8 @@ function showTxAmountInfo(id,amount,fee){
 	}else{
 		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
 		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
-
 	}
 }
-
-
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 $('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
