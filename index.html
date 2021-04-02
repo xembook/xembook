@@ -38,12 +38,32 @@
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		</dl>
 
-		<h2>接続ノード</h2>
+		<h2>ノード</h2>
 		<dl id="node_info">
 			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+
+<!--
+			<dt>手数料相場</dt><dd><span id="fee_median"></span>XYM</dd>
+			<dt>レンタル相場</dt><dd>ネームスペース[年額]:<span id="fee_namespace"></span>XYM, モザイク:<span id="fee_mosaic"></span>XYM</dd>
+-->
+			<dt>手数料相場</dt>
+			<dd>
+			<table id="fees"  class="table">
+				<thead><tr>
+					<th>送金[中央値]</th>
+					<th>ネームスペース[年]</th>
+					<th>モザイク</th>
+				</tr></thead>
+				<tbody><tr>
+					<td><span id="fee_median"></span>XYM</td>
+					<td><span id="fee_namespace"></span>XYM</td>
+					<td><span id="fee_mosaic"></span>XYM</td>
+				</tr></tbody>
+			</table>
+			</dd>
 
 		</dl>
 		</div>
@@ -236,6 +256,22 @@ function showAccountInfo(accountInfo){
 		})
 	});
 
+	nwRepo.getTransactionFees().subscribe(fees=>{
+		medianFeeMultiplier = fees.medianFeeMultiplier;
+		medianTxFee = 176 * fees.medianFeeMultiplier;
+		$("#fee_median").text(dispAmount(medianTxFee,6).slice(0,-4));
+	})
+
+	nwRepo.getRentalFees().subscribe(fees=>{
+		effectiveRootNamespaceRentalFeePerBlock = fees.effectiveRootNamespaceRentalFeePerBlock;
+		monthRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
+		$("#fee_namespace").text(dispAmount(monthRentalNamespaceFee,6).slice(0,-7));
+		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
+
+	})
+
+
+
 	//ノード
 	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
 
@@ -301,7 +337,7 @@ function showAccountInfo(accountInfo){
 			b += 1;
 		}
 		pHalf = b / 2880 ;
-		if(pHalf > 1){
+		if(pHalf > 0.5){
 
 			while(0.15 < p){
 				p = p * pFalse;
