@@ -38,12 +38,27 @@
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		</dl>
 
-		<h2>接続ノード</h2>
+		<h2>ノード</h2>
 		<dl id="node_info">
 			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+			<dt>手数料相場</dt>
+			<dd>
+			<table id="fees"  class="table">
+				<thead><tr>
+					<th>送金[中央値]</th>
+					<th>ネームスペース[年]</th>
+					<th>モザイク</th>
+				</tr></thead>
+				<tbody><tr>
+					<td><span id="fee_median"></span>XYM</td>
+					<td><span id="fee_namespace"></span>XYM</td>
+					<td><span id="fee_mosaic"></span>XYM</td>
+				</tr></tbody>
+			</table>
+			</dd>
 
 		</dl>
 		</div>
@@ -122,15 +137,19 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="xembook_config.js"></script>
 <script src="xembook.js"></script>
 <script>
 
 function showInfo(accountInfo){
+
+	$("#node_activity").html("<font color='green'>●</font>");
+
 	accountInfo.subscribe(async _=>{
-		await getTransfers(20);
-		await getHarvests(15);
-		await getRecipets(15);
 		showAccountInfo(_);
+		await getHarvests(15);
+		await getTransfers(20);
+		await getRecipets(15);
 	});
 }
 
@@ -141,7 +160,6 @@ function showAmountInfo(amount){
 		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
 	)
 	.done(function(tickers) {
-		console.log(tickers);
 
 		probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
@@ -170,7 +188,6 @@ function showAccountInfo(accountInfo){
 		//親アカウント
 		var parentKeys = "";
 		for(cosignatory of msig.cosignatoryAddresses){
-			console.log(cosignatory);
 			parentAddress = cosignatory.pretty().slice(0,20) + "..." + cosignatory.pretty().slice( -3 );
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}
@@ -181,14 +198,13 @@ function showAccountInfo(accountInfo){
 		//子アカウント
 		var childKeys = "";
 		for(multisig of msig.multisigAddresses){
-			console.log(multisig);
 			childAddress = multisig.pretty().slice(0,20) + "..."+ multisig.pretty().slice( -3 );
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}
 		if(msig.multisigAddresses.length > 0){
 			$("#account_append_info").append('<dt>子アカウント</dt>' + childKeys);
 		}
-	})
+	},err=>console.log("no multisig"))
 
 	//ブロック
 	chainRepo.getChainInfo().subscribe(chain=>{
@@ -236,13 +252,23 @@ function showAccountInfo(accountInfo){
 		})
 	});
 
+	nwRepo.getTransactionFees().subscribe(fees=>{
+		const medianTxFee = 176 * fees.medianFeeMultiplier;
+		$("#fee_median").text(dispAmount(medianTxFee,6).slice(0,-4));
+	})
+
+	nwRepo.getRentalFees().subscribe(fees=>{
+		const yearRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
+		$("#fee_namespace").text(dispAmount(yearRentalNamespaceFee,6).slice(0,-7));
+		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
+	})
+
 	//ノード
 	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
 
 	//委任ノード
-	var delegatedNode = localStorage.getItem('delegated_node' + address);
+	var delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
 	var dnode ="https://" + delegatedNode;
-//	if(delegatedNode !== "d3rmzi6ltfh1jy.cloudfront.net"){
 	if(!NO_3001_NODES.includes(delegatedNode)){
 		dnode = dnode + ":3001";
 	}
@@ -253,11 +279,9 @@ function showAccountInfo(accountInfo){
 		dnodeRepo = drepo.createNodeRepository();
 
 		dnodeRepo.getUnlockedAccount().subscribe(async ukeys=>{
-			console.log(ukeys);
 
 			harvesterKeys = Array();
 			for(unlockedPublicKey of ukeys){
-				console.log(unlockedPublicKey);
 				unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address
 				try{
 					unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
@@ -279,8 +303,7 @@ function showAccountInfo(accountInfo){
 
 		},err=>{
 			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
-				console.log("removeItem:" + 'delegated_node' + address)
-				localStorage.removeItem('delegated_node' + address)
+				localStorage.removeItem('delegated_node' + rawAddress)
 			}
 		});
 	}
@@ -301,7 +324,7 @@ function showAccountInfo(accountInfo){
 			b += 1;
 		}
 		pHalf = b / 2880 ;
-		if(pHalf > 1){
+		if(pHalf > 0.5){
 
 			while(0.15 < p){
 				p = p * pFalse;
@@ -327,25 +350,18 @@ function showAccountInfo(accountInfo){
 			op.filter(_ => !_.signedByAccount(accountInfo.address))
 		).subscribe(_=>{
 
-			console.log("署名の要求があります。");
-
- 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
- 			.subscribe(aggTx =>{
- 				console.log(aggTx[0].innerTransactions);
- 				txs = aggTx[0].innerTransactions;
- 				for(tx of txs){
-					console.log(nem.TransactionType[tx.type]);
-					console.log(tx.recipientAddress.plain());
-					console.log(tx.signer.address.plain());
+			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
+			.subscribe(aggTx =>{
+				txs = aggTx[0].innerTransactions;
+				for(tx of txs){
 
 					dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
 					ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>"
 					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>"
 					$("#tx_info").append(dtTx + ddTx);
 				}
- 			});
+			});
 
-			console.log(_);
 			$('#modal-notice').modal('show');
 		});
 	}
@@ -358,9 +374,20 @@ function setDelegatedNode(){
 
 	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
 	if(delegatedNode !== null){
-		localStorage.setItem('delegated_node' + address,delegatedNode);
+		localStorage.setItem('delegated_node' + rawAddress,delegatedNode);
 		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。")
 	}
+}
+
+function dispBlockTimeStamp(id,height){
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(block => {
+
+		$(id).text(
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		);
+	})
 }
 
 function appendAggTx(tx){
@@ -375,13 +402,7 @@ function appendAggTx(tx){
 	+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(block => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
 }
 
 function appendTx(insTag,id,tx){
@@ -396,13 +417,7 @@ function appendTx(insTag,id,tx){
 		+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(block => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
 }
 
 function insertTxAfter(insTag,id,tx){
@@ -429,13 +444,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 	+ "</tr>"
 	);
 
-	blockRepo.getBlockByHeight(height)
-	.subscribe(b => {
-
-		$("#" + tag + "_date"+ height + receipt.type).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-	})
+	dispBlockTimeStamp("#" + tag + "_date"+ height + receipt.type,height);
 }
 
 function showTxAmountInfo(id,amount,fee){
@@ -463,17 +472,16 @@ setInterval(function(){
 
 }, 60000);
 
-//impl
 function getNewInfo(height){
 
-	receiptRepo.searchReceipts({targetAddress:alice,height:height})
+	receiptRepo.searchReceipts({targetAddress:address,height:height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("レシートが追加されました。再表示してください。");
 		}
 	})
 
-	txRepo.search({address:alice,height:height,group:nem.TransactionGroup.Confirmed})
+	txRepo.search({address:address,height:height,group:nem.TransactionGroup.Confirmed})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("トランザクションが追加されました。再表示してください。");
@@ -487,8 +495,8 @@ $('#harvests_more' ).click(function(){getHarvests(15); return false;});
 $('#receipts_more' ).click(function(){getRecipets(15); return false;});
 $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 
-$("#xemmessage"          ).attr("href", "xemmessage.html?address=" + address);
-$("#xemtax"       ).attr("href", "xemtax.html?address=" + address);
+$("#xemmessage"          ).attr("href", "xemmessage.html?address=" + rawAddress);
+$("#xemtax"       ).attr("href", "xemtax.html?address=" + rawAddress);
 
 </script>
 </body>
