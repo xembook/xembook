@@ -137,15 +137,19 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="xembook_config.js"></script>
 <script src="xembook.js"></script>
 <script>
 
 function showInfo(accountInfo){
+
+	$("#node_activity").html("<font color='green'>●</font>");
+
 	accountInfo.subscribe(async _=>{
-		await getTransfers(20);
-		await getHarvests(15);
-		await getRecipets(15);
 		showAccountInfo(_);
+		await getHarvests(15);
+		await getTransfers(20);
+		await getRecipets(15);
 	});
 }
 
