@@ -140,7 +140,8 @@ async function listenerKeepOpening(){
 		op.filter(_ => _.id.toHex() === currencyId),
 	)
 	.subscribe(_=>{
-		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+//		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "XYM</dd>");
+		$("#account_balance").text(dispAmount(_.amount.toString(),6));
 		showAmountInfo(_.amount);
 	});
 
