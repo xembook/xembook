@@ -25,7 +25,7 @@
 		<h2>アカウント</h2>
 		<dl id="account_info">
 			<dt>アドレス</dt><dd><span id="account_address"></span></dd>
-			<dt>残高</dt><dd><span id="account_balance"></span></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
 			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
 		</dl>
 
@@ -57,7 +57,6 @@
 		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 		</dl>
 
-
 		<h2>トランザクション</h2>
 		<table id="table"  class="table">
 			<thead><tr>
@@ -82,28 +81,22 @@
 			</dl>
 		</div>
 	</div>
-
-
 </div>
-
-
-
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="xembook_config.js"></script>
 <script src="xembook.js"></script>
 <script>
 
-
-var xym_jpy;
-var avgXymJpyDaily = Array();
+var dateId2price;
+var dateIds = Array();
 function getNewInfo(height){}
 function showInfo(accountInfo){
 
 	$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
 	.done(x=>{
-		console.log(x)
-		xym_jpy = x;
+		dateId2price = x;
 		getBatchOfTransfers(1);
 		getBatchOfHarvests(1);
 		getBatchOfRecipets(1);
@@ -116,7 +109,6 @@ function getBatchOfTransfers(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getTransfers(25);
 		if (isLastPage || count >= maxCount){
@@ -131,7 +123,6 @@ function getBatchOfHarvests(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getHarvests(25);
 		if (isLastPage || count >= maxCount){
@@ -145,7 +136,6 @@ function getBatchOfRecipets(maxCount){
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
-		console.log(count)
 		count++;
 		isLastPage = await getRecipets(25);
 		if (isLastPage || count >= maxCount){
@@ -162,13 +152,25 @@ function showAmountInfo(amount){
 		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
 	)
 	.done(function(tickers) {
-		console.log(tickers);
 
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
 		var market_price = amount / 1000000 * gateio;
 		market_price = comma3(String(Math.round(market_price)));
 		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 	});
+}
+
+async function dispBlockTimeStamp(id,height){
+
+	var block = await blockRepo.getBlockByHeight(height).toPromise();
+
+	$("#date" + id).text(
+		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+	);
+	dateId = getDateId(Number(block.timestamp.toString()),epochAdjustment)
+	if(dateId in dateId2price){
+		dateIds[id] = dateId
+	}
 }
 
 async function appendAggTx(tx){
@@ -186,31 +188,8 @@ async function appendAggTx(tx){
 	+ "</tr>"
 	);
 
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
-
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
-
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-	})
-*/
 }
 
 async function appendTx(insTag,id,tx){
@@ -228,30 +207,8 @@ async function appendTx(insTag,id,tx){
 		+ "</tr>"
 	);
 
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
-
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-
-	})
-*/
 }
 
 async function insertTxAfter(insTag,id,tx){
@@ -267,31 +224,7 @@ async function insertTxAfter(insTag,id,tx){
 		+ "</tr>"
 	);
 
-/*
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
-
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		);
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			avgXymJpyDaily[id] = indexDate
-		}
-
-	})
-*/
-	var block = await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise();
-
-	$("#date"+ id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	);
-	indexDate = indexTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-	if(indexDate in xym_jpy){
-		avgXymJpyDaily[id] = indexDate
-	}
-
-
+	await dispBlockTimeStamp(id,tx.transactionInfo.height);
 
 }
 
@@ -301,19 +234,14 @@ function showReceiptInfo(tag,height,receipt,cnt){
 		cnt = "";
 	}
 
-
-
-
 	$("#" + tag).append("<tr>"
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
 	+ "<td id='" + tag + "_type' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
 	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
 	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
-
 	+ "</tr>"
 	);
-
 
 	blockRepo.getBlockByHeight(height)
 	.subscribe(b => {
@@ -322,23 +250,18 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
 		);
 
-		indexDate = indexTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
-		if(indexDate in xym_jpy){
-			console.log(xym_jpy[indexDate]);
+		dateId = getDateId(Number(b.timestamp.toString()),epochAdjustment)
+		if(dateId in dateId2price){
 
-			avgJPY   = Number(xym_jpy[indexDate]);
+			avgJPY   = Number(dateId2price[dateId]);
 			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
 
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
 
-
-
-
 		}else{
-				$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
-				$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
-
+			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
 		}
 	})
 }
@@ -350,11 +273,9 @@ function showTxAmountInfo(id,amount,fee){
 		dispAmount(totalAmount,6)
 	);
 
-	if(avgXymJpyDaily[id] in xym_jpy){
+	if(dateIds[id] in dateId2price){
 
-		console.log(xym_jpy[avgXymJpyDaily[id]]);
-
-		avgJPY   = Number(xym_jpy[avgXymJpyDaily[id]]);
+		avgJPY   = Number(dateId2price[dateIds[id]]);
 		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
 		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
 
@@ -364,17 +285,14 @@ function showTxAmountInfo(id,amount,fee){
 	}else{
 		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
 		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
-
 	}
 }
-
-
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 $('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
 $('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
-$("#xembook"          ).attr("href", "index.html?address=" + address);
-$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + address);
+$("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
+$("#xemmessage"       ).attr("href", "xemmessage.html?address=" + rawAddress);
 
 </script>
 </body>

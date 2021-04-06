@@ -1,172 +1,7 @@
-const ACTIVE_IMPORTANCE_RATE = 0.1999;
-const NO_3001_NODES = [
-"d3rmzi6ltfh1jy.cloudfront.net",
-"a.symbol.lcnem.net",
-];
-const NODES = [
-//"https://xym.harvester.earth:3001",
-//"https://umbriel.uranus-satellite.net:3001",
-//"https://symbol.kazgb.net:3001",
-//"https://symbol-node-01.kokichi.tokyo:3001",
-//"https://xym.jp1.node.leywapool.com:3001",
-//"https://xym.jp5.node.leywapool.com:3001",
-//"https://xym.jp2.node.leywapool.com:3001",
-//"https://ik1-438-51340.vs.sakura.ne.jp:3001",
-//"https://symbol.nuaka.net:3001",
-
-"https://d3rmzi6ltfh1jy.cloudfront.net",
-"https://a.symbol.lcnem.net",
-
-"https://ik1-432-48199.vs.sakura.ne.jp:3001",
-"https://35kx.c.time4vps.cloud:3001",
-"https://raharu-symbol-node-01.com:3001",
-"https://sn2.msus-symbol.com:3001",
-"https://0-0symbol-node1.trivill.com:3001",
-"https://sn1.msus-symbol.com:3001",
-"https://00.symsym.info:3001",
-"https://01.symsym.info:3001",
-"https://02.symsym.info:3001",
-"https://03.symsym.info:3001",
-"https://04.symsym.info:3001",
-"https://0.symsym.info:3001",
-"https://00.alpaca.symbolist.jp:3001",
-"https://00.bison.symbolist.jp:3001",
-"https://00.cow.symbolist.jp:3001",
-"https://00.dragon.symbolist.jp:3001",
-"https://00.elephant.symbolist.jp:3001",
-"https://00.fushicho.symbolist.jp:3001",
-"https://00.gorilla.symbolist.jp:3001",
-"https://00.high-performance.symbol-nodes.com:3001",
-"https://00.hippopotamus.symbolist.jp:3001",
-"https://super-harvester.com:3001",
-"https://symbol02.spdysgr.net:3001",
-"https://sym-main.opening-line.jp:3001",
-"https://node1.xym-harvesting.com:3001",
-"https://node2.xym-harvesting.com:3001",
-"https://ls1.rellc.jp:3001",
-"https://888.symsym.info:3001",
-"https://symbol.nagoya:3001",
-"https://xym.idol-library.jp:3001",
-"https://age01.kitsutsuki.tokyo:3001",
-"https://age02.kitsutsuki.tokyo:3001",
-"https://age03.kitsutsuki.tokyo:3001",
-"https://cryptocat-xym-node2.com:3001",
-"https://ik1-332-26240.vs.sakura.ne.jp:3001",
-"https://02.symbol-node.net:3001",
-"https://00.symbol-node.net:3001",
-"https://23167.xym.stir-hosyu.com:3001",
-"https://symbol03.node.oe-jpy.com:3001",
-"https://07.symbol-node.net:3001",
-"https://006symbol.open-nodes.com:3001",
-"https://sym-main.daoka.tk:3001",
-"https://002symbol.open-nodes.com:3001",
-"https://harvesting-sweet-potatoes.com:3001",
-"https://01.symbol-gentoo.tokyo:3001",
-"https://007symbol.open-nodes.com:3001",
-"https://000symbol.open-nodes.com:3001",
-"https://08.symbol-node.net:3001",
-"https://symbol01.node.oe-jpy.com:3001",
-"https://harvest-festa.com:3001",
-"https://00.harvester.earth:3001",
-"https://009symbol.open-nodes.com:3001",
-"https://001symbol.open-nodes.com:3001",
-"https://09.symbol-node.net:3001",
-"https://symbol-harvesting.com:3001",
-"https://003symbol.open-nodes.com:3001",
-"https://xymtokyo.harvest-node.net:3001",
-"https://0-a.muraka.me:3001",
-"https://05.symbol-node.net:3001",
-"https://0-0-1.symbol-nodes.net:3001",
-"https://0-0-2.symbol-nodes.net:3001",
-"https://30153.xym.stir-hosyu.com:3001",
-"https://03.symbol-node.net:3001",
-"https://symbol02.node.oe-jpy.com:3001",
-"https://paotan01.momotapo.com:3001",
-"https://paotan02.momotapo.com:3001",
-"https://paotan03.momotapo.com:3001",
-"https://119-47-17-86.catv296.ne.jp:3001",
-"https://puipui.iizukak.com:3001",
-"https://06.symbol-node.net:3001",
-"https://04.symbol-node.net:3001",
-"https://symbol-node.net:3001",
-"https://node-01.rruby.org:3001",
-"https://ik1-449-56512.vs.sakura.ne.jp:3001",
-"https://sushi.sakurairo.tokyo:3001",
-"https://0m0-neko-neko-nyaa-symbolcat.com:3001",
-"https://shikinami.starlight.tokyo:3001",
-"https://19902.xym.stir-hosyu.com:3001",
-"https://62828.xym.stir-hosyu.com:3001",
-"https://64519.xym.stir-hosyu.com:3001",
-"https://33603.xym.stir-hosyu.com:3001",
-"https://12936.xym.stir-hosyu.com:3001",
-"https://26760.xym.stir-hosyu.com:3001",
-"https://00ffd768.xym.stir-hosyu.com:3001",
-"https://01.symbol-node.net:3001",
-"https://14601.xym.stir-hosyu.com:3001",
-"https://005symbol.open-nodes.com:3001",
-"https://ik1-426-45178.vs.sakura.ne.jp:3001",
-"https://ik1-421-42893.vs.sakura.ne.jp:3001",
-"https://008symbol.open-nodes.com:3001",
-"https://004symbol.open-nodes.com:3001",
-"https://00A06705.xym.stir-hosyu.com:3001",
-"https://ik1-432-48497.vs.sakura.ne.jp:3001",
-"https://symbol01.harvestasya.com:3001",
-"https://aiteruyo.jp:3001",
-"https://amaterasu-01.kamigami.jp:3001",
-"https://amaterasu-02.kamigami.jp:3001",
-"https://symbol-node.bakobox.net:3001",
-"https://0-0-xym.cubkab-crypto.tokyo:3001",
-"https://0-0-axym.cubkab-crypto.tokyo:3001",
-"https://01.symbol.enoki-do.com:3001",
-"https://harvest-01.symbol.farm:3001",
-"https://harvest-02.symbol.farm:3001",
-"https://harvest-03.symbol.farm:3001",
-"https://symbol.harvest-monitor.com:3001",
-"https://nemauthn.harvestfield.tokyo:3001",
-"https://hideyoshi-node.net:3001",
-"https://criptian-xym-node.net:3001",
-"https://symbol.kazgb.net:3001",
-"https://35665.xym.stir-hosyu.com:3001",
-"https://yuna.keshet.finance:3001",
-"https://keshet01-symbol-paradise.com:3001",
-"https://keshet02-symbol-paradise.com:3001",
-"https://keshet03-symbol-paradise.com:3001",
-"https://keshet04-symbol-paradise.com:3001",
-"https://symbol.from.nagoya:3001",
-"https://cryptocat-xym-node.com:3001",
-"https://sn.newecosym.com:3001",
-"https://misaki-xym.com:3001",
-"https://41506.xym.stir-hosyu.com:3001",
-"https://symbol-sakura-16.next-web-technology.com:3001",
-"https://28387.xym.stir-hosyu.com:3001",
-"https://ik1-305-12844.vs.sakura.ne.jp:3001",
-"https://16948.xym.stir-hosyu.com:3001",
-"https://17107.xym.stir-hosyu.com:3001",
-"https://23639.xym.stir-hosyu.com:3001",
-"https://sym-main-01.opening-line.jp:3001",
-"https://sym-main-02.opening-line.jp:3001",
-"https://sym-main-03.opening-line.jp:3001",
-"https://sym-main-04.opening-line.jp:3001",
-"https://sym-main-05.opening-line.jp:3001",
-"https://sym-main-06.opening-line.jp:3001",
-"https://sym-main-07.opening-line.jp:3001",
-"https://sym-main-08.opening-line.jp:3001",
-"https://sym-main-09.opening-line.jp:3001",
-"https://sym-main-10.opening-line.jp:3001",
-"https://sym-main-11.opening-line.jp:3001",
-"https://symbol-harvest-node.com:3001",
-"https://symbol01.master-ryzen00.trade:3001",
-"https://50038.xym.stir-hosyu.com:3001",
-"https://27423.xym.stir-hosyu.com:3001",
-"https://angel.vistiel-arch.jp:3001",
-"https://00-symbol-node.yagiyoshi.com:3001",
-
-];
-
 var transferPageNumber = 1;
 var harvestPageNumber = 1;
 var reciptPageNumber = 1;
-var address = "";
+var rawAddress = "";
 if (1 < document.location.search.length) {
 
 	var query = document.location.search.substring(1);
@@ -179,28 +14,30 @@ if (1 < document.location.search.length) {
 		item[idx] = decodeURIComponent(val);
 	}
 	if("address" in item){
-		address = item["address"];
+		rawAddress = item["address"];
 	}
 }
 
-if( address == ""){
+if( rawAddress == ""){
 
 	var proaddress = window.prompt('Symbolアドレスを入力してください','');
 	if(proaddress === '' || proaddress === null){
 		alert("サンプルアカウントを表示します");
 		proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
 	}
-	address = proaddress.replace( /-/g , "" ).toUpperCase();
+	rawAddress = proaddress.replace( /-/g , "" ).toUpperCase();
 
 	if(history.replaceState) {
-		history.replaceState(null,null,"?address=" + address)
+		history.replaceState(null,null,"?address=" + rawAddress)
 	}
 }
-address = address.replace( /-/g , "" ).toUpperCase();
+rawAddress = rawAddress.replace( /-/g , "" ).toUpperCase();
 
 const nem = require("/node_modules/symbol-sdk");
 const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
+const address = nem.Address.createFromRawAddress(rawAddress);
+
 var listener;
 function connectNode(nodes,d){
 
@@ -222,7 +59,9 @@ async function createRepo(d2){
 	const d = $.Deferred();
 	const node = await connectNode(NODES,d);
 	repo = new nem.RepositoryFactoryHttp(node);
+	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
+	receiptRepo = repo.createReceiptRepository();
 	wsEndpoint = node.replace('http', 'ws') + "/ws";
 	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
@@ -248,7 +87,7 @@ async function listenerKeepOpening(){
 		await listenerKeepOpening();
 
 		//リスナーに関係する情報をリロード
-		accountRepo.getAccountInfo(alice)
+		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
 		});
@@ -261,18 +100,14 @@ async function listenerKeepOpening(){
 }
 
 (async() =>{
-
 	const d2 = $.Deferred();
 	repo = await createRepo(d2);
 	const d3 = $.Deferred();
 	repo2 = await createRepo(d3);
 	
-
-	txRepo = repo.createTransactionRepository();
 	nwRepo = repo.createNetworkRepository();
 //	blockRepo = repo.createBlockRepository();
 	blockRepo = repo2.createBlockRepository();
-	receiptRepo = repo.createReceiptRepository();
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
 	tsRepo = repo.createTransactionStatusRepository();
@@ -289,17 +124,15 @@ async function listenerKeepOpening(){
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 	networkType = await repo.getNetworkType().toPromise();
 	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
-	console.log(totalChainImportance)
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
 
-	alice = nem.Address.createFromRawAddress(address);
-	$("#account_address").text(alice.pretty().slice(0,20) + "..." + alice.pretty().slice(-3));
-	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + alice.plain());
+	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
+	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
 
 	//アカウント情報
-	var accountInfo = accountRepo.getAccountInfo(alice);
+	var accountInfo = accountRepo.getAccountInfo(address);
 
 	accountInfo
 	.pipe(
@@ -307,7 +140,8 @@ async function listenerKeepOpening(){
 		op.filter(_ => _.id.toHex() === currencyId),
 	)
 	.subscribe(_=>{
-		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+//		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "XYM</dd>");
+		$("#account_balance").text(dispAmount(_.amount.toString(),6));
 		showAmountInfo(_.amount);
 	});
 
@@ -320,7 +154,7 @@ async function listenerKeepOpening(){
 async function getTransfers(pageSize){
 
 	txs = await txRepo.search({
-		address:alice,
+		address:address,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
 		pageSize:pageSize,
@@ -338,11 +172,9 @@ async function getTransfers(pageSize){
 
 
 async function getRecipets(pageSize){
-	console.log(reciptPageNumber);
-
 
 	var res = await receiptRepo.searchReceipts({
-		senderAddress:alice,
+		senderAddress:address,
 		pageNumber:reciptPageNumber,
 		pageSize:pageSize,
 		order:"desc"
@@ -354,7 +186,7 @@ async function getRecipets(pageSize){
 
 		var filterdReceipts = statements.receipts.filter(item => {
 			if(item.senderAddress){
-				return item.senderAddress.plain() === alice.plain();
+				return item.senderAddress.plain() === address.plain();
 			}
 			return false;
 		});
@@ -377,7 +209,7 @@ async function getRecipets(pageSize){
 async function getHarvests(pageSize){
 
 	var res = await receiptRepo.searchReceipts({
-		targetAddress:alice,
+		targetAddress:address,
 		pageNumber:harvestPageNumber,
 		pageSize:pageSize,
 		order:"desc"
@@ -389,7 +221,7 @@ async function getHarvests(pageSize){
 
 		var filterdReceipts = statements.receipts.filter(item => {
 			if(item.targetAddress){
-				return item.targetAddress.plain() === alice.plain();
+				return item.targetAddress.plain() === address.plain();
 			}
 			return false;
 		});
@@ -421,7 +253,7 @@ async function parseTx(txs,parentId){
 			const id = tx.transactionInfo.id;
 			await appendAggTx(tx);
 			var tranType;
-			if(alice.plain() ===  tx.signer.address.plain()){
+			if(address.plain() ===  tx.signer.address.plain()){
 //			if(alice.plain() === tx.recipientAddress.plain()){
 				tranType = "<font color='red'>送信[集約]</font>";
 				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
@@ -450,8 +282,21 @@ async function parseTx(txs,parentId){
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
-//			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE",currencyId].includes(item.id.toHex()));
 			xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+
+			if(xym.length === 0 
+				&& parentId === undefined 
+				&& address.plain() ===  tx.signer.address.plain()){
+
+					const id = tx.transactionInfo.id;
+					await appendTx("#table",id,tx);
+					$("#type"+ id ).html("<font color='red'>送信</font>");
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+						showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+					});
+			}
 
 			for(mosaic of xym){
 
@@ -460,7 +305,7 @@ async function parseTx(txs,parentId){
 				if(parentId !== undefined){
 
 					//インターナルトランザクション
-					if(alice.plain() === tx.recipientAddress.plain() || alice.plain() ===  tx.signer.address.plain()){
+					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
 						await insertTxAfter("#agg" + parentId,id,tx);
 						
 					}else{
@@ -472,34 +317,20 @@ async function parseTx(txs,parentId){
 				}
 
 				var tranType;
-				if(alice.plain() ===  tx.signer.address.plain()){
+				if(address.plain() ===  tx.signer.address.plain()){
 					tranType = "<font color='red'>送信</font>";
 					if(parentId === undefined){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 						.subscribe(fee => {
 
-//							showTxAmountInfo("#amount"+ id,mosaicAmount.add(nem.UInt64.fromNumericString(fee.toString() ) ));
 							showTxAmountInfo(id,mosaicAmount,fee);
-/*
-							$("#amount"+ id).text(
-								dispAmount(
-									mosaicAmount.add(
-										nem.UInt64.fromNumericString(fee.toString())
-									),6
-								)
-							);
-*/
 						});
 					}else{
-//						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
-//						showTxAmountInfo("#amount"+ id,mosaicAmount);
 						showTxAmountInfo(id,mosaicAmount,0);
 					}
 				}else{
 					tranType = "<font color='green'>受信</font>";
 					showTxAmountInfo(id,mosaicAmount,0);
-//					showTxAmountInfo("#amount"+ id,mosaicAmount);
-					
 				}
 				$("#type"+ id ).html(tranType);
 			}
@@ -547,12 +378,12 @@ function dispTimeStamp(timeStamp,epoch){
 	return 	strDate;
 }
 
-function indexTimeStamp(timeStamp,epoch){
+function getDateId(timeStamp,epoch){
 	const d = new Date(timeStamp + epoch * 1000)
-	const strDate = d.getFullYear()
+	const dateId = d.getFullYear()
 		+ paddingDate0( d.getMonth() + 1 )
 		+ paddingDate0( d.getDate() );
-	return 	strDate;
+	return 	dateId;
 	
 }
 	
