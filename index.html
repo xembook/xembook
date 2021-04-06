@@ -253,8 +253,14 @@ function showAccountInfo(accountInfo){
 	});
 
 	nwRepo.getTransactionFees().subscribe(fees=>{
-		const medianTxFee = 176 * fees.medianFeeMultiplier;
-		$("#fee_median").text(dispAmount(medianTxFee,6).slice(0,-4));
+
+		var txFee;
+		if(fees.medianFeeMultiplier > fees.minFeeMultiplier){
+			txFee = fees.medianFeeMultiplier;
+		}else{
+			txFee = fees.minFeeMultiplier;
+		}
+		$("#fee_median").text(dispAmount(txFee * 176,6).slice(0,-4));
 	})
 
 	nwRepo.getRentalFees().subscribe(fees=>{
