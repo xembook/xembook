@@ -282,8 +282,21 @@ async function parseTx(txs,parentId){
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
-//			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE",currencyId].includes(item.id.toHex()));
 			xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+
+			if(xym.length === 0 
+				&& parentId === undefined 
+				&& address.plain() ===  tx.signer.address.plain()){
+
+					const id = tx.transactionInfo.id;
+					await appendTx("#table",id,tx);
+					$("#type"+ id ).html("<font color='red'>送信</font>");
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+						showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+					});
+			}
 
 			for(mosaic of xym){
 
@@ -310,28 +323,14 @@ async function parseTx(txs,parentId){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 						.subscribe(fee => {
 
-//							showTxAmountInfo("#amount"+ id,mosaicAmount.add(nem.UInt64.fromNumericString(fee.toString() ) ));
 							showTxAmountInfo(id,mosaicAmount,fee);
-/*
-							$("#amount"+ id).text(
-								dispAmount(
-									mosaicAmount.add(
-										nem.UInt64.fromNumericString(fee.toString())
-									),6
-								)
-							);
-*/
 						});
 					}else{
-//						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
-//						showTxAmountInfo("#amount"+ id,mosaicAmount);
 						showTxAmountInfo(id,mosaicAmount,0);
 					}
 				}else{
 					tranType = "<font color='green'>受信</font>";
 					showTxAmountInfo(id,mosaicAmount,0);
-//					showTxAmountInfo("#amount"+ id,mosaicAmount);
-					
 				}
 				$("#type"+ id ).html(tranType);
 			}
