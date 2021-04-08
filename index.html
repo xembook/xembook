@@ -24,7 +24,7 @@
 		<div class="account col-sm-4">
 		<h2>アカウント</h2>
 		<dl id="account_info">
-			<dt>アドレス</dt><dd><span id="account_address"></span>　<a target="_blank" id="account_explorer">explorer</a></dd>
+			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
 			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
 			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
 			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
@@ -143,7 +143,7 @@
 
 function showInfo(accountInfo){
 
-	$("#node_activity").html("<font color='green'>●</font>");
+	$("#node_activity").html("<font color='green'>● </font>");
 
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
@@ -299,9 +299,9 @@ function showAccountInfo(accountInfo){
 
 			var unlockedMark = "";
 			if(harvesterKeys.includes(accountInfo.publicKey)){
-				unlockedMark = "<font color='green'>●</font>"
+				unlockedMark = "<font color='green'>● </font>"
 			}else{
-				unlockedMark = "<font color='red'>●</font>"
+				unlockedMark = "<font color='red'>● </font>"
 			}
 			$("#delegated_node").html(
 				unlockedMark + delegatedNode
