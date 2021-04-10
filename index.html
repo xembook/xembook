@@ -37,7 +37,7 @@
 		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		</dl>
-
+		<small>最終更新　<span id="last_update"></span></small>
 		<h2>ノード</h2>
 		<dl id="node_info">
 			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
@@ -173,6 +173,9 @@ function showAmountInfo(amount){
 		var market_price = amount / 1000000 * gateio;
 		market_price = comma3(String(Math.round(market_price)));
 		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+		$("#last_update").text(tickers.last_update);
+
+
 	});
 }
 
@@ -465,6 +468,8 @@ function showTxAmountInfo(id,amount,fee){
 
 var lastBlockHash = "";
 setInterval(function(){
+
+	showPriceInfo(accountRepo.getAccountInfo(address));
 
 	var nodeActivity = "";
 	if(lastBlockHash === newBlockHash){

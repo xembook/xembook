@@ -133,6 +133,11 @@ async function listenerKeepOpening(){
 
 	//アカウント情報
 	var accountInfo = accountRepo.getAccountInfo(address);
+	showPriceInfo(accountInfo);
+	showInfo(accountInfo);
+})();
+
+function showPriceInfo(accountInfo){
 
 	accountInfo
 	.pipe(
@@ -140,13 +145,10 @@ async function listenerKeepOpening(){
 		op.filter(_ => _.id.toHex() === currencyId),
 	)
 	.subscribe(_=>{
-//		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "XYM</dd>");
 		$("#account_balance").text(dispAmount(_.amount.toString(),6));
 		showAmountInfo(_.amount);
 	});
-
-	showInfo(accountInfo);
-})();
+}
 
 
 

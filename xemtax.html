@@ -35,10 +35,10 @@
 		<table id="harvest"  class="table">
 			<thead><tr>
 				<th>日時</th>
-				<th>区分</th>
-				<th>数量</th>
-				<th>円換算値</th>
-				<th>円平均</th>
+				<th class='text-left'>区分</th>
+				<th class='text-right'>数量</th>
+				<th class='text-right'>円換算値</th>
+				<th class='text-right'>円平均</th>
 			</tr></thead>
 		</table>
 		<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -48,10 +48,10 @@
 		<table id="receipt"  class="table">
 			<thead><tr>
 				<th>日時</th>
-				<th>区分</th>
-				<th>数量</th>
-				<th>円換算値</th>
-				<th>円平均</th>
+				<th class='text-left'>区分</th>
+				<th class='text-right'>数量</th>
+				<th class='text-right'>円換算値</th>
+				<th class='text-right'>円平均</th>
 			</tr></thead>
 		</table>
 		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -62,10 +62,10 @@
 			<thead><tr>
 				<th>日時</th>
 				<th>区分</th>
-				<th>数量</th>
-				<th>円換算値</th>
-				<th>円平均</th>
-				<th>負担手数料</th>
+				<th class='text-right'>数量</th>
+				<th class='text-right'>円換算値</th>
+				<th class='text-right'>円平均</th>
+				<th class='text-right'>負担手数料</th>
 			</tr></thead>
 		</table>
 		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
@@ -237,9 +237,9 @@ function showReceiptInfo(tag,height,receipt,cnt){
 	$("#" + tag).append("<tr>"
 	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
 	+ "<td id='" + tag + "_type' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
-	+ "<td id='" + tag + "_amount'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
-	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "'></td>" //mosaicLabel
-	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "'></td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount' class='text-right'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy" + height + receipt.type + cnt + "' class='text-right'></td>" //mosaicLabel
+	+ "<td id='" + tag + "_amount_jpy_avg" + height + receipt.type + cnt + "' class='text-right'></td>" //mosaicLabel
 	+ "</tr>"
 	);
 
@@ -254,10 +254,10 @@ function showReceiptInfo(tag,height,receipt,cnt){
 		if(dateId in dateId2price){
 
 			avgJPY   = Number(dateId2price[dateId]);
-			totalJPY = Number(avgJPY * receipt.amount/1000000).toFixed(4);
+			totalJPY = Number(avgJPY * totalAmount/1000000);
 
-			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(totalJPY);
-			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(avgJPY.toFixed(4));
+			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(dispJpyAmount(totalJPY));
+			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(dispJpyAmount(avgJPY));
 
 		}else{
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
@@ -276,16 +276,21 @@ function showTxAmountInfo(id,amount,fee){
 	if(dateIds[id] in dateId2price){
 
 		avgJPY   = Number(dateId2price[dateIds[id]]);
-		totalJPY = Number(avgJPY * totalAmount/1000000).toFixed(4);
-		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000).toFixed(4);
+		totalJPY = Number(avgJPY * totalAmount/1000000);
+		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000);
 
-		$("#amount"+ id + "_jpy_avg").text(avgJPY.toFixed(4));
-		$("#amount"+ id + "_jpy"    ).text(totalJPY);
-		$("#amount"+ id + "_jpy_fee").text(feeJPY);
+		$("#amount"+ id + "_jpy_avg").text(dispJpyAmount(avgJPY));
+		$("#amount"+ id + "_jpy"    ).text(dispJpyAmount(totalJPY));
+		$("#amount"+ id + "_jpy_fee").text(dispJpyAmount(feeJPY));
 	}else{
 		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
 		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
 	}
+}
+
+function dispJpyAmount(jpyAmount){
+
+	return dispAmount(jpyAmount.toFixed(4) * 10000,4);
 }
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
