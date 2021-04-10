@@ -104,7 +104,7 @@ async function listenerKeepOpening(){
 	repo = await createRepo(d2);
 	const d3 = $.Deferred();
 	repo2 = await createRepo(d3);
-	
+
 	nwRepo = repo.createNetworkRepository();
 //	blockRepo = repo.createBlockRepository();
 	blockRepo = repo2.createBlockRepository();
@@ -286,8 +286,8 @@ async function parseTx(txs,parentId){
 
 			xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 
-			if(xym.length === 0 
-				&& parentId === undefined 
+			if(xym.length === 0
+				&& parentId === undefined
 				&& address.plain() ===  tx.signer.address.plain()){
 
 					const id = tx.transactionInfo.id;
@@ -309,10 +309,10 @@ async function parseTx(txs,parentId){
 					//インターナルトランザクション
 					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
 						await insertTxAfter("#agg" + parentId,id,tx);
-						
+
 					}else{
 						//自分が送信・受信していないインナートランザクションは表示しない。
-						continue;	
+						continue;
 					}
 				}else{
 					await appendTx("#table",id,tx);
@@ -336,6 +336,20 @@ async function parseTx(txs,parentId){
 				}
 				$("#type"+ id ).html(tranType);
 			}
+		}else{
+			if(parentId === undefined 
+				&& address.plain() ===  tx.signer.address.plain()){
+
+					const id = tx.transactionInfo.id;
+					await appendTx("#table",id,tx);
+					$("#type"+ id ).html("<font color='red'>送信</font>");
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+						showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+					});
+			}
+
 		}
 	}
 }
@@ -386,10 +400,10 @@ function getDateId(timeStamp,epoch){
 		+ paddingDate0( d.getMonth() + 1 )
 		+ paddingDate0( d.getDate() );
 	return 	dateId;
-	
+
 }
-	
-	
+
+
 function paddingDate0(num) {
 	return ( num < 10 ) ? '0' + num  : num;
 };

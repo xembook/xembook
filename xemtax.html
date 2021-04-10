@@ -253,8 +253,8 @@ function showReceiptInfo(tag,height,receipt,cnt){
 		dateId = getDateId(Number(b.timestamp.toString()),epochAdjustment)
 		if(dateId in dateId2price){
 
-			avgJPY   = Number(dateId2price[dateId]);
-			totalJPY = Number(avgJPY * totalAmount/1000000);
+			avgJPY   = Number(dateId2price[dateId]).toFixed(4);
+			totalJPY = Number(avgJPY * receipt.amount/1000000);
 
 			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text(dispJpyAmount(totalJPY));
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(dispJpyAmount(avgJPY));
@@ -275,7 +275,7 @@ function showTxAmountInfo(id,amount,fee){
 
 	if(dateIds[id] in dateId2price){
 
-		avgJPY   = Number(dateId2price[dateIds[id]]);
+		avgJPY   = Number(dateId2price[dateIds[id]]).toFixed(4);
 		totalJPY = Number(avgJPY * totalAmount/1000000);
 		feeJPY = Number(avgJPY * nem.UInt64.fromNumericString(fee.toString())/1000000);
 
@@ -290,7 +290,8 @@ function showTxAmountInfo(id,amount,fee){
 
 function dispJpyAmount(jpyAmount){
 
-	return dispAmount(jpyAmount.toFixed(4) * 10000,4);
+//	return dispAmount(jpyAmount.toFixed(4) * 10000,4);
+	return dispAmount((jpyAmount*10000).toFixed(),4);
 }
 
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});

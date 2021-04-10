@@ -31,13 +31,13 @@
 		</dl>
 		<dl id="account_append_info"></dl>
 		<h2>取引所</h2>
+		<small>最終更新　<span id="last_update"></span></small>
 		<dl>
 		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
 		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
 		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		</dl>
-		<small>最終更新　<span id="last_update"></span></small>
 		<h2>ノード</h2>
 		<dl id="node_info">
 			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
@@ -300,12 +300,25 @@ function showAccountInfo(accountInfo){
 				}
 			}
 
+			dchainRepo = drepo.createChainRepository();
+
+			var zip = await rxjs.zip(
+				chainRepo.getChainInfo(),
+				dchainRepo.getChainInfo()
+			).toPromise();
+
 			var unlockedMark = "";
-			if(harvesterKeys.includes(accountInfo.publicKey)){
-				unlockedMark = "<font color='green'>● </font>"
+			if(!harvesterKeys.includes(accountInfo.publicKey)){
+				unlockedMark = "<font color='red'>● </font>";
+
+			}else if(zip[0].height.compact() > zip[1].height.compact() + 1){
+
+				unlockedMark = "<font color='orange'>● </font>";
+
 			}else{
-				unlockedMark = "<font color='red'>● </font>"
+				unlockedMark = "<font color='green'>● </font>";
 			}
+
 			$("#delegated_node").html(
 				unlockedMark + delegatedNode
 			);
