@@ -1,4 +1,4 @@
-const ACTIVE_IMPORTANCE_RATE = 0.1999;
+const ACTIVE_IMPORTANCE_RATE = 0.21975;
 const NO_3001_NODES = [
 "d3rmzi6ltfh1jy.cloudfront.net",
 "a.symbol.lcnem.net",
