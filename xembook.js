@@ -4,13 +4,13 @@ var reciptPageNumber = 1;
 var rawAddress = "";
 if (1 < document.location.search.length) {
 
-	var query = document.location.search.substring(1);
-	var prms = query.split('&');
-	var item = new Object();
+	const query = document.location.search.substring(1);
+	const prms = query.split('&');
+	const item = new Object();
 	for (var i = 0; i < prms.length; i++) {
-		var elm   = prms[i].split('=');
-		var idx   = decodeURIComponent(elm[0]);
-		var val   = decodeURIComponent(elm[1]);
+		const elm   = prms[i].split('=');
+		const idx   = decodeURIComponent(elm[0]);
+		const val   = decodeURIComponent(elm[1]);
 		item[idx] = decodeURIComponent(val);
 	}
 	if("address" in item){
@@ -28,7 +28,7 @@ if( rawAddress == ""){
 	rawAddress = proaddress.replace( /-/g , "" ).toUpperCase();
 
 	if(history.replaceState) {
-		history.replaceState(null,null,"?address=" + rawAddress)
+		history.replaceState(null,null,"?address=" + rawAddress);
 	}
 }
 rawAddress = rawAddress.replace( /-/g , "" ).toUpperCase();
@@ -54,20 +54,25 @@ function connectNode(nodes,d){
 	return d.promise();
 }
 
+var txRepo;
+var nsRepo;
+var receiptRepo;
+var epochAdjustment;
+var listener;
 async function createRepo(d2){
 
 	const d = $.Deferred();
 	const node = await connectNode(NODES,d);
-	repo = new nem.RepositoryFactoryHttp(node);
+	const repo = new nem.RepositoryFactoryHttp(node);
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
 	receiptRepo = repo.createReceiptRepository();
-	wsEndpoint = node.replace('http', 'ws') + "/ws";
+	const wsEndpoint = node.replace('http', 'ws') + "/ws";
 	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	try{
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
-		await listenerKeepOpening();
+		await listenerKeepOpening(wsEndpoint);
 		d2.resolve(repo);
 
 	}catch{
@@ -77,7 +82,7 @@ async function createRepo(d2){
 }
 
 var newBlockHash;
-async function listenerKeepOpening(){
+async function listenerKeepOpening(wsEndpoint){
 
 	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 	await listener.open();
@@ -99,40 +104,55 @@ async function listenerKeepOpening(){
 	});
 }
 
+var blockRepo;
+var nwRepo;
+var accountRepo;
+var nodeRepo;
+var chainRepo;
+var msigRepo;
+var networkType;
+var currencyId;
+var totalChainImportance;
+var currencyNamespaceId;
 (async() =>{
 	const d2 = $.Deferred();
-	repo = await createRepo(d2);
+	const repo = await createRepo(d2);
 	const d3 = $.Deferred();
-	repo2 = await createRepo(d3);
-	
+	const repo2 = await createRepo(d3);
+
 	nwRepo = repo.createNetworkRepository();
 //	blockRepo = repo.createBlockRepository();
 	blockRepo = repo2.createBlockRepository();
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
-	tsRepo = repo.createTransactionStatusRepository();
+//	tsRepo = repo.createTransactionStatusRepository();
 	chainRepo = repo.createChainRepository();
-	finRepo = repo.createFinalizationRepository();
-	hlRepo = repo.createHashLockRepository();
-	metaRepo = repo.createMetadataRepository();
-	mosaicRepo = repo.createMosaicRepository();
+//	finRepo = repo.createFinalizationRepository();
+//	hlRepo = repo.createHashLockRepository();
+//	metaRepo = repo.createMetadataRepository();
+//	mosaicRepo = repo.createMosaicRepository();
 	msigRepo = repo.createMultisigRepository();
-	resAccountRepo = repo.createRestrictionAccountRepository();
-	resMosaicRepo = repo.createRestrictionMosaicRepository();
-	slRepo = repo.createSecretLockRepository();
+//	resAccountRepo = repo.createRestrictionAccountRepository();
+//	resMosaicRepo = repo.createRestrictionMosaicRepository();
+//	slRepo = repo.createSecretLockRepository();
 
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 	networkType = await repo.getNetworkType().toPromise();
 	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
-	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0]
+	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
 
 	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
-	$("#account_explorer"  ).attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
+	$("#account_explorer").attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
 
 	//アカウント情報
-	var accountInfo = accountRepo.getAccountInfo(address);
+	const accountInfo = accountRepo.getAccountInfo(address);
+	showPriceInfo(accountInfo);
+	showInfo(accountInfo);
+})();
+
+function showPriceInfo(accountInfo){
 
 	accountInfo
 	.pipe(
@@ -140,19 +160,15 @@ async function listenerKeepOpening(){
 		op.filter(_ => _.id.toHex() === currencyId),
 	)
 	.subscribe(_=>{
-		$("#account_balance").append("<dd>" + dispAmount(_.amount.toString(),6) + "</dd>");
+		$("#account_balance").text(dispAmount(_.amount.toString(),6));
 		showAmountInfo(_.amount);
 	});
-
-	showInfo(accountInfo);
-})();
-
-
+}
 
 //トランザクション取得
 async function getTransfers(pageSize){
 
-	txs = await txRepo.search({
+	const txs = await txRepo.search({
 		address:address,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
@@ -169,10 +185,9 @@ async function getTransfers(pageSize){
 	return txs.isLastPage;
 }
 
-
 async function getRecipets(pageSize){
 
-	var res = await receiptRepo.searchReceipts({
+	const res = await receiptRepo.searchReceipts({
 		senderAddress:address,
 		pageNumber:reciptPageNumber,
 		pageSize:pageSize,
@@ -181,16 +196,16 @@ async function getRecipets(pageSize){
 
 	reciptPageNumber++;
 
-	for(statements  of res.data){
+	for(const statements  of res.data){
 
-		var filterdReceipts = statements.receipts.filter(item => {
+		const filterdReceipts = statements.receipts.filter(item => {
 			if(item.senderAddress){
 				return item.senderAddress.plain() === address.plain();
 			}
 			return false;
 		});
 
-		cnt = 0
+		var cnt = 0;
 		for(receipt of filterdReceipts){
 
 			showReceiptInfo("receipt",statements.height,receipt,cnt);
@@ -207,7 +222,7 @@ async function getRecipets(pageSize){
 //入金レシート
 async function getHarvests(pageSize){
 
-	var res = await receiptRepo.searchReceipts({
+	const res = await receiptRepo.searchReceipts({
 		targetAddress:address,
 		pageNumber:harvestPageNumber,
 		pageSize:pageSize,
@@ -216,17 +231,17 @@ async function getHarvests(pageSize){
 
 	harvestPageNumber++;
 
-	for(statements  of res.data){
+	for(const statements  of res.data){
 
-		var filterdReceipts = statements.receipts.filter(item => {
+		const filterdReceipts = statements.receipts.filter(item => {
 			if(item.targetAddress){
 				return item.targetAddress.plain() === address.plain();
 			}
 			return false;
 		});
 
-		cnt = 0
-		for(receipt of filterdReceipts){
+		var cnt = 0;
+		for(const receipt of filterdReceipts){
 
 			showReceiptInfo("harvest",statements.height,receipt,cnt);
 			cnt++;
@@ -239,10 +254,9 @@ async function getHarvests(pageSize){
 	return res.isLastPage;
 }
 
-
 //トランザクション一覧
 async function parseTx(txs,parentId){
-	for(var tx of txs){
+	for(const tx of txs){
 
 		if([
 			nem.TransactionType.AGGREGATE_COMPLETE,
@@ -281,10 +295,23 @@ async function parseTx(txs,parentId){
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
-//			xym = tx.mosaics.filter(item=> ["E74B99BA41F4AFEE",currencyId].includes(item.id.toHex()));
-			xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+			const xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 
-			for(mosaic of xym){
+			if(xym.length === 0
+				&& parentId === undefined
+				&& address.plain() ===  tx.signer.address.plain()){
+
+					const id = tx.transactionInfo.id;
+					await appendTx("#table",id,tx);
+					$("#type"+ id ).html("<font color='red'>送信</font>");
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+						showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+					});
+			}
+
+			for(const mosaic of xym){
 
 				const id = tx.transactionInfo.id + mosaic.id.toHex();
 				const mosaicAmount = mosaic.amount;
@@ -293,10 +320,10 @@ async function parseTx(txs,parentId){
 					//インターナルトランザクション
 					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
 						await insertTxAfter("#agg" + parentId,id,tx);
-						
+
 					}else{
 						//自分が送信・受信していないインナートランザクションは表示しない。
-						continue;	
+						continue;
 					}
 				}else{
 					await appendTx("#table",id,tx);
@@ -309,30 +336,29 @@ async function parseTx(txs,parentId){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 						.subscribe(fee => {
 
-//							showTxAmountInfo("#amount"+ id,mosaicAmount.add(nem.UInt64.fromNumericString(fee.toString() ) ));
 							showTxAmountInfo(id,mosaicAmount,fee);
-/*
-							$("#amount"+ id).text(
-								dispAmount(
-									mosaicAmount.add(
-										nem.UInt64.fromNumericString(fee.toString())
-									),6
-								)
-							);
-*/
 						});
 					}else{
-//						$("#amount"+ id).text(dispAmount(mosaicAmount,6));
-//						showTxAmountInfo("#amount"+ id,mosaicAmount);
 						showTxAmountInfo(id,mosaicAmount,0);
 					}
 				}else{
 					tranType = "<font color='green'>受信</font>";
 					showTxAmountInfo(id,mosaicAmount,0);
-//					showTxAmountInfo("#amount"+ id,mosaicAmount);
-					
 				}
 				$("#type"+ id ).html(tranType);
+			}
+		}else{
+			if(parentId === undefined
+				&& address.plain() ===  tx.signer.address.plain()){
+
+					const id = tx.transactionInfo.id;
+					await appendTx("#table",id,tx);
+					$("#type"+ id ).html("<font color='red'>送信</font>");
+
+					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
+					.subscribe(fee => {
+						showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),fee);
+					});
 			}
 		}
 	}
@@ -384,10 +410,10 @@ function getDateId(timeStamp,epoch){
 		+ paddingDate0( d.getMonth() + 1 )
 		+ paddingDate0( d.getDate() );
 	return 	dateId;
-	
+
 }
-	
-	
+
+
 function paddingDate0(num) {
 	return ( num < 10 ) ? '0' + num  : num;
 };
