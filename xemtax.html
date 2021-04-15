@@ -269,7 +269,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(dispJpyAmount(avgJPY));
 
 		}else{
-			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+//			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
 		}
 	})
@@ -292,7 +292,7 @@ function showTxAmountInfo(id,amount,fee){
 		$("#amount"+ id + "_jpy"    ).text(dispJpyAmount(totalJPY));
 		$("#amount"+ id + "_jpy_fee").text(dispJpyAmount(feeJPY));
 	}else{
-		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
+//		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
 		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
 	}
 }
@@ -315,9 +315,19 @@ function onCSVDownload(a, table, filename) {
 	for (r=0;	r<table.rows.length; r++) {
 		row.length = 0;
 		for (c=0; c<table.rows[r].cells.length; c++) {
+
 			field = table.rows[r].cells[c].textContent;
-			row.push(escaped.test(field)? '"'+field.replace(e, '""')+'"': field);
+			field = field.split(',').join('');
 			// 区切り、改行、エスケープ文字を含む場合、エスケープ文字文字で囲む（エスケープ文字は二重にする）
+			if(c==0){
+
+				console.log(field)
+				if(field === ""){
+					field = lastField;
+				}
+				lastField = field;
+			}
+			row.push(escaped.test(field)? '"'+field.replace(e, '""')+'"': field);
 		}
 		csv.push(row.join(','));
 	}
