@@ -67,12 +67,14 @@ async function createRepo(d2){
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
 	receiptRepo = repo.createReceiptRepository();
-	const wsEndpoint = node.replace('http', 'ws') + "/ws";
-	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 
 	try{
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
-		await listenerKeepOpening(wsEndpoint);
+		if(listener === undefined){
+			const wsEndpoint = node.replace('http', 'ws') + "/ws";
+			listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+			await listenerKeepOpening(wsEndpoint);
+		}
 		d2.resolve(repo);
 
 	}catch{
@@ -100,7 +102,7 @@ async function listenerKeepOpening(wsEndpoint){
 
 	listener.newBlock().subscribe(async block=>{
 		newBlockHash = block.hash; //活性チェック用
-		getNewInfo(block.height);
+		getNewInfo(block);
 	});
 }
 
