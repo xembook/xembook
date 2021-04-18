@@ -67,6 +67,7 @@ async function createRepo(d2){
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
 	receiptRepo = repo.createReceiptRepository();
+	chainRepo = repo.createChainRepository();
 
 	try{
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
@@ -91,12 +92,17 @@ async function listenerKeepOpening(wsEndpoint){
 
 	listener.webSocket.onclose = async function(){
 		console.log("listener onclose");
-		await listenerKeepOpening();
+		await listenerKeepOpening(wsEndpoint);
 
 		//リスナーに関係する情報をリロード
 		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
+		});
+
+		listener.newBlock().subscribe(async block=>{
+			newBlockHash = block.hash; //活性チェック用
+			getNewInfo(block);
 		});
 	}
 
@@ -105,6 +111,7 @@ async function listenerKeepOpening(wsEndpoint){
 		getNewInfo(block);
 	});
 }
+
 
 var blockRepo;
 var nwRepo;
@@ -128,7 +135,6 @@ var currencyNamespaceId;
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
 //	tsRepo = repo.createTransactionStatusRepository();
-	chainRepo = repo.createChainRepository();
 //	finRepo = repo.createFinalizationRepository();
 //	hlRepo = repo.createHashLockRepository();
 //	metaRepo = repo.createMetadataRepository();

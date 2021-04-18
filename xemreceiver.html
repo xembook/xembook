@@ -22,22 +22,39 @@
 <div class="container">
 	<div class="row">
 		<div class="account col-sm-4">
+
+		<div class="form">
+			<h2>注文情報</h2>
+			<dl>
+				<dt>伝票番号</dt>
+				<dd><input id="cnumber" type="text" value=""></dd>
+				<dt>価格(JPY)</dt>
+				<dd><input id="jpy_price" type="text" value="0"  >円</dd>
+			</dl>
+			<h2>価格情報</h2>
+			<dl>
+				<dt>現在のレート</dt>
+				<dd><span id="last_price"></span></dd>
+				<dt>XEM価格（参考値）</dt>
+				<dd><span id="xem_price"></span></dd>
+			</dl>
+			<h2>ご注文</h2>
+			<ul class="list-unstyled">
+			<li><button id="submit_price" type="button" class="btn btn-default">現在価格で確定</button></li>
+			<li><img id="receiverqr" src="" alt="" width="180" height="180"></li>
+			</ul>
+
+
+		</div>
+
+<!--
 		<h2>アカウント</h2>
 		<dl id="account_info">
 			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
 			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
 			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
 		</dl>
 		<dl id="account_append_info"></dl>
-		<h2>取引所</h2>
-		<small>最終更新　<span id="last_update"></span></small>
-		<dl>
-		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
-		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
-		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
-		<dt>ProBit</dt><dd><span id="probit"></span></dd>
-		</dl>
 		<h2>ノード</h2>
 		<dl id="node_info">
 			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
@@ -61,55 +78,60 @@
 			</dd>
 
 		</dl>
+-->
 		</div>
 		<div class="account col-sm-4">
-			<h2>レシート</h2>
-			<h5>対象アカウント</h5>
+
+			<h2>ファイナライズ</h2>
+
+			<dl id="node_info">
+				<dt>確定済み日時</dt>
+				<dd><span id="finalize_range"></span></dd>
+				<dt>次回確定予想日時</dt>
+				<dd><span id="finalize_next_time"></span></dd>
+				<dt>次回確定予想範囲</dt>
+				<dd><span id="finalize_next_range"></span></dd>
+			</dl>
+
+			<h2>注文状況</h2>
+			<table id="rollback"  class="table">
+					<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+
+<!--
 			<table id="harvest"  class="table">
-				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
-				</tr></thead>
+
+				<tbody>
+				<tr>
+					<td>確定</td>
+					<td id="finalize_time"></td>
+					<td id="finalize_range"></td>
+				</tr>
+				<tr>
+					<td>次回予測</td>
+					<td id="finalize_next_time"></td>
+					<td id="finalize_next_range"></td>
+				</tr>
+				</tbody>
+				
 			</table>
-			<dl>
-				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-			</dl>
-			<h5>送信元アカウント</h5>
-			<table id="receipt"  class="table">
-				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
-				</tr></thead>
-			</table>
-			<dl>
-				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-			</dl>
+-->
 		</div>
 		<div class="account col-sm-4">
-			<h2>トランザクション</h2>
-			<table id="table"  class="table">
-				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
-				</tr></thead>
-			</table>
+			<h2>確認</h2>
 			<dl>
-				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+				<dd><a id="xembook" href="">XEMBookで確認</a></dd>
+				<dd><a id="xembook" href="">Explorerで確認</a></dd>
 			</dl>
+
 		</div>
+
 	</div>
-	<div>
-		<div class="faucet">
-			<h2>リンク</h2>
-			<dl>
-				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
-				<dd><a id="xemtax" href="">XEMTax</a></dd>
-			</dl>
-		</div>
-	</div>
+
 
 </div>
 
@@ -136,7 +158,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="symbol-sdk-pack-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script src="xembook.js"></script>
 <script>
@@ -145,12 +167,45 @@ function showInfo(accountInfo){
 
 	$("#node_activity").html("<font color='green'>● </font>");
 
+	accountInfo.subscribe(async _=>{
+		showAccountInfo(_);
+	});
+	
 }
+$("#jpy_price").change(function() {
+	showAmountInfo();
+});
 
-function showAmountInfo(amount){}
+function dispXEM(){
+//		if(is_realtime){
+		xem_price = Math.ceil($("#jpy_price").val() /	ZAIF_JPY_XEM * 1000000);
+		console.log(xem_price);
+		$("#xem_price").text(dispAmount(xem_price) + "XEM");
+		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 
-function showAccountInfo(accountInfo){
+//		}
 }
+	
+function showAmountInfo(){
+
+	$.when(
+//		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+
+		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+		$("#last_price").text( gateio + "円 / XYM");
+
+		xem_price = Math.ceil($("#jpy_price").val() /	gateio );
+		console.log(xem_price);
+		$("#xem_price").text(dispAmount(xem_price) + "XEM");
+		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+
+	});
+	
+}
+function showAccountInfo(accountInfo){}
 
 
 function dispBlockTimeStamp(id,height){
@@ -164,25 +219,11 @@ function dispBlockTimeStamp(id,height){
 	})
 }
 
-function appendAggTx(tx){
-
-}
-
-function appendTx(insTag,id,tx){
-
-}
-
-function insertTxAfter(insTag,id,tx){
-
-}
-
-function showReceiptInfo(tag,height,receipt,cnt){
-
-}
-
-function showTxAmountInfo(id,amount,fee){
-
-}
+function appendAggTx(tx){}
+function appendTx(insTag,id,tx){}
+function insertTxAfter(insTag,id,tx){}
+function showReceiptInfo(tag,height,receipt,cnt){}
+function showTxAmountInfo(id,amount,fee){}
 
 var lastBlockHash = "";
 setInterval(function(){
@@ -205,7 +246,20 @@ var lastHeight = 0;
 var lastFinalizedHeight = 0;
 function getNewInfo(block){
 
-	t3 = dispTimeStamp(block.timestamp.compact(),epochAdjustment)
+
+	txRepo.search({
+		height:block.height,
+		group:nem.TransactionGroup.Confirmed,
+		embedded:true,
+		pageSize:100,
+		pageNumber:1,
+		order:"desc"})
+	.subscribe(x=>console.log(x.data));
+	
+
+	console.log("===================================================");
+
+	t3 = dispTimeStamp2(block.timestamp.compact(),epochAdjustment)
 	console.log("ブロック生成日時");
 	console.log(t3);
 
@@ -213,42 +267,33 @@ function getNewInfo(block){
 	const height = block.height;
 	chainRepo.getChainInfo().subscribe(chain=>{
 
-
-
 		//次回ファイナライズ予定
-		remainHeight = 36  - (height.compact() - chain.latestFinalizedBlock.height.compact());
-		t = dispTimeStamp(block.timestamp.compact() + (remainHeight * 30000),epochAdjustment)
-		console.log("次回ファイナライズ発生日時");
-		console.log(t);
-		console.log(remainHeight);
-
-
-
-
-
-
+		remainHeight = 38  - (height.compact() - chain.latestFinalizedBlock.height.compact());
+		remainMinutes = remainHeight / 2
 
 		blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height)
 		.subscribe(finalizedBlock=>{
-//			console.log(block.height.compact());
 
-
-			t2 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
+			t2 = dispTimeStamp2(finalizedBlock.timestamp.compact(),epochAdjustment)
 			console.log("現在ファイナライズ済み日時[確定]");
 			console.log("[" + finalizedBlock.height.toString() + "]:" + t2);
+			t3 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
 
-			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (18 * 30000),epochAdjustment)
-			console.log("次回ファイナライズ対象日時");
-			console.log(t2 + "までのトランザクションがファイナライズされます。");
+			$("#finalize_time").text(finalizedBlock.height.toString() );
+			$("#finalize_range").text(t3 );
 
 
+			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (20 * 30000),epochAdjustment)
+			console.log(t2 + "までのトランザクションが" + remainMinutes.toString() + "分後にファイナライズされます。");
+
+			$("#finalize_next_time").text(remainMinutes.toString() + "分後");
+			$("#finalize_next_range").text(t2 + " までの承認ブロック");
 
 			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
-				console.log("update finalize!!");
+				console.log("■■■■update finalize!!");
 				dispTimeStamp(Number(finalizedBlock.timestamp.toString()),epochAdjustment)
 				lastFinalizedHeight = chain.latestFinalizedBlock.height.compact();
 			}
-
 		})
 	});
 
@@ -258,9 +303,15 @@ function getNewInfo(block){
 		console.log(block.height.compact());
 		blockRepo.getBlockByHeight(height)
 		.subscribe(block=>{
-			alert("ロールバックが発生しました");
-			console.log("roll back!!");
-			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+//			alert("ロールバックが発生しました");
+			console.log(">>>>>>>>>roll back!!");
+			const rollbackTime = dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+
+			$("#rollback").append("<tr>"
+			+ "<td>" + rollbackTime + "</td>"
+			+ "<td>" + height.toString() + "</td>"
+			+ "</tr>"
+			);
 		})
 
 
@@ -269,6 +320,13 @@ function getNewInfo(block){
 	console.log(height);
 
 }
+
+function dispTimeStamp2(timeStamp,epoch){
+
+	const d = new Date(timeStamp + epoch * 1000)
+	return 	d;
+}
+
 
 $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
