@@ -26,22 +26,21 @@
 		<div class="form">
 			<h2>注文情報</h2>
 			<dl>
-				<dt>伝票番号</dt>
+				<dt>注文番号</dt>
 				<dd><input id="cnumber" type="text" value=""></dd>
 				<dt>価格(JPY)</dt>
 				<dd><input id="jpy_price" type="text" value="0"  >円</dd>
 			</dl>
-			<h2>価格情報</h2>
 			<dl>
 				<dt>現在のレート</dt>
 				<dd><span id="last_price"></span></dd>
 				<dt>XEM価格（参考値）</dt>
-				<dd><span id="xem_price"></span></dd>
+				<dd><span id="xem_price"></span> XYM</dd>
 			</dl>
-			<h2>ご注文</h2>
+			<h2>QRコード</h2>
 			<ul class="list-unstyled">
 			<li><button id="submit_price" type="button" class="btn btn-default">現在価格で確定</button></li>
-			<li><img id="receiverqr" src="" alt="" width="180" height="180"></li>
+			<li id="receiverqr"></li>
 			</ul>
 
 
@@ -117,7 +116,7 @@
 					<td id="finalize_next_range"></td>
 				</tr>
 				</tbody>
-				
+
 			</table>
 -->
 		</div>
@@ -170,22 +169,12 @@ function showInfo(accountInfo){
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 	});
-	
-}
-$("#jpy_price").change(function() {
-	showAmountInfo();
-});
 
-function dispXEM(){
-//		if(is_realtime){
-		xem_price = Math.ceil($("#jpy_price").val() /	ZAIF_JPY_XEM * 1000000);
-		console.log(xem_price);
-		$("#xem_price").text(dispAmount(xem_price) + "XEM");
-		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
-
-//		}
 }
-	
+
+
+
+
 function showAmountInfo(){
 
 	$.when(
@@ -199,11 +188,11 @@ function showAmountInfo(){
 
 		xem_price = Math.ceil($("#jpy_price").val() /	gateio );
 		console.log(xem_price);
-		$("#xem_price").text(dispAmount(xem_price) + "XEM");
-		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+		$("#xem_price").text(dispAmount(xem_price));
+//		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 
 	});
-	
+
 }
 function showAccountInfo(accountInfo){}
 
@@ -254,8 +243,23 @@ function getNewInfo(block){
 		pageSize:100,
 		pageNumber:1,
 		order:"desc"})
-	.subscribe(x=>console.log(x.data));
-	
+	.subscribe(x=>{
+		console.log(x.data)
+		for(const tx of x.data){
+
+			if(tx.type === nem.TransactionType.TRANSFER){
+				$("#rollback").prepend("<tr>"
+				+ "<td>" + tx.transactionInfo.height.toString() + "</td>"
+				+ "<td>" + tx.signer.address.plain() + "</td>"
+				+ "<td>" + tx.message.payload + "</td>"
+				+ "</tr>"
+				);
+			}
+		}
+
+
+	});
+
 
 	console.log("===================================================");
 
@@ -313,8 +317,6 @@ function getNewInfo(block){
 			+ "</tr>"
 			);
 		})
-
-
 	}
 	lastHeight = height.compact();
 	console.log(height);
@@ -327,9 +329,28 @@ function dispTimeStamp2(timeStamp,epoch){
 	return 	d;
 }
 
+qr = require("/node_modules/symbol-qr-library");
 
+$("#jpy_price").change(function() {
+	showAmountInfo();
+});
 $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
+$("#submit_price").click(function(){
+
+	alert("XEM価格を固定し、注文用QRコードを出力します" );
+	tx = nem.TransferTransaction.create(
+	    nem.Deadline.create(epochAdjustment),
+	    address,
+	    [networkCurrency.createRelative(Number($("#xem_price").text()))],
+	    nem.PlainMessage.create($("#cnumber").val()),
+	    networkType
+	);
+	qrcode = qr.QRCodeGenerator.createTransactionRequest(tx,networkType,generationHash);
+	qrcode.toBase64().subscribe(x=>$("#receiverqr").html('<img src=' + x + '>'))
+
+});
+
 
 </script>
 </body>

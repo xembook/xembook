@@ -143,8 +143,11 @@
 
 function showInfo(accountInfo){
 
-	$("#node_activity").html("<font color='green'>● </font>");
-
+	if(listener.isOpen()){
+		$("#node_activity").html("<font color='green'>● </font>");
+	}else{
+		$("#node_activity").html("<font color='red'>● </font>");
+	}
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 		await getHarvests(15);
@@ -494,18 +497,20 @@ setInterval(function(){
 	$("#node_activity").html(nodeActivity);
 	lastBlockHash = newBlockHash;
 
+
+
 }, 60000);
 
-function getNewInfo(height){
+function getNewInfo(block){
 
-	receiptRepo.searchReceipts({targetAddress:address,height:height})
+	receiptRepo.searchReceipts({targetAddress:address,height:block.height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("レシートが追加されました。再表示してください。");
 		}
 	})
 
-	txRepo.search({address:address,height:height,group:nem.TransactionGroup.Confirmed})
+	txRepo.search({address:address,height:block.height,group:nem.TransactionGroup.Confirmed})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("トランザクションが追加されました。再表示してください。");

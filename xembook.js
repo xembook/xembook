@@ -147,6 +147,8 @@ var currencyNamespaceId;
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 	networkType = await repo.getNetworkType().toPromise();
 	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
+	networkCurrency = (await repo.getCurrencies().toPromise()).currency;
+	generationHash = await repo.getGenerationHash().toPromise();
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
