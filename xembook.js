@@ -38,7 +38,6 @@ const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
 const address = nem.Address.createFromRawAddress(rawAddress);
 
-var listener;
 function connectNode(nodes,d){
 
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
@@ -73,12 +72,13 @@ async function createRepo(d2){
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
 		if(listener === undefined){
 			const wsEndpoint = node.replace('http', 'ws') + "/ws";
-			listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+//			listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 			await listenerKeepOpening(wsEndpoint);
 		}
 		d2.resolve(repo);
 
-	}catch{
+	}catch(error){
+		console.log(error);
 		createRepo(d2);
 	}
 	return d2.promise();
@@ -94,22 +94,22 @@ async function listenerKeepOpening(wsEndpoint){
 		console.log("listener onclose");
 		await listenerKeepOpening(wsEndpoint);
 
+
 		//リスナーに関係する情報をリロード
 		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
 		});
-
+/*
 		listener.newBlock().subscribe(async block=>{
 			newBlockHash = block.hash; //活性チェック用
 			getNewInfo(block);
 		});
+*/
+		getListenerInfo(listener);
 	}
 
-	listener.newBlock().subscribe(async block=>{
-		newBlockHash = block.hash; //活性チェック用
-		getNewInfo(block);
-	});
+	getListenerInfo(listener);
 }
 
 

@@ -39,7 +39,7 @@
 			</dl>
 			<h2>QRコード</h2>
 			<ul class="list-unstyled">
-			<li><button id="submit_price" type="button" class="btn btn-default">現在価格で確定</button></li>
+			<li><button id="submit_price" type="button" class="btn btn-default">出力k</button></li>
 			<li id="receiverqr"></li>
 			</ul>
 
@@ -233,11 +233,50 @@ setInterval(function(){
 
 var lastHeight = 0;
 var lastFinalizedHeight = 0;
+
+function getListenerInfo(listener){
+
+
+	listener.unconfirmedAdded(address)
+	.subscribe(tx=>{
+		console.log("未承認");
+		console.log(tx);
+		
+		if(tx.type === nem.TransactionType.TRANSFER){
+			$("#rollback").prepend("<tr>"
+			+ "<td>未承認</td>"
+			+ "<td>" + tx.signer.address.plain() + "</td>"
+			+ "<td>" + tx.message.payload + "</td>"
+			+ "</tr>"
+			);
+		}
+	})
+
+	listener.confirmed(address)
+	.subscribe(tx=>{
+		if(tx.type === nem.TransactionType.TRANSFER){
+			$("#rollback").prepend("<tr>"
+			+ "<td>" + tx.transactionInfo.height.toString() + "</td>"
+			+ "<td>" + tx.signer.address.plain() + "</td>"
+			+ "<td>" + tx.message.payload + "</td>"
+			+ "</tr>"
+			);
+		}
+	})
+		
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block);
+	});
+			
+}
 function getNewInfo(block){
 
 
+
+/*
 	txRepo.search({
-		height:block.height,
+		address:address,
 		group:nem.TransactionGroup.Confirmed,
 		embedded:true,
 		pageSize:100,
@@ -247,6 +286,7 @@ function getNewInfo(block){
 		console.log(x.data)
 		for(const tx of x.data){
 
+
 			if(tx.type === nem.TransactionType.TRANSFER){
 				$("#rollback").prepend("<tr>"
 				+ "<td>" + tx.transactionInfo.height.toString() + "</td>"
@@ -255,11 +295,12 @@ function getNewInfo(block){
 				+ "</tr>"
 				);
 			}
+
 		}
 
 
 	});
-
+*/
 
 	console.log("===================================================");
 

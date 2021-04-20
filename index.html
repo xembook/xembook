@@ -141,13 +141,22 @@
 <script src="xembook.js"></script>
 <script>
 
-function showInfo(accountInfo){
+function getListenerInfo(listener){
 
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block);
+	});
+		
 	if(listener.isOpen()){
 		$("#node_activity").html("<font color='green'>● </font>");
 	}else{
 		$("#node_activity").html("<font color='red'>● </font>");
 	}
+
+}
+function showInfo(accountInfo){
+
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 		await getHarvests(15);
