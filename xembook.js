@@ -61,7 +61,7 @@ var listener;
 async function createRepo(d2){
 
 	const d = $.Deferred();
-	const node = await connectNode(NODES,d);
+	const node = await connectNode(nodelist,d);
 	const repo = new nem.RepositoryFactoryHttp(node);
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();

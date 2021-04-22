@@ -26,7 +26,7 @@
 		<div class="form">
 			<h2>注文情報</h2>
 			<dl>
-				<dt>注文番号</dt>
+				<dt>注文ID</dt>
 				<dd><input id="cnumber" type="text" value=""></dd>
 				<dt>価格(JPY)</dt>
 				<dd><input id="jpy_price" type="text" value="0"  >円</dd>
@@ -37,9 +37,8 @@
 				<dt>XEM価格（参考値）</dt>
 				<dd><span id="xem_price"></span> XYM</dd>
 			</dl>
-			<h2>QRコード</h2>
 			<ul class="list-unstyled">
-			<li><button id="submit_price" type="button" class="btn btn-default">出力k</button></li>
+			<li><button id="submit_price" type="button" class="btn btn-default">QRコード出力</button></li>
 			<li id="receiverqr"></li>
 			</ul>
 
@@ -96,8 +95,8 @@
 			<table id="rollback"  class="table">
 					<thead><tr>
 					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
+					<th>送信者</th>
+					<th>メッセージ</th>
 				</tr></thead>
 			</table>
 
@@ -159,8 +158,13 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-pack-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
+<script>
+//const nodelist = NODES;
+const nodelist = TEST_NODES;
+</script>
 <script src="xembook.js"></script>
 <script>
+
 
 function showInfo(accountInfo){
 
@@ -169,11 +173,7 @@ function showInfo(accountInfo){
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 	});
-
 }
-
-
-
 
 function showAmountInfo(){
 
@@ -187,7 +187,6 @@ function showAmountInfo(){
 		$("#last_price").text( gateio + "円 / XYM");
 
 		xem_price = Math.ceil($("#jpy_price").val() /	gateio );
-		console.log(xem_price);
 		$("#xem_price").text(dispAmount(xem_price));
 //		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 
@@ -197,15 +196,26 @@ function showAmountInfo(){
 function showAccountInfo(accountInfo){}
 
 
-function dispBlockTimeStamp(id,height){
+function dispBlockTimeStamp(id,txInfo){
 
-	blockRepo.getBlockByHeight(height)
+	blockRepo.getBlockByHeight(txInfo.height)
 	.subscribe(block => {
 
 		$(id).text(
 			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
+
+	$("#statehash" + txInfo.hash).css("color","brown");
+
+/*	
+	$(".state" + height).each((i,o)=>{
+
+		console.log(o);
+		$(o).css("color","brown");
+	});
+*/
+
 }
 
 function appendAggTx(tx){}
@@ -234,14 +244,34 @@ setInterval(function(){
 var lastHeight = 0;
 var lastFinalizedHeight = 0;
 
+
+
 function getListenerInfo(listener){
 
+	listener.status(address);
 
 	listener.unconfirmedAdded(address)
 	.subscribe(tx=>{
 		console.log("未承認");
 		console.log(tx);
-		
+
+		$("#rollback").prepend("<tr>"
+		+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
+		+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
+		+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+		+ "</tr>"
+		);
+
+		$("#statehash" + tx.transactionInfo.hash).css("color","gray");
+
+/*
+		$("#statehash" + tx.transactionInfo.hash).each((i,o)=>{
+
+			console.log(o);
+			$(o).css("color","gray");
+		});
+*/	
+/*		
 		if(tx.type === nem.TransactionType.TRANSFER){
 			$("#rollback").prepend("<tr>"
 			+ "<td>未承認</td>"
@@ -250,17 +280,42 @@ function getListenerInfo(listener){
 			+ "</tr>"
 			);
 		}
+*/
 	})
 
+
 	listener.confirmed(address)
-	.subscribe(tx=>{
-		if(tx.type === nem.TransactionType.TRANSFER){
-			$("#rollback").prepend("<tr>"
-			+ "<td>" + tx.transactionInfo.height.toString() + "</td>"
-			+ "<td>" + tx.signer.address.plain() + "</td>"
-			+ "<td>" + tx.message.payload + "</td>"
-			+ "</tr>"
-			);
+	.subscribe(async confirmedTx=>{
+		if(confirmedTx.type === nem.TransactionType.TRANSFER){
+
+			const txs = await txRepo.search({
+			address:address,
+			height:confirmedTx.transactionInfo.height,
+			group:nem.TransactionGroup.Confirmed,
+			embedded:true,
+			pageSize:20,
+			pageNumber:1,
+			order:"desc"}).toPromise();
+
+			console.log(txs.data[0]);
+
+
+			for(const tx  of txs.data){
+
+
+				const txId = tx.transactionInfo.id;
+				console.log("承認済");
+				console.log(tx);
+
+				$("#" + tx.transactionInfo.hash).html(
+					"<a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+					+ tx.transactionInfo.hash + "'><span id='date" + txId + "'>"
+					+ "</span></a>");
+
+				$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height);
+				
+				dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
+			}			
 		}
 	})
 		
@@ -268,45 +323,36 @@ function getListenerInfo(listener){
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
 	});
+	
+	listener.finalizedBlock().subscribe(async block=>{
+		console.log("listener finalized block");
+		for (let h = lastFinalizedHeight + 1; h <= block.height.compact(); h++){		
+			console.log("finalize:" + h);
+
+			$(".state" + h).each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","green");
+
+				$(o).removeClass("state" + h);
+				$(o).addClass("statefin" + h);
+
+			});	
+		}
+
+		lastFinalizedHeight = block.height.compact();
+	});
+	
 			
 }
 function getNewInfo(block){
 
 
-
-/*
-	txRepo.search({
-		address:address,
-		group:nem.TransactionGroup.Confirmed,
-		embedded:true,
-		pageSize:100,
-		pageNumber:1,
-		order:"desc"})
-	.subscribe(x=>{
-		console.log(x.data)
-		for(const tx of x.data){
-
-
-			if(tx.type === nem.TransactionType.TRANSFER){
-				$("#rollback").prepend("<tr>"
-				+ "<td>" + tx.transactionInfo.height.toString() + "</td>"
-				+ "<td>" + tx.signer.address.plain() + "</td>"
-				+ "<td>" + tx.message.payload + "</td>"
-				+ "</tr>"
-				);
-			}
-
-		}
-
-
-	});
-*/
-
-	console.log("===================================================");
+	console.log("===================================================" + block.height);
 
 	t3 = dispTimeStamp2(block.timestamp.compact(),epochAdjustment)
-	console.log("ブロック生成日時");
-	console.log(t3);
+//	console.log("ブロック生成日時");
+//	console.log(t3);
 
 
 	const height = block.height;
@@ -320,8 +366,8 @@ function getNewInfo(block){
 		.subscribe(finalizedBlock=>{
 
 			t2 = dispTimeStamp2(finalizedBlock.timestamp.compact(),epochAdjustment)
-			console.log("現在ファイナライズ済み日時[確定]");
-			console.log("[" + finalizedBlock.height.toString() + "]:" + t2);
+//			console.log("現在ファイナライズ済み日時[確定]");
+//			console.log("[" + finalizedBlock.height.toString() + "]:" + t2);
 			t3 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
 
 			$("#finalize_time").text(finalizedBlock.height.toString() );
@@ -329,14 +375,15 @@ function getNewInfo(block){
 
 
 			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (20 * 30000),epochAdjustment)
-			console.log(t2 + "までのトランザクションが" + remainMinutes.toString() + "分後にファイナライズされます。");
+//			console.log(t2 + "までのトランザクションが" + remainMinutes.toString() + "分後にファイナライズされます。");
 
 			$("#finalize_next_time").text(remainMinutes.toString() + "分後");
 			$("#finalize_next_range").text(t2 + " までの承認ブロック");
 
-			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
-				console.log("■■■■update finalize!!");
-				dispTimeStamp(Number(finalizedBlock.timestamp.toString()),epochAdjustment)
+//			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
+			if(lastFinalizedHeight === 0 ){
+				console.log("■■■■init finalize!!");
+//				dispTimeStamp(Number(finalizedBlock.timestamp.toString()),epochAdjustment)
 				lastFinalizedHeight = chain.latestFinalizedBlock.height.compact();
 			}
 		})
@@ -351,17 +398,22 @@ function getNewInfo(block){
 //			alert("ロールバックが発生しました");
 			console.log(">>>>>>>>>roll back!!");
 			const rollbackTime = dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-
-			$("#rollback").append("<tr>"
-			+ "<td>" + rollbackTime + "</td>"
-			+ "<td>" + height.toString() + "</td>"
-			+ "</tr>"
-			);
 		})
+
+		for (let h = block.height.compact() + 1; h <= lastHeight; h++){		
+			console.log("finalize:" + h);
+
+			$(".state" + h).each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","red");
+				$(o).removeClass("state" + h);
+				$(o).addClass("staterb" + h);
+
+			});
+		}
 	}
 	lastHeight = height.compact();
-	console.log(height);
-
 }
 
 function dispTimeStamp2(timeStamp,epoch){
