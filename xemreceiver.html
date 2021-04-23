@@ -86,7 +86,7 @@
 				<dt>確定済み日時</dt>
 				<dd><span id="finalize_range"></span></dd>
 				<dt>次回確定予想日時</dt>
-				<dd><span id="finalize_next_time"></span></dd>
+				<dd>時刻<span id="finalize_next_time"></span></dd>
 				<dt>次回確定予想範囲</dt>
 				<dd><span id="finalize_next_range"></span></dd>
 			</dl>
@@ -205,17 +205,6 @@ function dispBlockTimeStamp(id,txInfo){
 			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	})
-
-	$("#statehash" + txInfo.hash).css("color","brown");
-
-/*	
-	$(".state" + height).each((i,o)=>{
-
-		console.log(o);
-		$(o).css("color","brown");
-	});
-*/
-
 }
 
 function appendAggTx(tx){}
@@ -248,6 +237,7 @@ var lastFinalizedHeight = 0;
 
 function getListenerInfo(listener){
 
+	/* この一行を加えると何故か動く */
 	listener.status(address);
 
 	listener.unconfirmedAdded(address)
@@ -263,24 +253,6 @@ function getListenerInfo(listener){
 		);
 
 		$("#statehash" + tx.transactionInfo.hash).css("color","gray");
-
-/*
-		$("#statehash" + tx.transactionInfo.hash).each((i,o)=>{
-
-			console.log(o);
-			$(o).css("color","gray");
-		});
-*/	
-/*		
-		if(tx.type === nem.TransactionType.TRANSFER){
-			$("#rollback").prepend("<tr>"
-			+ "<td>未承認</td>"
-			+ "<td>" + tx.signer.address.plain() + "</td>"
-			+ "<td>" + tx.message.payload + "</td>"
-			+ "</tr>"
-			);
-		}
-*/
 	})
 
 
@@ -288,6 +260,7 @@ function getListenerInfo(listener){
 	.subscribe(async confirmedTx=>{
 		if(confirmedTx.type === nem.TransactionType.TRANSFER){
 
+			//リスナーのtxは情報が不安定なので取り直す
 			const txs = await txRepo.search({
 			address:address,
 			height:confirmedTx.transactionInfo.height,
@@ -297,23 +270,21 @@ function getListenerInfo(listener){
 			pageNumber:1,
 			order:"desc"}).toPromise();
 
-			console.log(txs.data[0]);
-
-
+			console.log(confirmedTx);
+			console.log(txs.data);
 			for(const tx  of txs.data){
-
 
 				const txId = tx.transactionInfo.id;
 				console.log("承認済");
 				console.log(tx);
 
+				//承認日付に変更
 				$("#" + tx.transactionInfo.hash).html(
-					"<a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
-					+ tx.transactionInfo.hash + "'><span id='date" + txId + "'>"
-					+ "</span></a>");
+					"<a target='_blank' href='http://explorer.symbolblockchain.io/transactions/" + tx.transactionInfo.hash + "'>"
+					+ "<span id='date" + txId + "'></span></a>");
 
-				$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height);
-				
+				$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
+				$("#statehash" + tx.transactionInfo.hash).css("color","brown");
 				dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
 			}			
 		}
@@ -322,6 +293,10 @@ function getListenerInfo(listener){
 	listener.newBlock().subscribe(async block=>{
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
+
+
+
+
 	});
 	
 	listener.finalizedBlock().subscribe(async block=>{
@@ -334,8 +309,9 @@ function getListenerInfo(listener){
 				console.log(o);
 				$(o).css("color","green");
 
+//				$(o).removeAttr('id');
 				$(o).removeClass("state" + h);
-				$(o).addClass("statefin" + h);
+//				$(o).addClass("statefin" + h);
 
 			});	
 		}
@@ -347,15 +323,58 @@ function getListenerInfo(listener){
 }
 function getNewInfo(block){
 
+	const height = block.height;
 
-	console.log("===================================================" + block.height);
+
+	if(lastHeight !== 0 && lastHeight + 1 !== height.compact() ){
+
+		blockRepo.getBlockByHeight(height)
+		.subscribe(block=>{
+//			alert("ロールバックが発生しました");
+			console.log("■■■■■■■■roll back!!");
+			const rollbackTime = dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		})
+
+		console.log("from:" +block.height.compact() );
+		console.log("to:" +lastHeight );
+
+
+		for (let h = block.height.compact() ; h <= lastHeight; h++){		
+			console.log("roll back:" + h);
+
+			$(".state" + h).each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","red");
+//				$(o).removeAttr('id');
+				$(o).removeClass("state" + h);
+//				$(o).addClass("staterb" + h);
+
+			});
+		}
+	}else{
+
+		
+		$(".state" + (block.height.compact() - 1).toString()).each((i,o)=>{
+
+			$(o).css("color","orange");
+		});
+
+
+
+
+
+	}
+	lastHeight = height.compact();
+
+
+	console.log("==============" + block.height);
 
 	t3 = dispTimeStamp2(block.timestamp.compact(),epochAdjustment)
 //	console.log("ブロック生成日時");
 //	console.log(t3);
 
 
-	const height = block.height;
 	chainRepo.getChainInfo().subscribe(chain=>{
 
 		//次回ファイナライズ予定
@@ -382,7 +401,7 @@ function getNewInfo(block){
 
 //			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
 			if(lastFinalizedHeight === 0 ){
-				console.log("■■■■init finalize!!");
+				console.log(">>>init finalize!!");
 //				dispTimeStamp(Number(finalizedBlock.timestamp.toString()),epochAdjustment)
 				lastFinalizedHeight = chain.latestFinalizedBlock.height.compact();
 			}
@@ -390,30 +409,6 @@ function getNewInfo(block){
 	});
 
 
-	if(lastHeight !== 0 && lastHeight + 1 !== height.compact() ){
-
-		console.log(block.height.compact());
-		blockRepo.getBlockByHeight(height)
-		.subscribe(block=>{
-//			alert("ロールバックが発生しました");
-			console.log(">>>>>>>>>roll back!!");
-			const rollbackTime = dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		})
-
-		for (let h = block.height.compact() + 1; h <= lastHeight; h++){		
-			console.log("finalize:" + h);
-
-			$(".state" + h).each((i,o)=>{
-
-				console.log(o);
-				$(o).css("color","red");
-				$(o).removeClass("state" + h);
-				$(o).addClass("staterb" + h);
-
-			});
-		}
-	}
-	lastHeight = height.compact();
 }
 
 function dispTimeStamp2(timeStamp,epoch){
