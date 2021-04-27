@@ -1,3 +1,7 @@
+
+const EXPLORER = "http://explorer.symbolblockchain.io";
+const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
+
 const ACTIVE_IMPORTANCE_RATE = 0.21975;
 const NO_3001_NODES = [
 "d3rmzi6ltfh1jy.cloudfront.net",
@@ -237,4 +241,4 @@ const TEST_NODES = [
 "https://35kx.c.time4vps.cloud:3001",
 "https://373t.c.time4vps.cloud:3001",
 "https://35oc.c.time4vps.cloud:3001",
-]
+];

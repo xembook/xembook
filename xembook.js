@@ -154,7 +154,7 @@ var currencyNamespaceId;
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
 
 	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
-	$("#account_explorer").attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
+	$("#account_explorer").attr("href", explorer + "/accounts/" + address.plain());
 
 	//アカウント情報
 	const accountInfo = accountRepo.getAccountInfo(address);

@@ -45,38 +45,6 @@
 
 		</div>
 
-<!--
-		<h2>アカウント</h2>
-		<dl id="account_info">
-			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
-			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
-			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-		</dl>
-		<dl id="account_append_info"></dl>
-		<h2>ノード</h2>
-		<dl id="node_info">
-			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
-			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
-			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
-			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
-			<dt>手数料相場</dt>
-			<dd>
-			<table id="fees"  class="table">
-				<thead><tr>
-					<th>送金[中央値]</th>
-					<th>ネームスペース[年]</th>
-					<th>モザイク</th>
-				</tr></thead>
-				<tbody><tr>
-					<td><span id="fee_median"></span>XYM</td>
-					<td><span id="fee_namespace"></span>XYM</td>
-					<td><span id="fee_mosaic"></span>XYM</td>
-				</tr></tbody>
-			</table>
-			</dd>
-
-		</dl>
--->
 		</div>
 		<div class="account col-sm-4">
 
@@ -85,46 +53,29 @@
 			<dl id="node_info">
 				<dt>確定済み日時</dt>
 				<dd><span id="finalize_range"></span></dd>
-				<dt>次回確定予想日時</dt>
-				<dd>時刻<span id="finalize_next_time"></span></dd>
-				<dt>次回確定予想範囲</dt>
-				<dd><span id="finalize_next_range"></span></dd>
+				<dt>次回確定予想[<span id="finalize_next_time"></span>分後]</dt>
+				<dd><span id="finalize_next_range"></span>までの注文分</dd>
 			</dl>
 
+		</div>
+		<div class="account col-sm-4">
+			<h2>確認</h2>
+			<dl>
+				<dd><a id="xembook" href="">XEMBookで確認</a></dd>
+				<dd><a target="_blank" id="account_explorer">Explorerで確認</a></dd>
+			</dl>
+
+		</div>
+		<div class="account col-sm-8">
 			<h2>注文状況</h2>
 			<table id="rollback"  class="table">
 					<thead><tr>
 					<th>日時</th>
 					<th>送信者</th>
 					<th>メッセージ</th>
+					<th>価格</th>
 				</tr></thead>
 			</table>
-
-<!--
-			<table id="harvest"  class="table">
-
-				<tbody>
-				<tr>
-					<td>確定</td>
-					<td id="finalize_time"></td>
-					<td id="finalize_range"></td>
-				</tr>
-				<tr>
-					<td>次回予測</td>
-					<td id="finalize_next_time"></td>
-					<td id="finalize_next_range"></td>
-				</tr>
-				</tbody>
-
-			</table>
--->
-		</div>
-		<div class="account col-sm-4">
-			<h2>確認</h2>
-			<dl>
-				<dd><a id="xembook" href="">XEMBookで確認</a></dd>
-				<dd><a id="xembook" href="">Explorerで確認</a></dd>
-			</dl>
 
 		</div>
 
@@ -159,8 +110,10 @@
 <script src="symbol-sdk-pack-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
-//const nodelist = NODES;
-const nodelist = TEST_NODES;
+const nodelist = NODES;
+const explorer = EXPLORER;
+//const nodelist = TEST_NODES;
+//const explorer = TEST_EXPLORER;
 </script>
 <script src="xembook.js"></script>
 <script>
@@ -186,8 +139,10 @@ function showAmountInfo(){
 		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
 		$("#last_price").text( gateio + "円 / XYM");
 
-		xem_price = Math.ceil($("#jpy_price").val() /	gateio );
-		$("#xem_price").text(dispAmount(xem_price));
+//		xem_price = Math.ceil($("#jpy_price").val() /gateio );
+		xem_price = $("#jpy_price").val() /gateio ;
+		console.log(xem_price)
+		$("#xem_price").text(xem_price.toFixed(2));
 //		$("#xem_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
 
 	});
@@ -199,11 +154,17 @@ function showAccountInfo(accountInfo){}
 function dispBlockTimeStamp(id,txInfo){
 
 	blockRepo.getBlockByHeight(txInfo.height)
+	.pipe(
+		op.delay(1000),
+	)
 	.subscribe(block => {
 
 		$(id).text(
 			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
+	},err=>{
+		console.log("retry");	
+		dispBlockTimeStamp(id,txInfo);
 	})
 }
 
@@ -216,7 +177,7 @@ function showTxAmountInfo(id,amount,fee){}
 var lastBlockHash = "";
 setInterval(function(){
 
-	showPriceInfo(accountRepo.getAccountInfo(address));
+//	showPriceInfo(accountRepo.getAccountInfo(address));
 
 	var nodeActivity = "";
 	if(lastBlockHash === newBlockHash){
@@ -242,51 +203,55 @@ function getListenerInfo(listener){
 
 	listener.unconfirmedAdded(address)
 	.subscribe(tx=>{
-		console.log("未承認");
+
+		let amountMark = "";
+		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
+		if(xym != undefined){
+			if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+				amountMark = "&#x2705;" ;
+			}
+		
+		}
+
+		
+		console.log("未承認" + tx.message.payload.slice(0,14));
 		console.log(tx);
 
 		$("#rollback").prepend("<tr>"
 		+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
 		+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
 		+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+		+ "<td>" + amountMark + "</td>"
 		+ "</tr>"
 		);
 
 		$("#statehash" + tx.transactionInfo.hash).css("color","gray");
+		$("#statehash" + tx.transactionInfo.hash).addClass("unconfirmed");
 	})
 
 
 	listener.confirmed(address)
-	.subscribe(async confirmedTx=>{
-		if(confirmedTx.type === nem.TransactionType.TRANSFER){
 
-			//リスナーのtxは情報が不安定なので取り直す
-			const txs = await txRepo.search({
-			address:address,
-			height:confirmedTx.transactionInfo.height,
-			group:nem.TransactionGroup.Confirmed,
-			embedded:true,
-			pageSize:20,
-			pageNumber:1,
-			order:"desc"}).toPromise();
+	.subscribe(async tx=>{
+		if(tx.type === nem.TransactionType.TRANSFER){
 
-			console.log(confirmedTx);
-			console.log(txs.data);
-			for(const tx  of txs.data){
 
-				const txId = tx.transactionInfo.id;
-				console.log("承認済");
-				console.log(tx);
+			const txId = tx.transactionInfo.hash;
+			console.log("承認済"+tx.message.payload.slice(0,14));
+//				console.log(txId);
 
-				//承認日付に変更
-				$("#" + tx.transactionInfo.hash).html(
-					"<a target='_blank' href='http://explorer.symbolblockchain.io/transactions/" + tx.transactionInfo.hash + "'>"
-					+ "<span id='date" + txId + "'></span></a>");
 
-				$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
-				$("#statehash" + tx.transactionInfo.hash).css("color","brown");
-				dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
-			}			
+
+//				//承認日付に変更
+			$("#" + tx.transactionInfo.hash).html(
+				"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
+				+ "<span id='date" + txId + "'></span></a>");
+
+			$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
+			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）				
+			$("#statehash" + tx.transactionInfo.hash).css("color","brown");
+
+			dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
 		}
 	})
 		
@@ -351,11 +316,21 @@ function getNewInfo(block){
 //				$(o).addClass("staterb" + h);
 
 			});
+/*
+			$(".unconfirmed").each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","red");
+				//未承認トランザクションはロールバックしても再度取り込まれる可能性がある。
+//				$(o).removeAttr('id');
+
+			});
+*/			
 		}
 	}else{
 
 		
-		$(".state" + (block.height.compact() - 1).toString()).each((i,o)=>{
+		$(".state" + (block.height.compact() - 2).toString()).each((i,o)=>{
 
 			$(o).css("color","orange");
 		});
@@ -396,8 +371,8 @@ function getNewInfo(block){
 			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (20 * 30000),epochAdjustment)
 //			console.log(t2 + "までのトランザクションが" + remainMinutes.toString() + "分後にファイナライズされます。");
 
-			$("#finalize_next_time").text(remainMinutes.toString() + "分後");
-			$("#finalize_next_range").text(t2 + " までの承認ブロック");
+			$("#finalize_next_time").text(remainMinutes.toString());
+			$("#finalize_next_range").text(t2.slice(-5));
 
 //			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
 			if(lastFinalizedHeight === 0 ){
@@ -422,11 +397,11 @@ qr = require("/node_modules/symbol-qr-library");
 $("#jpy_price").change(function() {
 	showAmountInfo();
 });
-$("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
-$("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
+$("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
+
 $("#submit_price").click(function(){
 
-	alert("XEM価格を固定し、注文用QRコードを出力します" );
+	alert("QRコードを出力します" );
 	tx = nem.TransferTransaction.create(
 	    nem.Deadline.create(epochAdjustment),
 	    address,
