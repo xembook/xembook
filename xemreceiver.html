@@ -46,9 +46,10 @@
 
 			<h2>ファイナライズ</h2>
 			<dl id="node_info">
+				<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 				<dt>確定済み日時</dt>
 				<dd><span id="finalize_range"></span></dd>
-				<dt>次回確定予想[<span id="finalize_next_time"></span>分後]</dt>
+				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後]</dt>
 				<dd><span id="finalize_next_range"></span>までの注文分</dd>
 			</dl>
 		</div>
@@ -88,13 +89,25 @@ const explorer = EXPLORER;
 
 const qr = require("/node_modules/symbol-qr-library");
 
-function showInfo(accountInfo){
+async function showInfo(accountInfo){
 
 	$("#node_activity").html("<font color='green'>● </font>");
 
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 	});
+	
+	chainRepo.getChainInfo().subscribe(chain=>{
+
+		blockRepo.getBlockByHeight(chain.height).subscribe(block=>{
+		
+			getNewInfo(block);
+		});
+	});
+
+	//ノード
+	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
+	
 }
 
 function showAmountInfo(){
@@ -158,6 +171,8 @@ setInterval(function(){
 
 var lastHeight = 0;
 var lastFinalizedHeight = 0;
+var lastFinalizedTimestamp = 0;
+var lastFinalizedBlock;
 
 function getListenerInfo(listener){
 
@@ -173,6 +188,7 @@ function getListenerInfo(listener){
 			if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
 				amountMark = "&#x2705;" ;
 			}
+			amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
 		}
 
 		console.log("未承認" + tx.message.payload.slice(0,14));
@@ -215,8 +231,16 @@ function getListenerInfo(listener){
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
 	});
-	
+
 	listener.finalizedBlock().subscribe(async block=>{
+
+		fintime = (new Date()).getTime();
+		lastFinalizedTimestamp = (new Date()).getTime();
+
+		console.log(fintime - lastFinalizedTimestamp);
+		console.log((fintime - lastFinalizedTimestamp) / 1000 / 60);
+		lastFinalizedTimestamp = fintime;
+
 		console.log("listener finalized block");
 		for (let h = lastFinalizedHeight + 1; h <= block.height.compact(); h++){		
 			console.log("finalize:" + h);
@@ -236,15 +260,8 @@ function getNewInfo(block){
 	const height = block.height;
 	if(lastHeight !== 0 && lastHeight + 1 !== height.compact() ){
 
-		blockRepo.getBlockByHeight(height)
-		.subscribe(block=>{
-//			alert("ロールバックが発生しました");
-			console.log("■■■■■■■■roll back!!");
-			const rollbackTime = dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
-		})
-
-		console.log("from:" +block.height.compact() );
-		console.log("to:" +lastHeight );
+		console.log("roll back from:" +block.height.compact() );
+		console.log("toll back to:" +lastHeight );
 
 		for (let h = block.height.compact() ; h <= lastHeight; h++){		
 			console.log("roll back:" + h);
@@ -270,23 +287,31 @@ function getNewInfo(block){
 	chainRepo.getChainInfo().subscribe(chain=>{
 
 		//次回ファイナライズ予定
-		remainHeight = 38  - (height.compact() - chain.latestFinalizedBlock.height.compact());
-		remainMinutes = remainHeight / 2
+		if(lastFinalizedTimestamp != 0){
+
+			remainMinutes = 10 - ((new Date()).getTime() - lastFinalizedTimestamp) / 1000 / 60;
+			remainHeight = remainMinutes * 2;
+		}else{
+		
+			remainHeight = 38  - (height.compact() - chain.latestFinalizedBlock.height.compact());
+			remainMinutes = remainHeight / 2
+			console.log("remainMinutes:" + remainMinutes);
+			console.log("remainHeight:" + remainHeight);
+		}
 
 		blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height)
 		.subscribe(finalizedBlock=>{
 
 			t3 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
 
-			$("#finalize_time").text(finalizedBlock.height.toString() );
+//			$("#finalize_time").text(finalizedBlock.height.toString() );
 			$("#finalize_range").text(t3 );
 
 			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (20 * 30000),epochAdjustment)
 
-			$("#finalize_next_time").text(remainMinutes.toString());
+			$("#finalize_next_time").text(remainMinutes.toFixed(1));
 			$("#finalize_next_range").text(t2.slice(-5));
 
-//			if(lastFinalizedHeight === 0 || lastFinalizedHeight  !== chain.latestFinalizedBlock.height.compact() ){
 			if(lastFinalizedHeight === 0 ){
 				console.log(">>>init finalize!!");
 				lastFinalizedHeight = chain.latestFinalizedBlock.height.compact();
@@ -295,11 +320,12 @@ function getNewInfo(block){
 	});
 }
 
-$("#jpy_price").change(function() {showAmountInfo()});
+$("#jpy_price").blur(function() {showAmountInfo()});
 $("#xembook").attr("href", "index.html?address=" + rawAddress);
 
 $("#submit_price").click(function(){
 
+	showAmountInfo();
 	alert("QRコードを出力します" );
 	tx = nem.TransferTransaction.create(
 		nem.Deadline.create(epochAdjustment),
