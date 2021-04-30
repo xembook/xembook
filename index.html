@@ -35,8 +35,10 @@
 		<dl>
 		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
 		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
-		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
+		<dt>Bitrue</dt><dd><span id="bitrue"></span></dd>
+		<dt>Bittrex</dt><dd><span id="bittrex"></span></dd>
+<!--		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>-->
 		</dl>
 		<h2>ノード</h2>
 		<dl id="node_info">
@@ -107,6 +109,7 @@
 			<dl>
 				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
+				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
 			</dl>
 		</div>
 	</div>
@@ -138,12 +141,30 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
+<script>
+const nodelist = NODES;
+const explorer = EXPLORER;
+//const nodelist = TEST_NODES;
+//const explorer = TEST_EXPLORER;
+</script>
 <script src="xembook.js"></script>
 <script>
 
-function showInfo(accountInfo){
+function getListenerInfo(listener){
 
-	$("#node_activity").html("<font color='green'>● </font>");
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block);
+	});
+		
+	if(listener.isOpen()){
+		$("#node_activity").html("<font color='green'>● </font>");
+	}else{
+		$("#node_activity").html("<font color='red'>● </font>");
+	}
+
+}
+function showInfo(accountInfo){
 
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
@@ -163,12 +184,16 @@ function showAmountInfo(amount){
 
 		const probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
 		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-		const hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
+//		const hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
 		const kucoin = Math.round(tickers.USDJPY * tickers.kucoin * 1000) / 1000;
+		const bitrue = Math.round(tickers.USDJPY * tickers.bitrue * 1000) / 1000;
+		const bittrex = Math.round(tickers.USDJPY * tickers.bittrex * 1000) / 1000;
 		$("#probit").text( probit + "円 / XYM");
 		$("#gateio").text( gateio + "円 / XYM");
-		$("#hbtc").text( hbtc + "円 / XYM");
+//		$("#hbtc").text( hbtc + "円 / XYM");
 		$("#kucoin").text( kucoin + "円 / XYM");
+		$("#bitrue").text( bitrue + "円 / XYM");
+		$("#bittrex").text( bittrex + "円 / XYM");
 
 		var market_price = amount / 1000000 * gateio;
 		market_price = comma3(String(Math.round(market_price)));
@@ -486,26 +511,28 @@ setInterval(function(){
 
 	var nodeActivity = "";
 	if(lastBlockHash === newBlockHash){
-		nodeActivity = "<font color='red'>●</font>";
+		nodeActivity = "<font color='red'>● </font>";
 	}else{
-		nodeActivity = "<font color='green'>●</font>";
+		nodeActivity = "<font color='green'>● </font>";
 	}
 
 	$("#node_activity").html(nodeActivity);
 	lastBlockHash = newBlockHash;
 
+
+
 }, 60000);
 
-function getNewInfo(height){
+function getNewInfo(block){
 
-	receiptRepo.searchReceipts({targetAddress:address,height:height})
+	receiptRepo.searchReceipts({targetAddress:address,height:block.height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("レシートが追加されました。再表示してください。");
 		}
 	})
 
-	txRepo.search({address:address,height:height,group:nem.TransactionGroup.Confirmed})
+	txRepo.search({address:address,height:block.height,group:nem.TransactionGroup.Confirmed})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
 			alert("トランザクションが追加されました。再表示してください。");
@@ -520,6 +547,7 @@ $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 
 $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
+$("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
 
 </script>
 </body>

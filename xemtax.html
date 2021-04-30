@@ -31,30 +31,35 @@
 
 		<h2>レシート</h2>
 		<dl>
-		<dt>対象アカウント</dt>
-		<table id="harvest"  class="table">
-			<thead><tr>
-				<th>日時</th>
-				<th class='text-left'>区分</th>
-				<th class='text-right'>XYM数量</th>
-				<th class='text-right'>円換算値</th>
-				<th class='text-right'>円平均</th>
-			</tr></thead>
-		</table>
-		<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			<dt>対象アカウント</dt>
+			<table id="harvest"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th class='text-left'>区分</th>
+					<th class='text-right'>XYM数量</th>
+					<th class='text-right'>円換算値</th>
+					<th class='text-right'>円平均</th>
+				</tr></thead>
+			</table>
+			<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			<a id="harvests_csv" href="javascript:void(0)" >CSVダウンロード</a>
 		</dl>
 		<dl>
-		<dt>送信元アカウント</dt>
-		<table id="receipt"  class="table">
-			<thead><tr>
-				<th>日時</th>
-				<th class='text-left'>区分</th>
-				<th class='text-right'>XYM数量</th>
-				<th class='text-right'>円換算値</th>
-				<th class='text-right'>円平均</th>
-			</tr></thead>
-		</table>
-		<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			<dt>送信元アカウント</dt>
+			<table id="receipt"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th class='text-left'>区分</th>
+					<th class='text-right'>XYM数量</th>
+					<th class='text-right'>円換算値</th>
+					<th class='text-right'>円平均</th>
+				</tr></thead>
+			</table>
+			<dd id="receipts_footer">
+				<a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a><br>
+			</dd>
+			<a id="receipts_csv" href="javascript:void(0)" >CSVダウンロード</a>
+
 		</dl>
 
 		<h2>トランザクション</h2>
@@ -68,7 +73,11 @@
 				<th class='text-right'>負担手数料</th>
 			</tr></thead>
 		</table>
-		<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+		<dd id="transfers_footer">
+			<a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a><br>
+		</dd>
+		<a id="transfers_csv" href="javascript:void(0)" >CSVダウンロード</a>
+
 		</div>
 	</div>
 
@@ -86,12 +95,19 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
+<script>
+const nodelist = NODES;
+const explorer = EXPLORER;
+//const nodelist = TEST_NODES;
+//const explorer = TEST_EXPLORER;
+</script>
 <script src="xembook.js"></script>
 <script>
 
+
 var dateId2price;
 var dateIds = Array();
-function getNewInfo(height){}
+function getNewInfo(block){}
 function showInfo(accountInfo){
 
 	$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
@@ -260,7 +276,7 @@ function showReceiptInfo(tag,height,receipt,cnt){
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text(dispJpyAmount(avgJPY));
 
 		}else{
-			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
+//			$("#" + tag + "_amount_jpy"     + height + receipt.type + cnt).text("NO_JPY_DATA");
 			$("#" + tag + "_amount_jpy_avg" + height + receipt.type + cnt).text("NO_JPY_DATA");
 		}
 	})
@@ -283,7 +299,7 @@ function showTxAmountInfo(id,amount,fee){
 		$("#amount"+ id + "_jpy"    ).text(dispJpyAmount(totalJPY));
 		$("#amount"+ id + "_jpy_fee").text(dispJpyAmount(feeJPY));
 	}else{
-		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
+//		$("#amount"+ id + "_jpy"    ).text("NO_JPY_DATA");
 		$("#amount"+ id + "_jpy_avg"    ).text("NO_JPY_DATA");
 	}
 }
@@ -294,11 +310,82 @@ function dispJpyAmount(jpyAmount){
 	return dispAmount((jpyAmount*10000).toFixed(),4);
 }
 
+// テーブルデータのCSVダウンロード
+function onCSVDownload(a, table, filename) {
+	var escaped = /,|\r?\n|\r|"/;
+	var e = /"/g;
+
+	// データ作成
+	var bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8BOMあり
+	var csv = [], row = [], field, r, c;
+	console.log(table.rows)
+	for (r=0;	r<table.rows.length; r++) {
+		row.length = 0;
+		for (c=0; c<table.rows[r].cells.length; c++) {
+
+			field = table.rows[r].cells[c].textContent;
+			field = field.split(',').join('');
+			// 区切り、改行、エスケープ文字を含む場合、エスケープ文字文字で囲む（エスケープ文字は二重にする）
+			if(c==0){
+
+				console.log(field)
+				if(field === ""){
+					field = lastField;
+				}
+				lastField = field;
+			}
+			row.push(escaped.test(field)? '"'+field.replace(e, '""')+'"': field);
+		}
+		csv.push(row.join(','));
+	}
+	//var blob = new Blob([/*bom, */csv.join('\n')], {'type': 'text/csv'}); // BOMなし
+	var blob = new Blob([bom, csv.join('\n')], {'type': 'text/csv'});
+
+	// 保存
+	if (window.navigator.msSaveBlob) {
+		// IE用(保存 or 開く保存)
+		window.navigator.msSaveBlob(blob, filename); 
+		//window.navigator.msSaveOrOpenBlob(blob, filename);
+	} else {
+		a.download = filename;
+		a.href = window.URL.createObjectURL(blob);
+	}
+}
+
+
 $('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
 $('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
 $('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
 $("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
 $("#xemmessage"       ).attr("href", "xemmessage.html?address=" + rawAddress);
+
+
+$('#transfers_csv').click(function(){onCSVDownload($('#transfers_csv').get(0),$('#table').get(0),'transfer.csv');});
+$('#harvests_csv').click(function(){onCSVDownload($('#harvests_csv').get(0),$('#harvest').get(0),'target_receipt.csv');});
+$('#receipts_csv').click(function(){onCSVDownload($('#receipts_csv').get(0),$('#receipt').get(0),'sender_receipt.csv');});
+
+
+
+/*
+$(document).on("click", "#transfers_csv", function(e){
+
+
+	onCSVDownload($('#transfers_csv')[0],$('#table')[0],'transfer.csv');
+
+});
+
+$(document).on("click", "#harvests_csv", function(){
+	onCSVDownload($('#harvests_csv')[0],$('#harvest')[0],'target_receipt.csv');
+	return false;
+});
+
+
+$(document).on("click", "#receipts_csv", function(){
+	onCSVDownload($('#receipts_csv')[0],$('#receipt')[0],'sender_receipt.csv');
+	return false;
+});
+*/
+
 
 </script>
 </body>

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMReceiver</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-100421513-1', 'auto');
+	ga('send', 'pageview');
+	</script>
+</head>
+<body>
+	<h1>XEMReceiver</h1>
+	<hr class="zigzag-orange-white">
+<div class="container">
+	<div class="row">
+		<div class="account col-sm-4">
+			<div class="form">
+				<h2>注文情報</h2>
+				<dl>
+					<dt>注文ID</dt>
+					<dd><input id="cnumber" type="text" value=""></dd>
+					<dt>価格(JPY)</dt>
+					<dd><input id="jpy_price" type="text" value="0"  >円</dd>
+				</dl>
+				<dl>
+					<dt>現在のレート</dt>
+					<dd><span id="last_price"></span></dd>
+					<dt>XEM価格（参考値）</dt>
+					<dd><span id="xem_price"></span> XYM</dd>
+				</dl>
+				<ul class="list-unstyled">
+				<li><button id="submit_price" type="button" class="btn btn-default">QRコード出力</button></li>
+				<li id="receiverqr"></li>
+				</ul>
+			</div>
+		</div>
+		<div class="account col-sm-4">
+
+			<h2>ファイナライズ</h2>
+			<dl id="node_info">
+				<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+				<dt>確定済み日時</dt>
+				<dd><span id="finalize_range"></span></dd>
+				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後]</dt>
+				<dd><span id="finalize_next_range"></span>までの注文分</dd>
+			</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>確認</h2>
+			<dl>
+				<dd><a id="xembook" href="">XEMBookで確認</a></dd>
+				<dd><a target="_blank" id="account_explorer">Explorerで確認</a></dd>
+			</dl>
+		</div>
+		<div class="account col-sm-8">
+			<h2>注文状況</h2>
+			<table id="rollback"  class="table">
+					<thead><tr>
+					<th>日時</th>
+					<th>送信者</th>
+					<th>メッセージ</th>
+					<th>価格</th>
+				</tr></thead>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-pack-1.0.0.min.js"></script>
+<script src="xembook_config.js"></script>
+<script>
+const nodelist = NODES;
+const explorer = EXPLORER;
+//const nodelist = TEST_NODES;
+//const explorer = TEST_EXPLORER;
+</script>
+<script src="xembook.js"></script>
+<script>
+
+const qr = require("/node_modules/symbol-qr-library");
+
+async function showInfo(accountInfo){
+
+	$("#node_activity").html("<font color='green'>● </font>");
+
+	accountInfo.subscribe(async _=>{
+		showAccountInfo(_);
+	});
+	
+	chainRepo.getChainInfo().subscribe(chain=>{
+
+		blockRepo.getBlockByHeight(chain.height).subscribe(block=>{
+		
+			getNewInfo(block);
+		});
+	});
+
+	//ノード
+	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
+	
+}
+
+function showAmountInfo(){
+
+	$.when(
+//		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+
+		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+		$("#last_price").text( gateio + "円 / XYM");
+
+//		xem_price = Math.ceil($("#jpy_price").val() /gateio );
+		xem_price = $("#jpy_price").val() /gateio ;
+		console.log(xem_price)
+		$("#xem_price").text(xem_price.toFixed(2));
+	});
+}
+
+function dispBlockTimeStamp(id,txInfo){
+
+	blockRepo.getBlockByHeight(txInfo.height)
+	.pipe(
+		op.delay(1000),
+	)
+	.subscribe(block => {
+
+		$(id).text(
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		);
+	},err=>{
+		console.log("retry");	
+		dispBlockTimeStamp(id,txInfo);
+	})
+}
+
+function appendAggTx(tx){}
+function appendTx(insTag,id,tx){}
+function insertTxAfter(insTag,id,tx){}
+function showReceiptInfo(tag,height,receipt,cnt){}
+function showTxAmountInfo(id,amount,fee){}
+function showAccountInfo(accountInfo){}
+
+var lastBlockHash = "";
+setInterval(function(){
+
+//	showPriceInfo(accountRepo.getAccountInfo(address));
+
+	var nodeActivity = "";
+	if(lastBlockHash === newBlockHash){
+		nodeActivity = "<font color='red'>● </font>";
+	}else{
+		nodeActivity = "<font color='green'>● </font>";
+	}
+
+	$("#node_activity").html(nodeActivity);
+	lastBlockHash = newBlockHash;
+
+}, 60000);
+
+var lastHeight = 0;
+var lastFinalizedHeight = 0;
+var lastFinalizedTimestamp = 0;
+var lastFinalizedBlock;
+
+function getListenerInfo(listener){
+
+	/* この一行を加えると何故か動く */
+	listener.status(address);
+
+	listener.unconfirmedAdded(address)
+	.subscribe(tx=>{
+
+		let amountMark = "";
+		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
+		if(xym != undefined){
+			if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+				amountMark = "&#x2705;" ;
+			}
+			amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
+		}
+
+		console.log("未承認" + tx.message.payload.slice(0,14));
+		console.log(tx);
+
+		$("#rollback").prepend("<tr>"
+		+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
+		+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
+		+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+		+ "<td>" + amountMark + "</td>"
+		+ "</tr>"
+		);
+
+		$("#statehash" + tx.transactionInfo.hash).css("color","gray");
+		$("#statehash" + tx.transactionInfo.hash).addClass("unconfirmed");
+	})
+
+	listener.confirmed(address)
+
+	.subscribe(async tx=>{
+		if(tx.type === nem.TransactionType.TRANSFER){
+
+			const txId = tx.transactionInfo.hash;
+			console.log("承認済"+tx.message.payload.slice(0,14));
+
+			//承認日付に変更
+			$("#" + tx.transactionInfo.hash).html(
+				"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
+				+ "<span id='date" + txId + "'></span></a>");
+
+			$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
+			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）				
+			$("#statehash" + tx.transactionInfo.hash).css("color","brown");
+
+			dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
+		}
+	})
+		
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block);
+	});
+
+	listener.finalizedBlock().subscribe(async block=>{
+
+		fintime = (new Date()).getTime();
+		lastFinalizedTimestamp = (new Date()).getTime();
+
+		console.log(fintime - lastFinalizedTimestamp);
+		console.log((fintime - lastFinalizedTimestamp) / 1000 / 60);
+		lastFinalizedTimestamp = fintime;
+
+		console.log("listener finalized block");
+		for (let h = lastFinalizedHeight + 1; h <= block.height.compact(); h++){		
+			console.log("finalize:" + h);
+
+			$(".state" + h).each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","green");
+				$(o).removeClass("state" + h);
+			});	
+		}
+		lastFinalizedHeight = block.height.compact();
+	});
+}
+function getNewInfo(block){
+
+	const height = block.height;
+	if(lastHeight !== 0 && lastHeight + 1 !== height.compact() ){
+
+		console.log("roll back from:" +block.height.compact() );
+		console.log("toll back to:" +lastHeight );
+
+		for (let h = block.height.compact() ; h <= lastHeight; h++){		
+			console.log("roll back:" + h);
+
+			$(".state" + h).each((i,o)=>{
+
+				console.log(o);
+				$(o).css("color","red");
+				$(o).removeClass("state" + h);
+			});
+		}
+	}else{
+
+		$(".state" + (block.height.compact() - 2).toString()).each((i,o)=>{
+
+			$(o).css("color","orange");
+		});
+	}
+	lastHeight = height.compact();
+
+	console.log("==============" + block.height);
+
+	chainRepo.getChainInfo().subscribe(chain=>{
+
+		//次回ファイナライズ予定
+		if(lastFinalizedTimestamp != 0){
+
+			remainMinutes = 10 - ((new Date()).getTime() - lastFinalizedTimestamp) / 1000 / 60;
+			remainHeight = remainMinutes * 2;
+		}else{
+		
+			remainHeight = 38  - (height.compact() - chain.latestFinalizedBlock.height.compact());
+			remainMinutes = remainHeight / 2
+			console.log("remainMinutes:" + remainMinutes);
+			console.log("remainHeight:" + remainHeight);
+		}
+
+		blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height)
+		.subscribe(finalizedBlock=>{
+
+			t3 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
+
+//			$("#finalize_time").text(finalizedBlock.height.toString() );
+			$("#finalize_range").text(t3 );
+
+			t2 = dispTimeStamp(finalizedBlock.timestamp.compact() + (20 * 30000),epochAdjustment)
+
+			$("#finalize_next_time").text(remainMinutes.toFixed(1));
+			$("#finalize_next_range").text(t2.slice(-5));
+
+			if(lastFinalizedHeight === 0 ){
+				console.log(">>>init finalize!!");
+				lastFinalizedHeight = chain.latestFinalizedBlock.height.compact();
+			}
+		})
+	});
+}
+
+$("#jpy_price").blur(function() {showAmountInfo()});
+$("#xembook").attr("href", "index.html?address=" + rawAddress);
+
+$("#submit_price").click(function(){
+
+	showAmountInfo();
+	alert("QRコードを出力します" );
+	tx = nem.TransferTransaction.create(
+		nem.Deadline.create(epochAdjustment),
+		address,
+		[networkCurrency.createRelative(Number($("#xem_price").text()))],
+		nem.PlainMessage.create($("#cnumber").val()),
+		networkType
+	);
+	qrcode = qr.QRCodeGenerator.createTransactionRequest(tx,networkType,generationHash);
+	qrcode.toBase64().subscribe(x=>$("#receiverqr").html('<img src=' + x + '>'))
+
+});
+</script>
+</body>
+</html>

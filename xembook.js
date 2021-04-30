@@ -38,7 +38,6 @@ const op = require("/node_modules/rxjs/operators");
 const rxjs = require("/node_modules/rxjs");
 const address = nem.Address.createFromRawAddress(rawAddress);
 
-var listener;
 function connectNode(nodes,d){
 
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
@@ -62,20 +61,24 @@ var listener;
 async function createRepo(d2){
 
 	const d = $.Deferred();
-	const node = await connectNode(NODES,d);
+	const node = await connectNode(nodelist,d);
 	const repo = new nem.RepositoryFactoryHttp(node);
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
 	receiptRepo = repo.createReceiptRepository();
-	const wsEndpoint = node.replace('http', 'ws') + "/ws";
-	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+	chainRepo = repo.createChainRepository();
 
 	try{
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
-		await listenerKeepOpening(wsEndpoint);
+		if(listener === undefined){
+			const wsEndpoint = node.replace('http', 'ws') + "/ws";
+//			listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
+			await listenerKeepOpening(wsEndpoint);
+		}
 		d2.resolve(repo);
 
-	}catch{
+	}catch(error){
+		console.log(error);
 		createRepo(d2);
 	}
 	return d2.promise();
@@ -89,20 +92,26 @@ async function listenerKeepOpening(wsEndpoint){
 
 	listener.webSocket.onclose = async function(){
 		console.log("listener onclose");
-		await listenerKeepOpening();
+		await listenerKeepOpening(wsEndpoint);
+
 
 		//リスナーに関係する情報をリロード
 		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
 		});
+/*
+		listener.newBlock().subscribe(async block=>{
+			newBlockHash = block.hash; //活性チェック用
+			getNewInfo(block);
+		});
+*/
+		getListenerInfo(listener);
 	}
 
-	listener.newBlock().subscribe(async block=>{
-		newBlockHash = block.hash; //活性チェック用
-		getNewInfo(block.height);
-	});
+	getListenerInfo(listener);
 }
+
 
 var blockRepo;
 var nwRepo;
@@ -126,7 +135,6 @@ var currencyNamespaceId;
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
 //	tsRepo = repo.createTransactionStatusRepository();
-	chainRepo = repo.createChainRepository();
 //	finRepo = repo.createFinalizationRepository();
 //	hlRepo = repo.createHashLockRepository();
 //	metaRepo = repo.createMetadataRepository();
@@ -139,12 +147,14 @@ var currencyNamespaceId;
 	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
 	networkType = await repo.getNetworkType().toPromise();
 	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
+	networkCurrency = (await repo.getCurrencies().toPromise()).currency;
+	generationHash = await repo.getGenerationHash().toPromise();
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
 
 	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
-	$("#account_explorer").attr("href", "http://explorer.symbolblockchain.io/accounts/" + address.plain());
+	$("#account_explorer").attr("href", explorer + "/accounts/" + address.plain());
 
 	//アカウント情報
 	const accountInfo = accountRepo.getAccountInfo(address);

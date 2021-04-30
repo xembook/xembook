@@ -1,6 +1,11 @@
-const ACTIVE_IMPORTANCE_RATE = 0.21975;
+
+const EXPLORER = "http://explorer.symbolblockchain.io";
+const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
+
+const ACTIVE_IMPORTANCE_RATE = 0.22526837;
+
 const NO_3001_NODES = [
-"d3rmzi6ltfh1jy.cloudfront.net",
+"node.xembook.net",
 "a.symbol.lcnem.net",
 ];
 const NODES = [
@@ -214,6 +219,27 @@ const NODES = [
 "https://angel.vistiel-arch.jp:3001",
 "https://xym.stakeme.tokyo:3001",
 "https://00-symbol-node.yagiyoshi.com:3001",
+];
 
 
+const TEST_NODES = [
+
+"https://119-47-17-86.catv296.ne.jp:3001",
+"https://xym-node.xyz:3001",
+"https://sushi-testnet.sakurairo.tokyo:3001",
+"https://symbol-testnet.kintech-research.com:3001",
+"https://sym-test-01.opening-line.jp:3001",
+"https://sym-test-02.opening-line.jp:3001",
+"https://sym-test-03.opening-line.jp:3001",
+"https://sym-test-04.opening-line.jp:3001",
+"https://sym-test-05.opening-line.jp:3001",
+"https://sym-test-06.opening-line.jp:3001",
+"https://sym-test-07.opening-line.jp:3001",
+"https://sym-test-08.opening-line.jp:3001",
+"https://sym-test-09.opening-line.jp:3001",
+"https://sym-test-10.opening-line.jp:3001",
+"https://sym-test.opening-line.jp:3001",
+"https://35kx.c.time4vps.cloud:3001",
+"https://373t.c.time4vps.cloud:3001",
+"https://35oc.c.time4vps.cloud:3001",
 ];
