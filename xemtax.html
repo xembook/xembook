@@ -171,10 +171,11 @@ function showAmountInfo(amount){
 	)
 	.done(function(tickers) {
 
+		zaif = tickers.zaif;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-		var market_price = amount / 1000000 * gateio;
+		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
-		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+		$("#market_price").text(market_price + "円 [" + zaif + "JPY/XYM換算]");
 	});
 }
 

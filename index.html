@@ -33,12 +33,15 @@
 		<h2>取引所</h2>
 		<small>最終更新　<span id="last_update"></span></small>
 		<dl>
+		<dt><a href="https://zaif.jp/trade/xym_jpy" target="_blank">Zaif</a></dt><dd><span id="zaif"></span></dd>
 		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
 		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
+		<dt>Poloniex</dt><dd><span id="poloniex"></span></dd>
+		<dt>Bittrex</dt><dd><span id="bittrex"></span></dd>
+<!--
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		<dt>Bitrue</dt><dd><span id="bitrue"></span></dd>
-		<dt>Bittrex</dt><dd><span id="bittrex"></span></dd>
-<!--		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>-->
+		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>-->
 		</dl>
 		<h2>ノード</h2>
 		<dl id="node_info">
@@ -188,16 +191,20 @@ function showAmountInfo(amount){
 		const kucoin = Math.round(tickers.USDJPY * tickers.kucoin * 1000) / 1000;
 		const bitrue = Math.round(tickers.USDJPY * tickers.bitrue * 1000) / 1000;
 		const bittrex = Math.round(tickers.USDJPY * tickers.bittrex * 1000) / 1000;
+		const poloniex = Math.round(tickers.USDJPY * tickers.poloniex * 1000) / 1000;
+		const zaif = tickers.zaif;
 		$("#probit").text( probit + "円 / XYM");
 		$("#gateio").text( gateio + "円 / XYM");
 //		$("#hbtc").text( hbtc + "円 / XYM");
 		$("#kucoin").text( kucoin + "円 / XYM");
 		$("#bitrue").text( bitrue + "円 / XYM");
 		$("#bittrex").text( bittrex + "円 / XYM");
+		$("#poloniex").text( poloniex + "円 / XYM");
+		$("#zaif").text( zaif + "円 / XYM");
 
-		var market_price = amount / 1000000 * gateio;
+		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
-		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+		$("#market_price").text(market_price + "円 [" + zaif + "JPY/XYM換算]");
 		$("#last_update").text(tickers.last_update);
 	});
 }

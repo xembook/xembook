@@ -79,8 +79,8 @@
 <script src="symbol-sdk-pack-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
-const nodelist = NODES;
-const explorer = EXPLORER;
+var nodelist = NODES;
+var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
 </script>
@@ -119,10 +119,12 @@ function showAmountInfo(){
 	.done(function(tickers) {
 
 		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-		$("#last_price").text( gateio + "円 / XYM");
+		const zaif = tickers.zaif;
+
+		$("#last_price").text( zaif + "円 / XYM");
 
 //		xem_price = Math.ceil($("#jpy_price").val() /gateio );
-		xem_price = $("#jpy_price").val() /gateio ;
+		xem_price = $("#jpy_price").val() /zaif ;
 		console.log(xem_price)
 		$("#xem_price").text(xem_price.toFixed(2));
 	});
