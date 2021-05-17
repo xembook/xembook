@@ -58,10 +58,10 @@ var nsRepo;
 var receiptRepo;
 var epochAdjustment;
 var listener;
-async function createRepo(d2){
+async function createRepo(d2,nodes){
 
 	const d = $.Deferred();
-	const node = await connectNode(nodelist,d);
+	const node = await connectNode(nodes,d);
 	const repo = new nem.RepositoryFactoryHttp(node);
 	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
@@ -79,7 +79,7 @@ async function createRepo(d2){
 
 	}catch(error){
 		console.log(error);
-		createRepo(d2);
+		createRepo(d2,nodes);
 	}
 	return d2.promise();
 }
@@ -123,11 +123,18 @@ var networkType;
 var currencyId;
 var totalChainImportance;
 var currencyNamespaceId;
+const nemScriptionExpiredHeight = localStorage.getItem('NEMscriptionExpiredHeight' + rawAddress);
+
 (async() =>{
+
+	if(nemScriptionExpiredHeight !== null){
+		nodelist = JP_NODES;
+		console.log("connect japan node");
+	}
 	const d2 = $.Deferred();
-	const repo = await createRepo(d2);
+	const repo = await createRepo(d2,nodelist);
 	const d3 = $.Deferred();
-	const repo2 = await createRepo(d3);
+	const repo2 = await createRepo(d3,nodelist);
 
 	nwRepo = repo.createNetworkRepository();
 //	blockRepo = repo.createBlockRepository();
@@ -137,7 +144,7 @@ var currencyNamespaceId;
 //	tsRepo = repo.createTransactionStatusRepository();
 //	finRepo = repo.createFinalizationRepository();
 //	hlRepo = repo.createHashLockRepository();
-//	metaRepo = repo.createMetadataRepository();
+	metaRepo = repo.createMetadataRepository();
 //	mosaicRepo = repo.createMosaicRepository();
 	msigRepo = repo.createMultisigRepository();
 //	resAccountRepo = repo.createRestrictionAccountRepository();
@@ -155,6 +162,26 @@ var currencyNamespaceId;
 
 	$("#account_address").text(address.pretty().slice(0,20) + "..." + address.pretty().slice(-3));
 	$("#account_explorer").attr("href", explorer + "/accounts/" + address.plain());
+
+	//NEMscriptionExpiredHeight
+	const key = nem.KeyGenerator.generateUInt64Key("NEMscriptionExpiredHeight");
+	const srcAddress = nem.Address.createFromRawAddress("NAXXB6RI4FTXAKEY57P4ZKNYBAYEXBVCEEL2Q3Y");
+	metaRepo.search({
+		sourceAddress:srcAddress,
+		scopedMetadataKey:key.toHex(),
+		targetAddress:address,
+		metadataType:nem.MetadataType.Account}
+	).subscribe(x=>{
+		if(x.data.length > 0){
+			if(latestBlock.height.compact() < Number(x.data[0].metadataEntry.value)){
+			
+				localStorage.setItem('NEMscriptionExpiredHeight' + rawAddress,x.data[0].metadataEntry.value);
+				console.log(x.data[0].metadataEntry.value)
+			}
+		}else{
+			localStorage.removeItem('NEMscriptionExpiredHeight' + rawAddress);
+		}
+	})
 
 	//アカウント情報
 	const accountInfo = accountRepo.getAccountInfo(address);

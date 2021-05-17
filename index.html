@@ -110,11 +110,6 @@
 				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
 				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
-				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
-				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
-
-
-
 			</dl>
 		</div>
 	</div>
@@ -147,8 +142,8 @@
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
-const nodelist = NODES;
-const explorer = EXPLORER;
+var nodelist = NODES;
+var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
 </script>
@@ -161,7 +156,7 @@ function getListenerInfo(listener){
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
 	});
-
+		
 	if(listener.isOpen()){
 		$("#node_activity").html("<font color='green'>● </font>");
 	}else{
