@@ -21,6 +21,18 @@
 	<hr class="zigzag-orange-white">
 <div class="container">
 	<div class="row">
+
+		<div class="col-sm-12">
+			<h2>抽出条件</h2>
+
+			<form class="form-inline">
+				<div class="form-group">
+					<input id="search_word" type="text" name="name" class="form-control">
+				</div>
+				<button id="search_btn"	class="btn btn-default">再検索</button>
+			</form>
+		</div>
+	
 		<div class="col-sm-12">
 
 		<h2>トランザクション</h2>
@@ -31,9 +43,10 @@
 				<th>数量</th>
 				<th>メッセージ</th>
 			</tr></thead>
+			<tbody></tbody>
 		</table>
 		<dl>
-			<dd><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
 		</dl>		
 		</div>
 	</div>
@@ -66,8 +79,8 @@
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
-const nodelist = NODES;
-const explorer = EXPLORER;
+var nodelist = NODES;
+var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
 </script>
@@ -80,6 +93,28 @@ function showAmountInfo(amount){}
 function showInfo(accountInfo){
 	getBatchOfTransfers(1);
 }
+
+function replacer( str, word , size ) {
+
+	var SearchString = '(' + word.replace( ',', '|' ) + ')';
+	var RegularExp = new RegExp( SearchString, "g" );
+	var ReplaceString = "<span class='right' style='color:red; font-size:" + size + "px; background-color: yellow;'>$1</span>";
+	var ResString = str.replace( RegularExp , ReplaceString );
+	return ResString;
+}
+
+$('#search_btn').click(function(){
+
+	$('#table tbody *').remove();
+	transferPageNumber = 1;
+	harvestPageNumber = 1;
+	reciptPageNumber = 1;
+
+	getBatchOfTransfers(1);
+
+	return false;
+})
+
 
 function getBatchOfTransfers(maxCount){
 
@@ -97,47 +132,88 @@ function getBatchOfTransfers(maxCount){
 
 function appendAggTx(tx){
 
-	const id = tx.transactionInfo.id;
-	$("#table").append("<tr id='agg" + id + "'>"
-	+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
-	+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
-	+ "</span></a></td>"
-	+ "<td id='type" + id + "'></td>" //mosaicLabel
-	+ "<td id='amount" + id + "' class='text-right'></td>"
-	+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+	var searchWord = $("#search_word").val();
 
-	+ "</tr>"
-	);
+	var isHit = true;
+	if(searchWord != ""){
+		isHit = false;
+	}
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	const message =  getMessage(tx) ;
+	if(message.match(searchWord)  ){
 
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+		if(searchWord != ""){
+
+			plain_text = replacer( message, searchWord,15);
+			isHit = true;
+		}
+	}
+
+
+	if(isHit){
+		const id = tx.transactionInfo.id;
+		$("#table").append("<tr id='agg" + id + "'>"
+		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+		+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+		+ "</span></a></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "' class='text-right'></td>"
+		+ "<td class='text-left'>" + message + "</td>"
+
+		+ "</tr>"
 		);
-	})
+
+		blockRepo.getBlockByHeight(tx.transactionInfo.height)
+		.subscribe(b => {
+
+			$("#date"+ id).text(
+				dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			);
+		})
+	}
 }
 
 function appendTx(insTag,id,tx){
 
-	$(insTag).append(
-		"<tr>"
-		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
-		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
-		+ "</span></a></td>"
-		+ "<td id='type" + id + "'></td>" //mosaicLabel
-		+ "<td id='amount" + id + "' class='text-right'></td>"
-		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
-		+ "</tr>"
-	);
+	var searchWord = $("#search_word").val();
 
-	blockRepo.getBlockByHeight(tx.transactionInfo.height)
-	.subscribe(b => {
+	var isHit = true;
+	if(searchWord != ""){
+		isHit = false;
+	}
 
-		$("#date"+ id).text(
-			dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+	const message =  getMessage(tx) ;
+	if(message.match(searchWord)  ){
+
+		if(searchWord != ""){
+
+			plain_text = replacer( message, searchWord,15);
+			isHit = true;
+		}
+	}
+
+
+	if(isHit){
+
+		$(insTag).append(
+			"<tr>"
+			+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+			   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+			+ "</span></a></td>"
+			+ "<td id='type" + id + "'></td>" //mosaicLabel
+			+ "<td id='amount" + id + "' class='text-right'></td>"
+			+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+			+ "</tr>"
 		);
-	})
+
+		blockRepo.getBlockByHeight(tx.transactionInfo.height)
+		.subscribe(b => {
+
+			$("#date"+ id).text(
+				dispTimeStamp(Number(b.timestamp.toString()),epochAdjustment)
+			);
+		})
+	}
 }
 
 function insertTxAfter(insTag,id,tx){

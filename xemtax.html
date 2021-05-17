@@ -96,8 +96,8 @@
 <script src="symbol-sdk-1.0.0.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
-const nodelist = NODES;
-const explorer = EXPLORER;
+var nodelist = NODES;
+var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
 </script>
@@ -108,6 +108,8 @@ const explorer = EXPLORER;
 var dateId2price;
 var dateIds = Array();
 function getNewInfo(block){}
+function getListenerInfo(listener){}
+
 function showInfo(accountInfo){
 
 	$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/xym_jpy.json" ,type: 'GET'})
@@ -169,10 +171,11 @@ function showAmountInfo(amount){
 	)
 	.done(function(tickers) {
 
+		zaif = tickers.zaif;
 		gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-		var market_price = amount / 1000000 * gateio;
+		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
-		$("#market_price").text(market_price + "円 [" + gateio + "JPY/XYM換算]");
+		$("#market_price").text(market_price + "円 [" + zaif + "JPY/XYM換算]");
 	});
 }
 
