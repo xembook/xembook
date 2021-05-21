@@ -304,8 +304,17 @@ function showAccountInfo(accountInfo){
 		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
 	})
 
+
+
 	//ノード
-	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
+	nodeRepo.getNodeInfo().subscribe(node => {
+	
+		var nodeHost = node.host;
+		if(nemScriptionExpiredHeight !== null){
+			nodeHost = "[JP] " + nodeHost;
+		}
+		$("#node_host").text(nodeHost);
+	});
 
 	//委任ノード
 	const delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
