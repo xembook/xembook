@@ -317,6 +317,11 @@ function showAccountInfo(accountInfo){
 	});
 
 	//委任ノード
+	const NO_3001_NODES = [
+	"node.xembook.net",
+	"a.symbol.lcnem.net",
+	];
+
 	const delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
 	var dnode ="https://" + delegatedNode;
 	if(!NO_3001_NODES.includes(delegatedNode)){

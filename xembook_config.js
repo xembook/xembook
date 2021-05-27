@@ -4,10 +4,6 @@ const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
 
 const ACTIVE_IMPORTANCE_RATE = 0.25368896;
 
-const NO_3001_NODES = [
-"node.xembook.net",
-"a.symbol.lcnem.net",
-];
 const NODES = [
 //"https://xym.harvester.earth:3001",
 //"https://umbriel.uranus-satellite.net:3001",
