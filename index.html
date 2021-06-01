@@ -317,6 +317,11 @@ function showAccountInfo(accountInfo){
 	});
 
 	//委任ノード
+	const NO_3001_NODES = [
+	"node.xembook.net",
+	"a.symbol.lcnem.net",
+	];
+
 	const delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
 	var dnode ="https://" + delegatedNode;
 	if(!NO_3001_NODES.includes(delegatedNode)){
@@ -412,22 +417,28 @@ function showAccountInfo(accountInfo){
 	const bondedSubscribe = function(observer){
 		observer.pipe(
 
+			//すでに署名済みでない場合
 			op.filter(_ => !_.signedByAccount(accountInfo.address))
 		).subscribe(_=>{
 
 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
 			.subscribe(aggTx =>{
-				txs = aggTx[0].innerTransactions;
-				for(const tx of txs){
 
-					var dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
-					var ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
-					ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
-					$("#tx_info").append(dtTx + ddTx);
+				//インナートランザクションの署名者に自分が指定されている場合
+				if(aggTx[0].innerTransactions.find((inTx) => inTx.signer.equals(accountInfo.publicAccount))!= undefined){
+
+					txs = aggTx[0].innerTransactions;
+					for(const tx of txs){
+
+						var dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
+						var ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
+						ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
+						$("#tx_info").append(dtTx + ddTx);
+					}
+					$('#modal-notice').modal('show');
 				}
 			});
 
-			$('#modal-notice').modal('show');
 		});
 	}
 
