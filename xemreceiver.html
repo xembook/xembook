@@ -184,28 +184,33 @@ function getListenerInfo(listener){
 	listener.unconfirmedAdded(address)
 	.subscribe(tx=>{
 
+
 		let amountMark = "";
-		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
-		if(xym != undefined){
-			if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
-				amountMark = "&#x2705;" ;
+//		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
+		const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+
+		for(const xym of xyms){
+			if(xym != undefined){
+				if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+					amountMark = "&#x2705;" ;
+				}
+				amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
 			}
-			amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
+
+			console.log("未承認" + tx.message.payload.slice(0,14));
+			console.log(tx);
+
+			$("#rollback").prepend("<tr>"
+			+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
+			+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
+			+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+			+ "<td>" + amountMark + "</td>"
+			+ "</tr>"
+			);
+
+			$("#statehash" + tx.transactionInfo.hash).css("color","gray");
+			$("#statehash" + tx.transactionInfo.hash).addClass("unconfirmed");
 		}
-
-		console.log("未承認" + tx.message.payload.slice(0,14));
-		console.log(tx);
-
-		$("#rollback").prepend("<tr>"
-		+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
-		+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
-		+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
-		+ "<td>" + amountMark + "</td>"
-		+ "</tr>"
-		);
-
-		$("#statehash" + tx.transactionInfo.hash).css("color","gray");
-		$("#statehash" + tx.transactionInfo.hash).addClass("unconfirmed");
 	})
 
 	listener.confirmed(address)
