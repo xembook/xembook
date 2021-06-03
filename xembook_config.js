@@ -3,7 +3,7 @@ const EXPLORER = "http://explorer.symbolblockchain.io";
 const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
 
 const ACTIVE_IMPORTANCE_RATE = 0.27092749;
-
+const NG_NODES = [];
 const NODES = [
 
 //"https://xym.harvester.earth:3001",
@@ -175,9 +175,6 @@ const NODES = [
 "https://ik1-427-45769.vs.sakura.ne.jp:3001",
 "https://amaterasu-01.kamigami.jp:3001",
 "https://amaterasu-02.kamigami.jp:3001",
-"https://01.symbol-node.work:3001",
-"https://02.symbol-node.work:3001",
-"https://03.symbol-node.work:3001",
 "https://dual-1.nodes-xym.work:3001",
 "https://00bb5561.xym.stir-hosyu.com:3001",
 "https://symbol.harvest-monitor.com:3001",
@@ -214,7 +211,6 @@ const NODES = [
 "https://symbol.nuaka.net:3001",
 "https://28387.xym.stir-hosyu.com:3001",
 "https://poi-symbol-kickback-node.com:3001",
-"https://ik1-305-12844.vs.sakura.ne.jp:3001",
 "https://symbol.harvesting.sakanaman.net:3001",
 "https://16948.xym.stir-hosyu.com:3001",
 "https://17107.xym.stir-hosyu.com:3001",
@@ -256,7 +252,7 @@ const NODES = [
 "https://symbol-blockchain-00.waitfull.com:3001",
 "https://00-symbol-node.yagiyoshi.com:3001",
 "https://yumeya1.com:3001",
-];
+].filter(word => !NG_NODES.includes(word));
 
 
 const TEST_NODES = [
@@ -414,10 +410,7 @@ const JP_NODES = [
 "https://00A06705.xym.stir-hosyu.com:3001",
 "https://yukikaze.symbol-nem.net:3001",
 "https://ik1-432-48497.vs.sakura.ne.jp:3001",
-"https://ik1-305-12844.vs.sakura.ne.jp:3001",
 "https://symbol01.harvestasya.com:3001",
-"https://01.symbol-node.work:3001",
-"https://02.symbol-node.work:3001",
 "https://dual-1.nodes-xym.work:3001",
 "https://00bb5561.xym.stir-hosyu.com:3001",
 "https://x.symbol-nember.jp:3001",
@@ -481,4 +474,4 @@ const JP_NODES = [
 "https://xymnode01.fasterthanthespeedoflight.net:3001",
 "https://00-symbol-node.yagiyoshi.com:3001",
 "https://yumeya1.com:3001",
-];
+].filter(word => !NG_NODES.includes(word));
