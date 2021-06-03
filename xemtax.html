@@ -109,6 +109,7 @@ var dateId2price;
 var dateIds = Array();
 function getNewInfo(block){}
 function getListenerInfo(listener){}
+function showAccountInfo(accountInfo){}
 
 function showInfo(accountInfo){
 
@@ -347,7 +348,7 @@ function onCSVDownload(a, table, filename) {
 	// 保存
 	if (window.navigator.msSaveBlob) {
 		// IE用(保存 or 開く保存)
-		window.navigator.msSaveBlob(blob, filename); 
+		window.navigator.msSaveBlob(blob, filename);
 		//window.navigator.msSaveOrOpenBlob(blob, filename);
 	} else {
 		a.download = filename;
