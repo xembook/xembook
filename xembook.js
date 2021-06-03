@@ -92,21 +92,14 @@ async function listenerKeepOpening(wsEndpoint){
 
 	listener.webSocket.onclose = async function(){
 		console.log("listener onclose");
-		await listenerKeepOpening(wsEndpoint);
 
+		await listenerKeepOpening(wsEndpoint);
 
 		//リスナーに関係する情報をリロード
 		accountRepo.getAccountInfo(address)
 		.subscribe(accountInfo => {
 			showAccountInfo(accountInfo);
 		});
-/*
-		listener.newBlock().subscribe(async block=>{
-			newBlockHash = block.hash; //活性チェック用
-			getNewInfo(block);
-		});
-*/
-		getListenerInfo(listener);
 	}
 
 	getListenerInfo(listener);
@@ -174,7 +167,7 @@ const nemScriptionExpiredHeight = localStorage.getItem('NEMscriptionExpiredHeigh
 	).subscribe(x=>{
 		if(x.data.length > 0){
 			if(latestBlock.height.compact() < Number(x.data[0].metadataEntry.value)){
-			
+
 				localStorage.setItem('NEMscriptionExpiredHeight' + rawAddress,x.data[0].metadataEntry.value);
 				console.log(x.data[0].metadataEntry.value)
 			}
