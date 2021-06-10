@@ -185,11 +185,12 @@ function getListenerInfo(listener){
 	.subscribe(tx=>{
 
 
-		let amountMark = "";
 //		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
 		const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 
 		for(const xym of xyms){
+
+			let amountMark = "";
 			if(xym != undefined){
 				if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
 					amountMark = "&#x2705;" ;
@@ -200,8 +201,13 @@ function getListenerInfo(listener){
 			console.log("未承認" + tx.message.payload.slice(0,14));
 			console.log(tx);
 
+			let unconfirmedMark = "未承認";
+			if (tx.maxFee.compact() / tx.size < 100){
+				unconfirmedMark = "&#x1F422; " + unconfirmedMark; 
+			}
+
 			$("#rollback").prepend("<tr>"
-			+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
+			+ "<td id=" + tx.transactionInfo.hash + ">" + unconfirmedMark + "</td>"
 			+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
 			+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
 			+ "<td>" + amountMark + "</td>"
@@ -214,17 +220,43 @@ function getListenerInfo(listener){
 	})
 
 	listener.confirmed(address)
-
 	.subscribe(async tx=>{
 		if(tx.type === nem.TransactionType.TRANSFER){
 
 			const txId = tx.transactionInfo.hash;
 			console.log("承認済"+tx.message.payload.slice(0,14));
 
-			//承認日付に変更
-			$("#" + tx.transactionInfo.hash).html(
-				"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
-				+ "<span id='date" + txId + "'></span></a>");
+			if($("#" + tx.transactionInfo.hash).length){
+
+				//承認日付に変更
+				$("#" + tx.transactionInfo.hash).html(
+					"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
+					+ "<span id='date" + txId + "'></span></a>");
+
+			}else{
+
+				//接続ノードが未承認を検知できずに承認が発生した場合（超低手数料での送金が承認された場合）
+				const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+				for(const xym of xyms){
+
+					let amountMark = "";
+					if(xym != undefined){
+						if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+							amountMark = "&#x2705;" ;
+						}
+						amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
+					}
+
+					$("#rollback").prepend("<tr>"
+					+ "<td id=" + tx.transactionInfo.hash + "><a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"+ "<span id='date" + txId + "'></span></a></td>"
+					+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
+					+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+					+ "<td>" + amountMark + "</td>"
+					+ "</tr>"
+					);
+				}
+
+			}
 
 			$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
 			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）				
