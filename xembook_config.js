@@ -1165,3 +1165,46 @@ const JP_NODES = [
 "https://yumeya1.com:3001",
 
 ].filter(word => !NG_NODES.includes(word));
+
+
+const RECEICEVER_NODES = [
+
+"https://symderella-castle.net:3001",
+"https://00fabf14.xym.stir-hosyu.com:3001",
+"https://xxx-welcome-to-a-powerful-node.com:3001",
+"https://23639.xym.stir-hosyu.com:3001",
+"https://sn.newecosym.com:3001",
+"https://14601.xym.stir-hosyu.com:3001",
+"https://yumeya1.com:3001",
+"https://01.symbol-farm.tokyo:3001",
+"https://symbol01.harvestasya.com:3001",
+"https://paotan02.momotapo.com:3001",
+"https://sushi.sakurairo.tokyo:3001",
+"https://symbol.from.nagoya:3001",
+"https://symbol.shizuilab.com:3001",
+"https://shikinami.starlight.tokyo:3001",
+"https://paotan03.momotapo.com:3001",
+"https://paotan01.momotapo.com:3001",
+"https://symbol.harvesting.sakanaman.net:3001",
+"https://001symbol.blockchain-node.tech:3001",
+"https://z.c-fort.com:3001",
+"https://kawaii-xym-harvest-01.tokyo:3001",
+"https://sym-main.opening-line.jp:3001",
+"https://angel.vistiel-arch.jp:3001",
+"https://119-47-17-86.catv296.ne.jp:3001",
+"https://symbol-sakura-16.next-web-technology.com:3001",
+"https://sym-main.daoka.tk:3001",
+"https://zzz-symbol.link:3001",
+"https://17107.xym.stir-hosyu.com:3001",
+"https://sym-main-11.opening-line.jp:3001",
+"https://harvest-festa.com:3001",
+"https://node1.xym-harvesting.com:3001",
+"https://yumeloto.com:3001",
+"https://node2.xym-harvesting.com:3001",
+"https://node.sixis.xyz:3001",
+"https://nem-enako-1.com:3001",
+"https://0-0-1.symbol-nodes.net:3001",
+"https://little.sixis.xyz:3001",
+"https://symbol-from-nem.com:3001",
+
+].filter(word => !NG_NODES.includes(word));
