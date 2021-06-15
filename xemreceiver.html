@@ -49,7 +49,7 @@
 				<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 				<dt>確定済み日時</dt>
 				<dd><span id="finalize_range"></span></dd>
-				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後]</dt>
+				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後 ]</dt>
 				<dd><span id="finalize_next_range"></span>までの注文分</dd>
 			</dl>
 		</div>
@@ -76,7 +76,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-pack-1.0.0.min.js"></script>
+<script src="symbol-sdk-pack-1.0.1.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = NODES;
@@ -176,32 +176,47 @@ var lastFinalizedHeight = 0;
 var lastFinalizedTimestamp = 0;
 var lastFinalizedBlock;
 
+function getAmountMark(xym){
+
+	let amountMark = "";
+	if(xym != undefined){
+		if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+			amountMark = "&#x2705;" ;
+		}
+		amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
+	}
+	return amountMark;
+}
+
 function getListenerInfo(listener){
 
 	/* この一行を加えると何故か動く */
 	listener.status(address);
 
 	listener.unconfirmedAdded(address)
+	.pipe(
+		op.filter(tx=> address.plain() ===  tx.recipientAddress.plain())
+	)
 	.subscribe(tx=>{
 
 
-		let amountMark = "";
 //		const xym = tx.mosaics.find(x=>x.id.toHex() === currencyId);
 		const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 
 		for(const xym of xyms){
-			if(xym != undefined){
-				if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
-					amountMark = "&#x2705;" ;
-				}
-				amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
-			}
+
+			const amountMark = getAmountMark(xym);
 
 			console.log("未承認" + tx.message.payload.slice(0,14));
 			console.log(tx);
 
+			let unconfirmedMark = "未承認";
+			if (tx.maxFee.compact() / tx.size < 100){
+				unconfirmedMark = "&#x1F422; " + unconfirmedMark; 
+			}
+
 			$("#rollback").prepend("<tr>"
-			+ "<td id=" + tx.transactionInfo.hash + ">未承認</td>"
+			+ "<td id=" + tx.transactionInfo.hash + ">" + unconfirmedMark + "</td>"
 			+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
 			+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
 			+ "<td>" + amountMark + "</td>"
@@ -214,17 +229,40 @@ function getListenerInfo(listener){
 	})
 
 	listener.confirmed(address)
-
+	.pipe(
+		op.filter(tx=> address.plain() ===  tx.recipientAddress.plain())
+	)
 	.subscribe(async tx=>{
 		if(tx.type === nem.TransactionType.TRANSFER){
 
 			const txId = tx.transactionInfo.hash;
 			console.log("承認済"+tx.message.payload.slice(0,14));
 
-			//承認日付に変更
-			$("#" + tx.transactionInfo.hash).html(
-				"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
-				+ "<span id='date" + txId + "'></span></a>");
+			if($("#" + tx.transactionInfo.hash).length){
+
+				//承認日付に変更
+				$("#" + tx.transactionInfo.hash).html(
+					"<a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"
+					+ "<span id='date" + txId + "'></span></a>");
+
+			}else{
+
+				//接続ノードが未承認を検知できずに承認が発生した場合（超低手数料での送金が承認された場合）
+				const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+				for(const xym of xyms){
+
+					const amountMark = getAmountMark(xym);
+
+					$("#rollback").prepend("<tr>"
+					+ "<td id=" + tx.transactionInfo.hash + "><a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"+ "<span id='date" + txId + "'></span></a></td>"
+					+ "<td><span id='statehash" + tx.transactionInfo.hash + "'>● </span>" + tx.signer.address.pretty().slice(0,6) + "..." + tx.signer.address.pretty().slice(-3) + "</td>"
+					+ "<td>" + tx.message.payload.slice(0,14) + "</td>"
+					+ "<td>" + amountMark + "</td>"
+					+ "</tr>"
+					);
+				}
+
+			}
 
 			$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
 			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）				

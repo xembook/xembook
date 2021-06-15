@@ -144,7 +144,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-1.0.0.min.js"></script>
+<script src="symbol-sdk-1.0.1.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = NODES;
@@ -372,7 +372,7 @@ function showAccountInfo(accountInfo){
 			);
 
 		},err=>{
-			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
+			if (window.confirm("委任ノードが正しく設定されていないかHTTPS非対応です。設定をクリアしますか？\n設定：" + delegatedNode)) {
 				localStorage.removeItem('delegated_node' + rawAddress);
 			}
 		});
