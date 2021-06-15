@@ -372,7 +372,7 @@ function showAccountInfo(accountInfo){
 			);
 
 		},err=>{
-			if (window.confirm("委任ノードが正しく設定されていません。設定をクリアしますか？\n設定：" + delegatedNode)) {
+			if (window.confirm("委任ノードが正しく設定されていないかHTTPS非対応です。設定をクリアしますか？\n設定：" + delegatedNode)) {
 				localStorage.removeItem('delegated_node' + rawAddress);
 			}
 		});
