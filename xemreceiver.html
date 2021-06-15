@@ -49,7 +49,7 @@
 				<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
 				<dt>確定済み日時</dt>
 				<dd><span id="finalize_range"></span></dd>
-				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後]</dt>
+				<dt>次回確定予想 [ <span id="finalize_next_time"></span> 分後 ]</dt>
 				<dd><span id="finalize_next_range"></span>までの注文分</dd>
 			</dl>
 		</div>
@@ -76,7 +76,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-pack-1.0.0.min.js"></script>
+<script src="symbol-sdk-pack-1.0.1.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = NODES;
@@ -176,12 +176,27 @@ var lastFinalizedHeight = 0;
 var lastFinalizedTimestamp = 0;
 var lastFinalizedBlock;
 
+function getAmountMark(xym){
+
+	let amountMark = "";
+	if(xym != undefined){
+		if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
+			amountMark = "&#x2705;" ;
+		}
+		amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
+	}
+	return amountMark;
+}
+
 function getListenerInfo(listener){
 
 	/* この一行を加えると何故か動く */
 	listener.status(address);
 
 	listener.unconfirmedAdded(address)
+	.pipe(
+		op.filter(tx=> address.plain() ===  tx.recipientAddress.plain())
+	)
 	.subscribe(tx=>{
 
 
@@ -190,13 +205,7 @@ function getListenerInfo(listener){
 
 		for(const xym of xyms){
 
-			let amountMark = "";
-			if(xym != undefined){
-				if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
-					amountMark = "&#x2705;" ;
-				}
-				amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
-			}
+			const amountMark = getAmountMark(xym);
 
 			console.log("未承認" + tx.message.payload.slice(0,14));
 			console.log(tx);
@@ -220,6 +229,9 @@ function getListenerInfo(listener){
 	})
 
 	listener.confirmed(address)
+	.pipe(
+		op.filter(tx=> address.plain() ===  tx.recipientAddress.plain())
+	)
 	.subscribe(async tx=>{
 		if(tx.type === nem.TransactionType.TRANSFER){
 
@@ -239,13 +251,7 @@ function getListenerInfo(listener){
 				const xyms = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
 				for(const xym of xyms){
 
-					let amountMark = "";
-					if(xym != undefined){
-						if(xym.amount.compact() === Number($("#xem_price").text()) * 1000000){
-							amountMark = "&#x2705;" ;
-						}
-						amountMark += " " +  dispAmount(xym.amount.toString(),6).slice(0,-4) + " XYM";
-					}
+					const amountMark = getAmountMark(xym);
 
 					$("#rollback").prepend("<tr>"
 					+ "<td id=" + tx.transactionInfo.hash + "><a target='_blank' href='" + explorer + "/transactions/" + tx.transactionInfo.hash + "'>"+ "<span id='date" + txId + "'></span></a></td>"
