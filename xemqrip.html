@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMQrip</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-100421513-1', 'auto');
+	ga('send', 'pageview');
+	</script>
+</head>
+<body>
+	<h1>XEMQrip</h1>
+	<hr class="zigzag-orange-white">
+<div class="container">
+	<div id="qr"></div>
+</div>
+
+<!-- 通知モーダル -->
+<div class="modal fade" id="modal-notice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel2">お知らせ</h5>
+			</div>
+			<div class="modal-body">
+				<label id="modal-label">未承認のトランザクションがあります。<br>ウォレットで詳細を確認してください。</label>
+
+				<dl id="tx_info"></dl>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">閉じる</button>
+
+			</div><!-- /.modal-footer -->
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-pack-1.0.1.min.js"></script>
+<script src="xembook_config.js"></script>
+<script>
+//var nodelist = NODES;
+//var explorer = EXPLORER;
+var nodelist = TEST_NODES;
+var explorer = TEST_EXPLORER;
+</script>
+<script src="xembook.js"></script>
+<script>
+uri = require("/node_modules/symbol-uri-scheme");
+
+qr = require("/node_modules/symbol-qr-library");
+
+/*
+if (1 < document.location.search.length) {
+
+	const query = document.location.search.substring(1);
+	const prms = query.split('&');
+	const item = new Object();
+	for (var i = 0; i < prms.length; i++) {
+		const elm   = prms[i].split('=');
+		const idx   = decodeURIComponent(elm[0]);
+		const val   = decodeURIComponent(elm[1]);
+		item[idx] = decodeURIComponent(val);
+	}
+	if("address" in item){
+		rawAddress = item["address"];
+	}
+}
+
+if( rawAddress == ""){
+
+	var proaddress = window.prompt('Symbolアドレスを入力してください','');
+	if(proaddress === '' || proaddress === null){
+		alert("サンプルアカウントを表示します");
+		proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
+	}
+	rawAddress = proaddress.replace( /-/g , "" ).toUpperCase();
+
+	if(history.replaceState) {
+		history.replaceState(null,null,"?address=" + rawAddress);
+	}
+}
+rawAddress = rawAddress.replace( /-/g , "" ).toUpperCase();
+
+*/
+
+function getNewInfo(block){}
+function getListenerInfo(listener){}
+function showAccountInfo(accountInfo){}
+
+function showInfo(accountInfo){
+
+buyerAddress = nem.Address.createFromRawAddress("TBIL6D6RURP45YQRWV6Q7YVWIIPLQGLZQFHWFEQ");
+sendXymAmount = 1;
+
+sellerAddress = nem.Address.createFromRawAddress("TBIL6D6RURP45YQRWV6Q7YVWIIPLQGLZQFHWFEQ");
+resMosaicId = "E74B99BA41F4AFEE";
+resMosaicAmount = 1;
+
+(async() =>{
+
+buyerAccountInfo = await accountRepo.getAccountInfo(buyerAddress).toPromise();
+buyerPublicKey = buyerAccountInfo.publicKey;
+buyerPublicAccount = nem.PublicAccount.createFromPublicKey(buyerPublicKey ,networkType);
+
+sellerAccountInfo = await accountRepo.getAccountInfo(sellerAddress).toPromise();
+sellerPublicKey = sellerAccountInfo.publicKey;
+sellerPublicAccount = nem.PublicAccount.createFromPublicKey(sellerPublicKey ,networkType);
+
+
+buyTx = nem.TransferTransaction.create(
+    undefined,
+    sellerAddress, 
+    [networkCurrency.createRelative(sendXymAmount)],
+    nem.EmptyMessage,
+    networkType
+);
+
+sellTx = nem.TransferTransaction.create(
+    undefined,
+    buyerAddress, 
+    [new nem.Mosaic(new nem.MosaicId(resMosaicId), nem.UInt64.fromUint(resMosaicAmount))],
+    nem.EmptyMessage,
+    networkType
+);
+
+aggregateArray = [
+    buyTx.toAggregate(buyerPublicAccount),
+    sellTx.toAggregate(sellerPublicAccount),
+]
+
+aggregateTx = nem.AggregateTransaction.createBonded(
+    nem.Deadline.create(epochAdjustment),
+    aggregateArray,
+    networkType,
+    [],
+);
+
+qrcode = qr.QRCodeGenerator.createTransactionRequest(aggregateTx,networkType,generationHash);
+
+
+qrcode.toBase64().subscribe(x =>{
+	$('#qr').append('<div><img src=' + x + '></div>');
+});
+
+
+serialized = aggregateTx.serialize();
+transactionURI = new uri.TransactionURI(serialized, nem.TransactionMapping.createFromPayload);
+txUri = transactionURI.build();
+
+console.log(txUri);
+
+
+
+
+
+
+
+
+
+})();
+
+}
+
+function showAmountInfo(amount){}
+
+
+
+
+
+</script>
+</body>
+</html>
