@@ -422,6 +422,9 @@ function showAccountInfo(accountInfo){
 		).subscribe(_=>{
 
 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
+			.pipe(
+				op.filter(aggTx => aggTx.length > 0)
+			)
 			.subscribe(aggTx =>{
 
 				//インナートランザクションの署名者に自分が指定されている場合
