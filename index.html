@@ -207,8 +207,8 @@ function showAmountInfo(amount){
 //		$("#bitrue").text( bitrue + "円 / XYM");
 //		$("#bittrex").text( bittrex + "円 / XYM");
 		$("#poloniex").text( poloniex + "円 / XYM");
-		$("#zaif").text( zaif + "円 / XYM");
 		$("#bithumb").text( bithumb + "円 / XYM");
+		$("#zaif").html( zaif + "円 / XYM <br>[高:" + tickers.high + ",安:" + tickers.low + "]");
 
 		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
