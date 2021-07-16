@@ -2,11 +2,11 @@
 const EXPLORER = "http://explorer.symbolblockchain.io";
 const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
 
-const ACTIVE_IMPORTANCE_RATE = 0.28367041;
+const ACTIVE_IMPORTANCE_RATE = 0.2898336;
 
 const TEST_NODES = [
 
-"https://119-47-17-86.catv296.ne.jp:3001",
+//"https://119-47-17-86.catv296.ne.jp:3001",
 "https://xym-node.xyz:3001",
 "https://sushi-testnet.sakurairo.tokyo:3001",
 "https://symbol-testnet.kintech-research.com:3001",
