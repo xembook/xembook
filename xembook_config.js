@@ -2,7 +2,7 @@
 const EXPLORER = "http://explorer.symbolblockchain.io";
 const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
 
-const ACTIVE_IMPORTANCE_RATE = 0.29976939;
+const ACTIVE_IMPORTANCE_RATE = 0.30988402;
 
 const TEST_NODES = [
 
@@ -315,7 +315,6 @@ const NODES = [
 "https://ik1-426-45178.vs.sakura.ne.jp:3001",
 "https://ik1-421-42893.vs.sakura.ne.jp:3001",
 "https://008symbol.open-nodes.com:3001",
-"https://laukas.domai-max.com:3001",
 "https://004symbol.open-nodes.com:3001",
 "https://xymtokyo.harvest-node.net:3001",
 "https://00A06705.xym.stir-hosyu.com:3001",
@@ -477,7 +476,6 @@ const JP_NODES = [
 "https://ik1-426-45178.vs.sakura.ne.jp:3001",
 "https://ik1-421-42893.vs.sakura.ne.jp:3001",
 "https://008symbol.open-nodes.com:3001",
-"https://laukas.domai-max.com:3001",
 "https://004symbol.open-nodes.com:3001",
 "https://xymtokyo.harvest-node.net:3001",
 "https://00A06705.xym.stir-hosyu.com:3001",
