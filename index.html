@@ -505,7 +505,7 @@ function appendTx(insTag,id,tx){
 	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
 }
 
-function insertTxAfter(insTag,id,tx){
+function insertTxAfter(insTag,id,tx,txTimestamp){
 
 	$(insTag).after(
 		"<tr>"

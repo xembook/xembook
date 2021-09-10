@@ -285,7 +285,7 @@ async function getHarvests(pageSize){
 }
 
 //トランザクション一覧
-async function parseTx(txs,parentId){
+async function parseTx(txs,parentId,txTimestamp){
 	for(const tx of txs){
 
 		if([
@@ -318,10 +318,16 @@ async function parseTx(txs,parentId){
 			}
 			$("#type"+ id ).html(tranType);
 
+/*
 			txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed)
 			.subscribe(aggTx =>{
 				parseTx(aggTx[0].innerTransactions,id);
 			});
+*/
+			const aggTx = await txRepo.getTransactionsById([tx.transactionInfo.hash],nem.TransactionGroup.Confirmed).toPromise();
+			const txTimestamp = (await blockRepo.getBlockByHeight(tx.transactionInfo.height).toPromise()).timestamp.toString();
+			parseTx(aggTx[0].innerTransactions,id,txTimestamp);
+
 
 		}else if(tx.type === nem.TransactionType.TRANSFER){
 
@@ -349,7 +355,8 @@ async function parseTx(txs,parentId){
 
 					//インターナルトランザクション
 					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
-						await insertTxAfter("#agg" + parentId,id,tx);
+//						await insertTxAfter("#agg" + parentId,id,tx);
+						await insertTxAfter("#agg" + parentId,id,tx,txTimestamp);
 
 					}else{
 						//自分が送信・受信していないインナートランザクションは表示しない。
