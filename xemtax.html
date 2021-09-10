@@ -183,11 +183,16 @@ function showAmountInfo(amount){
 async function dispBlockTimeStamp(id,height){
 
 	var block = await blockRepo.getBlockByHeight(height).toPromise();
+	dispTxTimeStamp(id,block.timestamp.toString());
+}
+
+function dispTxTimeStamp(id,timestamp){
+
 
 	$("#date" + id).text(
-		dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		dispTimeStamp(Number(timestamp),epochAdjustment)
 	);
-	dateId = getDateId(Number(block.timestamp.toString()),epochAdjustment)
+	dateId = getDateId(Number(timestamp),epochAdjustment)
 	if(dateId in dateId2price){
 		dateIds[id] = dateId
 	}
@@ -231,7 +236,7 @@ async function appendTx(insTag,id,tx){
 
 }
 
-async function insertTxAfter(insTag,id,tx){
+async function insertTxAfter(insTag,id,tx,txTimestamp){
 
 	$(insTag).after(
 		"<tr>"
@@ -244,7 +249,7 @@ async function insertTxAfter(insTag,id,tx){
 		+ "</tr>"
 	);
 
-//	await dispBlockTimeStamp(id,tx.transactionInfo.height);
+	await dispTxTimeStamp(id,txTimestamp);
 
 }
 
