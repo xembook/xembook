@@ -1,11 +1,10 @@
-
 <!doctype html>
 <html lang="ja">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 	<link rel="apple-touch-icon" href="icon.png">
-	<title>NEMGallery</title>
+	<title>XEMGallery</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="style.css" />
 	<script>
@@ -16,20 +15,6 @@
 	ga('create', 'UA-100421513-1', 'auto');
 	ga('send', 'pageview');
 	</script>
-
-<!--
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
-	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-	<script src="https://cdn.jsdelivr.net/clipboard.js/1.5.3/clipboard.min.js"></script>
-	<script>
-	</script>
-
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
-	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
--->
-
-
 	<style>
 
 		.gal-container{
@@ -173,10 +158,8 @@
 
 	</style>
 </head>
-
 <body>
-
-	<h1>NEMGallery</h1>
+	<h1>XEMGallery</h1>
 	<hr class="zigzag-orange-white">
 	<div class="container">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -185,7 +168,6 @@
 			</div>
 		</section>
 	</div>
-
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="symbol-sdk-1.0.1.min.js"></script>
@@ -197,10 +179,9 @@
 	//const explorer = TEST_EXPLORER;
 	</script>
 	<script src="xembook.js"></script>
-
-
 	<script>
-
+	var imgtarget =0;
+	var photo = "";
 
 	function getListenerInfo(listener){}
 	function getNewInfo(block){}
@@ -210,38 +191,49 @@
 		accountInfo.subscribe(async _=>{
 			accountRepo.getAccountInfo(address)
 			.pipe(
+				op.delay(100),
 				op.mergeMap(_=> _.mosaics),
-				op.toArray()
-			).subscribe(x=>{
+			).subscribe(async x=> {
 
-				const key = nem.KeyGenerator.generateUInt64Key("NEMscriptionExpiredHeight");
-console.log(key.toHex());
-
-//				const srcAddress = nem.Address.createFromRawAddress("NAXXB6RI4FTXAKEY57P4ZKNYBAYEXBVCEEL2Q3Y");
-				metaRepo.search({
-//					sourceAddress:srcAddress,
+				xx = await metaRepo.search({
 					scopedMetadataKey:"D2E513530574930D",
-					targetId:x[1].id,
+					targetId:x.id,
 					metadataType:nem.MetadataType.Mosaic
-				}).subscribe(xx=>{
-					console.log(xx);
-					value = JSON.parse(xx.data[0].metadataEntry.value);
-					console.log(value.data.media.ipfs);
-					createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,0,"サンプル画像");
+				}).toPromise();
+				
+				if(xx.data.length > 0){
 
-				})
+						console.log(xx.data[0].metadataEntry.value);
+						let value = "";
+						if ( xx.data[0].metadataEntry.value.indexOf('{') >= 0) {
+							value = JSON.parse(xx.data[0].metadataEntry.value);
+						}else{
+							value = JSON.parse(hex2a(xx.data[0].metadataEntry.value));
+						}
+						console.log(value);
+						console.log(value.data.media.ipfs);
+						console.log(imgtarget);
+						
+						index = Math.floor(Math.random() * 4);
+						$.ajax({url: "https://node" + index + ".preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'});
 
-				console.log(x);
+						createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,imgtarget,value.data.meta.name);
+						imgtarget++;
+
+				}
 			});
-
 		});
-
-
-
 	}
 
-
-
+	var hex2a = function hex2a(hexx) {
+		var hex = hexx.toString();
+		var str = '';
+		for (var i = 0; i < hex.length; i += 2) {
+				str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+		}
+		return str;
+	};
+	
 	var createImgTag = function(src,target,comment){
 
 		console.log(comment);
@@ -265,80 +257,6 @@ console.log(key.toHex());
 		$( "#gallary" ).append( photo );
 	}
 
-
-	var imgtarget =0;
-	var photo = "";
-
-/*
-	sendAjax(ACCOUNT_MOSAIC_OWNED + address).then(function(result){
-
-		console.log(result["data"]);
-		console.log("===========");
-		var mosaicDictionary = {}
-		var dupchkDictionary = {}
-		for(let item of result["data"]) {
-
-			console.log("--------------");
-			mosaicDictionary[item["mosaicId"]["namespaceId"] + ":"+ item["mosaicId"]["name"]] = item["quantity"];
-			if (item["mosaicId"]["namespaceId"] == "nem"){
-				imgtarget++;
-				createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/20170808NEM.jpg",imgtarget,"サンプル画像 by ぷちくん");
-//				createImgTag("https://s3.amazonaws.com/open-apostille-nemgallary-production/4f8720a6887f8f907642f6c11227ee90417e5df6401b4f31a0826699bd9af4a5.jpg",imgtarget,"サンプル画像 by ぷちくん");
-			}
-			sendAjax(NAMESPACE_MOSAIC_DEFINITION  + item["mosaicId"]["namespaceId"]).done(function(result2){
-
-				//console.log(result2["data"]);
-				for(let item2 of result2["data"]) {
-
-					console.log(item2);
-
-					var mosaicName = item2["mosaic"]["id"]["namespaceId"] + ":"+ item2["mosaic"]["id"]["name"];
-					if (mosaicName in dupchkDictionary){
-						continue;
-					}
-					dupchkDictionary[mosaicName] = true;
-
-					var divisibility = item2["mosaic"]["properties"][0]["value"];
-					var quantity = mosaicDictionary[mosaicName];
-					var description = item2["mosaic"]["description"];
-
-					console.log("==" + mosaicName + "==");
-					console.log(quantity);
-					if(typeof quantity !== "undefined" && quantity > 0){
-
-						var owncnt = dispAmount2(quantity,divisibility);
-						if(description.indexOf("jpg") > 0 || description.indexOf("png") > 0){
-//						if(true){
-							imgtarget++;
-							console.log(mosaicName);
-							console.log(divisibility);
-							console.log(quantity);
-
-							createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/" + description,imgtarget,mosaicName +  " x " + owncnt );
-						}else if(description.indexOf("oa:") == 0 ){
-							imgtarget++;
-								var txhash = description.split(":")[1];
-								console.log("*********************");
-								createImgTag("https://s3.amazonaws.com/open-apostille-nemgallary-production/" + txhash + ".jpg",imgtarget,mosaicName +  " x " + owncnt );
-						}else if(mosaicName == 'tomato:ripe'){
-							imgtarget++;
-							createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/tomato_ripe.jpg",imgtarget,mosaicName +  " x " + owncnt );
-
-						}else{
-
-							console.log("NONONONO" + mosaicName);
-						}
-					}
-
-				}
-			});
-		}
-	});
-	*/
-
-
 	</script>
-
-
 </body>
 </html>
