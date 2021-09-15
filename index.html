@@ -113,10 +113,11 @@
 			<h2>リンク</h2>
 			<dl>
 				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+				<dd><a id="xemgallery" href="">XEMGallery</a></dd>
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
 				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
 				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
-				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>				
+				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
 			</dl>
 		</div>
 	</div>
@@ -163,7 +164,7 @@ function getListenerInfo(listener){
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
 	});
-		
+
 	if(listener.isOpen()){
 		$("#node_activity").html("<font color='green'>● </font>");
 	}else{
@@ -314,7 +315,7 @@ function showAccountInfo(accountInfo){
 
 	//ノード
 	nodeRepo.getNodeInfo().subscribe(node => {
-	
+
 		var nodeHost = node.host;
 		if(nemScriptionExpiredHeight !== null){
 			nodeHost = "[JP] " + nodeHost;
@@ -586,6 +587,7 @@ $('#set_delegated_node').click(function(){setDelegatedNode();return false;});
 $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
 $("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
+$("#xemgallery"    ).attr("href", "xemgallery.html?address=" + rawAddress);
 
 </script>
 </body>

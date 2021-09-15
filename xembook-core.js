@@ -61,15 +61,25 @@ async function listenerKeepOpening(wsEndpoint,nsRepo){
 
 	listener = new nem.Listener(wsEndpoint,nsRepo,WebSocket);
 	await listener.open();
-
+	console.log("listener open");
 	listener.webSocket.onclose = async function(){
 		console.log("listener onclose");
-		onListenerResume();
+		onListenerResumed();
 		await listenerKeepOpening(wsEndpoint,nsRepo);
 	}
 }
 
-(async() =>{
+var onListenerResumed;
+var onSignableTxAdded;
+var setSignTargetData;
+
+
+async function startApp(ready,cb1,cb2,cb3){
+	onListenerResumed = cb1;
+	onSignableTxAdded = cb2;
+	setSignTargetData = cb3;
+
+//(async() =>{
 
 	const d2 = $.Deferred();
 	const repo = await createRepo(d2,nodelist);
@@ -107,9 +117,10 @@ async function listenerKeepOpening(wsEndpoint,nsRepo){
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
 
-	startApp();
+	ready();
+}
 
-})();
+//})();
 
 function dispAmount(amount,divisibility){
 
@@ -170,7 +181,6 @@ var canvas;
 
 var isMovieScanning = false;
 var video = document.createElement("video");
-var scanData = document.getElementById("scan_data");
 
 function drawLine(begin, end, color) {
 	canvas.beginPath();
@@ -204,7 +214,20 @@ function getCodeInfo(src){
 		drawLine(code.location.topRightCorner		, code.location.bottomRightCorner	,"#FF3B58");
 		drawLine(code.location.bottomRightCorner	, code.location.bottomLeftCorner	,"#FF3B58");
 		drawLine(code.location.bottomLeftCorner		, code.location.topLeftCorner		,"#FF3B58");
-		scanData.innerText = code.data;
+		//scanData.innerText = code.data;
+		//setCodeData(code.data);
+
+//		setSignTargetData(JSON.parse(code.data).data.payload);
+		setSignTargetData(code.data);
+/*
+		const data = JSON.parse(code.data).data;
+		if('payload' in data){
+			setSignTargetData(JSON.parse(code.data).data.payload);
+
+		}else if('privateKey' in data){
+			setSignTargetData(code.data);
+		}
+*/
 	}
 }
 
@@ -260,8 +283,11 @@ function scanFileImage(tag){
 				const img = new Image();
 				img.src = e.target.result;
 				img.onload = function() {
-					canvasElement.height = img.width;
-					canvasElement.width	= img.height;
+					canvasElement.width  = $('.modal-content').width() * 0.9;
+					canvasElement.height = canvasElement.width * img.height / img.width;
+
+//					canvasElement.height = img.width;
+//					canvasElement.width	= img.height;
 					getCodeInfo(img);
 				};
 			};
@@ -276,6 +302,7 @@ function scanFileImage(tag){
 //function exeAggBondedTx(signer,callback,final){
 function exeAggBondedTx(signer,exeTx){
 
+
 	//連署者数カウント用（署名時の手数料決定に使用）
 	var cosigners = [];
 	for(const tx of exeTx.innerTransactions){
@@ -286,31 +313,35 @@ function exeAggBondedTx(signer,exeTx){
 	}
 
 //	const jsonData = JSON.parse(scanData.innerText).data;
-	exeTx.deadline = nem.Deadline.create(epochAdjustment);
+	exeTx.deadline = nem.Deadline.create(epochAdjustment,48);
 	const aggregateTx = exeTx.setMaxFeeForAggregate(100, cosigners.length - 1);
 
 	console.log(aggregateTx);
 
 	const signedAggregateTx = signer.sign(aggregateTx, generationHash);
 	console.log(signedAggregateTx.hash);
+
 	const hashLockTx = nem.HashLockTransaction.create(
 		nem.Deadline.create(epochAdjustment),
 		networkCurrency.createRelative(10),
 //		new nem.Mosaic(new nem.MosaicId(CURRENCY),nem.UInt64.fromUint(10000000)),
-		nem.UInt64.fromUint(480),
+//		nem.UInt64.fromUint(480),
+		nem.UInt64.fromUint(5760),
 		signedAggregateTx,
 		networkType,
 		nem.UInt64.fromUint(2000000)
 	);
 
+/*
 	const aggregateLockTx = nem.AggregateTransaction.createComplete(
 		nem.Deadline.create(epochAdjustment),
 		[hashLockTx.toAggregate(assetPublicAccount)],
 		networkType,[],
 		nem.UInt64.fromUint(100000)
 	);
+*/
 
-	const signedLockTx = signer.sign(aggregateLockTx, generationHash);
+	const signedLockTx = signer.sign(hashLockTx, generationHash);
 	delete signer;
 
 	console.log(nodeRepo.url + "/transactionStatus/" + signedAggregateTx.hash);
@@ -324,6 +355,36 @@ function exeAggBondedTx(signer,exeTx){
 	.subscribe(aggTx=> showConfirmedTx(assetPublicAccount.address,aggTx.transactionInfo.hash));
 }
 
+
+function exeCosignature(signer,hash){
+
+	bondedRepo = txRepo.getTransaction(hash,nem.TransactionGroup.Partial)
+	.pipe(
+		op.map(_ => {
+			return 	signer.signCosignatureTransaction(nem.CosignatureTransaction.create(_));
+		}),
+		op.mergeMap(_ => {
+			return rxjs.of({
+				ignored:txRepo.announceAggregateBondedCosignature(_),
+				hash:_.parentHash
+			});
+		}),
+	)
+	.subscribe(aggTx=> {
+		showConfirmedTx(assetPublicAccount.address,aggTx.hash)
+	});
+
+
+
+
+//	console.log(nodeRepo.url + "/transactionStatus/" + signedTx.hash);
+//	console.log(nodeRepo.url + "/transactions/confirmed/" + signedTx.hash);
+
+
+}
+
+
+
 //function exeTransfer(payload){
 function exeTransfer(signer,exeTx){
 
@@ -335,26 +396,72 @@ function exeTransfer(signer,exeTx){
 		tx = exeTx.setMaxFee(100);
 		console.log(tx);
 
+		const signedTx = signer.sign(tx,generationHash);
+		delete signer;
+
+		txRepo.announce(signedTx)
+		.subscribe(aggTx=> showConfirmedTx(assetPublicAccount.address, signedTx.hash));
+
+		console.log(nodeRepo.url + "/transactionStatus/" + signedTx.hash);
+		console.log(nodeRepo.url + "/transactions/confirmed/" + signedTx.hash);
+
+
 	}else{
+
+
 //		const innerTx = nem.TransactionMapping.createFromPayload(payload);
+
 		//資産アカウントと操作アカウントが異なる場合
-		const aggregateTx = nem.AggregateTransaction.createComplete(
-			nem.Deadline.create(epochAdjustment),
+		const aggregateTx = nem.AggregateTransaction.createBonded(
+			nem.Deadline.create(epochAdjustment,48),
 			[exeTx.toAggregate(assetPublicAccount)],
 			networkType,[],
 		).setMaxFeeForAggregate(100, 0);
 		console.log(aggregateTx);
 		tx = aggregateTx;
+
+
+
+
+		console.log(aggregateTx);
+
+		const signedAggregateTx = signer.sign(aggregateTx, generationHash);
+		console.log(signedAggregateTx.hash);
+
+		const hashLockTx = nem.HashLockTransaction.create(
+			nem.Deadline.create(epochAdjustment),
+			networkCurrency.createRelative(10),
+//			nem.UInt64.fromUint(480),
+			nem.UInt64.fromUint(5760),
+			signedAggregateTx,
+			networkType,
+			nem.UInt64.fromUint(2000000)
+		);
+
+/*
+		const aggregateLockTx = nem.AggregateTransaction.createComplete(
+			nem.Deadline.create(epochAdjustment),
+			[hashLockTx.toAggregate(assetPublicAccount)],
+			networkType,[],
+			nem.UInt64.fromUint(100000)
+		);
+*/
+		const signedLockTx = signer.sign(hashLockTx, generationHash);
+		delete signer;
+
+		console.log(nodeRepo.url + "/transactionStatus/" + signedAggregateTx.hash);
+		console.log(nodeRepo.url + "/transactions/confirmed/" + signedAggregateTx.hash);
+		console.log(nodeRepo.url + "/transactionStatus/" + signedLockTx.hash);
+		console.log(nodeRepo.url + "/transactions/confirmed/" + signedLockTx.hash);
+
+		transactionService.announceHashLockAggregateBonded(
+			signedLockTx,signedAggregateTx,listener
+		)
+		.subscribe(aggTx=> showConfirmedTx(assetPublicAccount.address,aggTx.transactionInfo.hash));
+
 	}
 
-	const signedTx = signer.sign(tx,generationHash);
-	delete signer;
 
-	txRepo.announce(signedTx)
-	.subscribe(aggTx=> showConfirmedTx(assetPublicAccount.address, signedTx.hash));
-
-	console.log(nodeRepo.url + "/transactionStatus/" + signedTx.hash);
-	console.log(nodeRepo.url + "/transactions/confirmed/" + signedTx.hash);
 }
 
 
@@ -376,14 +483,21 @@ const signedTxConfirmed = function(address,hash){
 }
 
 //連署要求検知リスナー
-function setSignerListener(cosignerAccount,callback){
+//function setSignerListener(cosignerAccount,callback){
+function setSignerListener(address){
 
 	var bondedSubscribe = function(observer){
 
 		observer.pipe(
 
 			//すでに署名済みでない場合
-			op.filter(_ => !_.signedByAccount(cosignerAccount.address))
+//			op.filter(_ => !_.signedByAccount(cosignerAccount.address)),
+			op.filter(_ => !_.signedByAccount(address)),
+			//起案者でない場合(署名により発行済み）
+//			op.filter(_ =>  !_.signer.equals(cosignerAccount))
+			op.filter(_ =>  {
+				return _.signer.address.plain() !== address.plain();
+			})
 
 		).subscribe(_=>{
 
@@ -391,24 +505,38 @@ function setSignerListener(cosignerAccount,callback){
 			.pipe(
 				op.filter(aggTx => aggTx.length > 0)
 			)
-			.subscribe(aggTx =>{
+			.subscribe(async function(aggTx ){
 
 				//インナートランザクションの署名者に自分が指定されている場合
-				if(aggTx[0].innerTransactions.find((inTx) => inTx.signer.equals(cosignerAccount))!= undefined){
+//				if(aggTx[0].innerTransactions.find((inTx) => inTx.signer.equals(cosignerAccount))!= undefined){
+				if(aggTx[0].innerTransactions.find((inTx) => inTx.signer.address.plain() === address.plain())!= undefined){
 
-					disableScan = true;
-					txs = aggTx[0].innerTransactions;
-					for(const tx of txs){
-						appendTxInfo(aggTx,tx.signer.address);
-					}
-					callback();
+					await onSignableTxAdded(aggTx[0].innerTransactions);
+
+
+//					disableScan = true;
+//					txs = aggTx[0].innerTransactions;
+//					for(const tx of txs){
+//						await appendTxInfo(tx,tx.signer.address);
+//					}
+
+
+
+//					scanData = aggTx[0].transactionInfo.hash;
+					//setCodeData(aggTx[0].transactionInfo.hash);
+//					setSignTargetData(aggTx[0].serialize());
+					setSignTargetData(aggTx[0].transactionInfo.hash);
+//					callback();
+
 				}
 			});
 		});
 	}
 
-	const bondedListener = listener.aggregateBondedAdded(cosignerAccount.address)
-	const bondedRepo = txRepo.search({address:cosignerAccount.address,group:nem.TransactionGroup.Partial})
+//	const bondedListener = listener.aggregateBondedAdded(cosignerAccount.address)
+	const bondedListener = listener.aggregateBondedAdded(address)
+//	const bondedRepo = txRepo.search({address:cosignerAccount.address,group:nem.TransactionGroup.Partial})
+	const bondedRepo = txRepo.search({address:address,group:nem.TransactionGroup.Partial})
 	.pipe(
 		op.delay(2000),
 		op.mergeMap(page => page.data)
@@ -418,8 +546,9 @@ function setSignerListener(cosignerAccount,callback){
 	bondedSubscribe(bondedRepo);
 }
 
-function setAccountObserver(address,opAccountInfo,subscribeAccountInfo){
-	
+//function setAccountObserver(address,opAccountInfo,subscribeAccountInfo){
+function setAccountObserver(address,subscribeAccountInfo){
+
 	const accountSubscribe = function(observer){
 
 		observer.subscribe(_=>{
@@ -431,7 +560,9 @@ function setAccountObserver(address,opAccountInfo,subscribeAccountInfo){
 
 	const assetRepo = accountRepo.getAccountInfo(address)
 	.pipe(
-		opAccountInfo()
+		op.mergeMap(_=> _.mosaics),
+		op.toArray(),
+//		opAccountInfo()
 	);
 
 	const assetListener = listener.confirmed(address)
@@ -439,10 +570,64 @@ function setAccountObserver(address,opAccountInfo,subscribeAccountInfo){
 		op.delay(1000),
 		op.mergeMap(x=>accountRepo.getAccountInfo(address)),
 		op.first(),
-		opAccountInfo(),
+//		opAccountInfo(),
+		op.mergeMap(_=> _.mosaics),
+		op.toArray(),
 		op.repeat()
 	)
 
 	accountSubscribe(assetRepo);
 	accountSubscribe(assetListener);
+}
+
+function _getMosaicAsset(targetId,mosaicInfos,mosaicNames){
+
+	var mosaicLabel;
+	var mosaicInfo = mosaicInfos.filter(function(item, index){
+	  if (item.id.toHex() == targetId.toHex()) return true;
+	});
+	var mosaicName = mosaicNames.filter(function(item, index){
+	  if (item.mosaicId.toHex() == targetId.toHex()) return true;
+	});
+	if (mosaicName[0].names[0]){
+		mosaicLabel = mosaicName[0].names[0].name;
+	}else{
+		mosaicLabel = mosaicName[0].mosaicId.toHex();
+	}
+
+	var mosaic = {info:mosaicInfo[0],label:mosaicLabel};
+	return mosaic;
+}
+
+
+async function getMosaicAsset(itemId){
+
+
+	var mosaicId;
+	if(itemId.constructor.name === "NamespaceId"){
+		mosaicId = await nsRepo.getLinkedMosaicId(itemId).toPromise();
+
+	}else{
+
+		mosaicId = itemId;
+	}
+
+	var mosaicInfos = await mosaicRepo.getMosaics([mosaicId]).toPromise();
+	var mosaicNames = await nsRepo.getMosaicsNames([mosaicId]).toPromise();
+
+	var mosaicLabel;
+	var mosaicInfo = mosaicInfos.filter(function(item, index){
+	  if (item.id.toHex() == mosaicId.toHex()) return true;
+	});
+	var mosaicName = mosaicNames.filter(function(item, index){
+	  if (item.mosaicId.toHex() == mosaicId.toHex()) return true;
+	});
+	if (mosaicName[0].names[0]){
+		mosaicLabel = mosaicName[0].names[0].name;
+	}else{
+		mosaicLabel = mosaicName[0].mosaicId.toHex();
+	}
+
+	var mosaic = {info:mosaicInfo[0],label:mosaicLabel};
+	return mosaic;
 }
