@@ -1,0 +1,344 @@
+
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>NEMGallery</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-100421513-1', 'auto');
+	ga('send', 'pageview');
+	</script>
+
+<!--
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="https://cdn.jsdelivr.net/clipboard.js/1.5.3/clipboard.min.js"></script>
+	<script>
+	</script>
+
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+-->
+
+
+	<style>
+
+		.gal-container{
+			padding: 12px;
+		}
+		.gal-item{
+			overflow: hidden;
+			padding: 3px;
+
+		}
+		.gal-item .box{
+			height: 350px;
+			overflow: hidden;
+		}
+		.box img{
+			height: 100%;
+			width: 100%;
+			object-fit:cover;
+			-o-object-fit:cover;
+		}
+		.gal-item a:focus{
+			outline: none;
+		}
+		.gal-item a:after{
+			content:"\e003";
+			font-family: 'Glyphicons Halflings';
+			opacity: 0;
+			background-color: rgba(0, 0, 0, 0.75);
+			position: absolute;
+			right: 3px;
+			left: 3px;
+			top: 3px;
+			bottom: 3px;
+			text-align: center;
+		    line-height: 350px;
+		    font-size: 30px;
+		    color: #fff;
+		    -webkit-transition: all 0.5s ease-in-out 0s;
+		    -moz-transition: all 0.5s ease-in-out 0s;
+		    transition: all 0.5s ease-in-out 0s;
+		}
+		.gal-item a:hover:after{
+			opacity: 1;
+		}
+		.modal-open .gal-container .modal{
+			background-color: rgba(0,0,0,0.4);
+		}
+		.modal-open .gal-item .modal-body{
+			padding: 0px;
+		}
+		.modal-open .gal-item button.close{
+		    position: absolute;
+		    width: 25px;
+		    height: 25px;
+		    background-color: #000;
+		    opacity: 1;
+		    color: #fff;
+		    z-index: 999;
+		    right: -12px;
+		    top: -12px;
+		    border-radius: 50%;
+		    font-size: 15px;
+		    border: 2px solid #fff;
+		    line-height: 25px;
+		    -webkit-box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
+			box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
+		}
+		.modal-open .gal-item button.close:focus{
+			outline: none;
+		}
+		.modal-open .gal-item button.close span{
+			position: relative;
+			top: -3px;
+			font-weight: lighter;
+			text-shadow:none;
+		}
+		.gal-container .modal-dialogue{
+			width: 80%;
+		}
+		.gal-container .description{
+			position: relative;
+			height: 40px;
+			top: -40px;
+			padding: 10px 25px;
+			background-color: rgba(0,0,0,0.5);
+			color: #fff;
+			text-align: left;
+		}
+		.gal-container .description h4{
+			margin:0px;
+			font-size: 15px;
+			font-weight: 300;
+			line-height: 20px;
+		}
+		.gal-container .modal.fade .modal-dialog {
+		    -webkit-transform: scale(0.1);
+		    -moz-transform: scale(0.1);
+		    -ms-transform: scale(0.1);
+		    transform: scale(0.1);
+		    top: 100px;
+		    opacity: 0;
+		    -webkit-transition: all 0.3s;
+		    -moz-transition: all 0.3s;
+		    transition: all 0.3s;
+		}
+
+		.gal-container .modal.fade.in .modal-dialog {
+		    -webkit-transform: scale(1);
+		    -moz-transform: scale(1);
+		    -ms-transform: scale(1);
+		    transform: scale(1);
+		    -webkit-transform: translate3d(0, -100px, 0);
+		    transform: translate3d(0, -100px, 0);
+		    opacity: 1;
+		}
+		@media (min-width: 768px) {
+		.gal-container .modal-dialog {
+		    width: 55%;
+		    margin: 50 auto;
+		}
+		}
+		@media (max-width: 768px) {
+		    .gal-container .modal-content{
+		        height:250px;
+		    }
+		}
+		/* Footer Style */
+		i.red{
+		    color:#BC0213;
+		}
+		.gal-container{
+		    padding-top :0px;
+		    padding-bottom:0px;
+		}
+		footer{
+		    font-family: 'Quicksand', sans-serif;
+		}
+		footer a,footer a:hover{
+		    color: #88C425;
+		}
+
+	</style>
+</head>
+
+<body>
+
+	<h1>NEMGallery</h1>
+	<hr class="zigzag-orange-white">
+	<div class="container">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<section>
+		  <div class="container gal-container" id="gallary">
+			</div>
+		</section>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script src="symbol-sdk-1.0.1.min.js"></script>
+	<script src="xembook_config.js"></script>
+	<script>
+	var nodelist = NODES;
+	var explorer = EXPLORER;
+	//const nodelist = TEST_NODES;
+	//const explorer = TEST_EXPLORER;
+	</script>
+	<script src="xembook.js"></script>
+
+
+	<script>
+
+
+	function getListenerInfo(listener){}
+	function getNewInfo(block){}
+	function showAmountInfo(amount){}
+	function showInfo(accountInfo){
+
+		accountInfo.subscribe(async _=>{
+			accountRepo.getAccountInfo(address)
+			.pipe(
+				op.mergeMap(_=> _.mosaics),
+				op.toArray()
+			).subscribe(x=>{
+
+				const key = nem.KeyGenerator.generateUInt64Key("NEMscriptionExpiredHeight");
+console.log(key.toHex());
+
+//				const srcAddress = nem.Address.createFromRawAddress("NAXXB6RI4FTXAKEY57P4ZKNYBAYEXBVCEEL2Q3Y");
+				metaRepo.search({
+//					sourceAddress:srcAddress,
+					scopedMetadataKey:"D2E513530574930D",
+					targetId:x[1].id,
+					metadataType:nem.MetadataType.Mosaic
+				}).subscribe(xx=>{
+					console.log(xx);
+					value = JSON.parse(xx.data[0].metadataEntry.value);
+					console.log(value.data.media.ipfs);
+					createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,0,"サンプル画像");
+
+				})
+
+				console.log(x);
+			});
+
+		});
+
+
+
+	}
+
+
+
+	var createImgTag = function(src,target,comment){
+
+		console.log(comment);
+//		var photo = '<div class="col-md-8 col-sm-12 co-xs-12 gal-item">';
+
+		var photo = '<div class="col-md-4 col-sm-6 co-xs-12 gal-item">';
+		photo += '<div class="box">';
+		photo += '<a href="#" data-toggle="modal" data-target="#' + target + '"><img src="' + src + '"></a>';
+		photo += '<div class="modal fade" id="' + target + '" tabindex="-1" role="dialog">';
+		photo += '<div class="modal-dialog" role="document">';
+		photo += '<div class="modal-content">';
+		photo += '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>';
+		photo += '<div class="modal-body"><img src="' + src + '"></div>';
+		photo += '<div class="col-md-12 description"><h4>' + comment + '</h4></div>';
+		photo += '</div>';
+		photo += '</div>';
+		photo += '</div>';
+		photo += '</div>';
+		photo += '</div>';
+
+		$( "#gallary" ).append( photo );
+	}
+
+
+	var imgtarget =0;
+	var photo = "";
+
+/*
+	sendAjax(ACCOUNT_MOSAIC_OWNED + address).then(function(result){
+
+		console.log(result["data"]);
+		console.log("===========");
+		var mosaicDictionary = {}
+		var dupchkDictionary = {}
+		for(let item of result["data"]) {
+
+			console.log("--------------");
+			mosaicDictionary[item["mosaicId"]["namespaceId"] + ":"+ item["mosaicId"]["name"]] = item["quantity"];
+			if (item["mosaicId"]["namespaceId"] == "nem"){
+				imgtarget++;
+				createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/20170808NEM.jpg",imgtarget,"サンプル画像 by ぷちくん");
+//				createImgTag("https://s3.amazonaws.com/open-apostille-nemgallary-production/4f8720a6887f8f907642f6c11227ee90417e5df6401b4f31a0826699bd9af4a5.jpg",imgtarget,"サンプル画像 by ぷちくん");
+			}
+			sendAjax(NAMESPACE_MOSAIC_DEFINITION  + item["mosaicId"]["namespaceId"]).done(function(result2){
+
+				//console.log(result2["data"]);
+				for(let item2 of result2["data"]) {
+
+					console.log(item2);
+
+					var mosaicName = item2["mosaic"]["id"]["namespaceId"] + ":"+ item2["mosaic"]["id"]["name"];
+					if (mosaicName in dupchkDictionary){
+						continue;
+					}
+					dupchkDictionary[mosaicName] = true;
+
+					var divisibility = item2["mosaic"]["properties"][0]["value"];
+					var quantity = mosaicDictionary[mosaicName];
+					var description = item2["mosaic"]["description"];
+
+					console.log("==" + mosaicName + "==");
+					console.log(quantity);
+					if(typeof quantity !== "undefined" && quantity > 0){
+
+						var owncnt = dispAmount2(quantity,divisibility);
+						if(description.indexOf("jpg") > 0 || description.indexOf("png") > 0){
+//						if(true){
+							imgtarget++;
+							console.log(mosaicName);
+							console.log(divisibility);
+							console.log(quantity);
+
+							createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/" + description,imgtarget,mosaicName +  " x " + owncnt );
+						}else if(description.indexOf("oa:") == 0 ){
+							imgtarget++;
+								var txhash = description.split(":")[1];
+								console.log("*********************");
+								createImgTag("https://s3.amazonaws.com/open-apostille-nemgallary-production/" + txhash + ".jpg",imgtarget,mosaicName +  " x " + owncnt );
+						}else if(mosaicName == 'tomato:ripe'){
+							imgtarget++;
+							createImgTag("https://s3-ap-northeast-1.amazonaws.com/xembook.net/gallery/tomato_ripe.jpg",imgtarget,mosaicName +  " x " + owncnt );
+
+						}else{
+
+							console.log("NONONONO" + mosaicName);
+						}
+					}
+
+				}
+			});
+		}
+	});
+	*/
+
+
+	</script>
+
+
+</body>
+</html>
