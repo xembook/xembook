@@ -200,7 +200,7 @@
 					targetId:x.id,
 					metadataType:nem.MetadataType.Mosaic
 				}).toPromise();
-				
+
 				if(xx.data.length > 0){
 
 						console.log(xx.data[0].metadataEntry.value);
@@ -213,11 +213,11 @@
 						console.log(value);
 						console.log(value.data.media.ipfs);
 						console.log(imgtarget);
-						
+
 						index = Math.floor(Math.random() * 4);
 						$.ajax({url: "https://node" + index + ".preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'});
+						createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,imgtarget,escape_html(decodeURIComponent( escape(value.data.meta.name))));
 
-						createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,imgtarget,value.data.meta.name);
 						imgtarget++;
 
 				}
@@ -233,7 +233,23 @@
 		}
 		return str;
 	};
-	
+
+	function escape_html (string) {
+		if(typeof string !== 'string') {
+			return string;
+		}
+		return string.replace(/[&'`"<>]/g, function(match) { //'
+			return {
+				'&': '&amp;',
+				"'": '&#x27;',
+				'`': '&#x60;',
+				'"': '&quot;',
+				'<': '&lt;',
+				'>': '&gt;',
+			}[match]
+		});
+	}
+
 	var createImgTag = function(src,target,comment){
 
 		console.log(comment);
