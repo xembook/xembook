@@ -63,10 +63,7 @@ async function createRepo(d2,nodes){
 	const d = $.Deferred();
 	const node = await connectNode(nodes,d);
 	const repo = new nem.RepositoryFactoryHttp(node);
-	txRepo = repo.createTransactionRepository();
 	nsRepo = repo.createNamespaceRepository();
-	receiptRepo = repo.createReceiptRepository();
-	chainRepo = repo.createChainRepository();
 
 	try{
 		epochAdjustment = await repo.getEpochAdjustment().toPromise();
@@ -107,6 +104,7 @@ async function listenerKeepOpening(wsEndpoint){
 
 
 var blockRepo;
+var blockRepo1;
 var nwRepo;
 var accountRepo;
 var nodeRepo;
@@ -129,11 +127,14 @@ const nemScriptionExpiredHeight = localStorage.getItem('NEMscriptionExpiredHeigh
 	const d3 = $.Deferred();
 	const repo2 = await createRepo(d3,nodelist);
 
+	txRepo = repo.createTransactionRepository();
+	chainRepo = repo.createChainRepository();
 	nwRepo = repo.createNetworkRepository();
-//	blockRepo = repo.createBlockRepository();
 	blockRepo = repo2.createBlockRepository();
+	blockRepo1 = repo.createBlockRepository();
 	accountRepo = repo.createAccountRepository();
 	nodeRepo = repo.createNodeRepository();
+	receiptRepo = repo.createReceiptRepository();
 //	tsRepo = repo.createTransactionStatusRepository();
 //	finRepo = repo.createFinalizationRepository();
 //	hlRepo = repo.createHashLockRepository();

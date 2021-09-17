@@ -96,18 +96,18 @@ async function showInfo(accountInfo){
 	accountInfo.subscribe(async _=>{
 		showAccountInfo(_);
 	});
-	
+
 	chainRepo.getChainInfo().subscribe(chain=>{
 
-		blockRepo.getBlockByHeight(chain.height).subscribe(block=>{
-		
+		blockRepo1.getBlockByHeight(chain.height).subscribe(block=>{
+
 			getNewInfo(block);
 		});
 	});
 
 	//ノード
 	nodeRepo.getNodeInfo().subscribe(node => {$("#node_host").text(node.host)});
-	
+
 }
 
 function showAmountInfo(){
@@ -132,7 +132,7 @@ function showAmountInfo(){
 
 function dispBlockTimeStamp(id,txInfo){
 
-	blockRepo.getBlockByHeight(txInfo.height)
+	blockRepo1.getBlockByHeight(txInfo.height)
 	.pipe(
 		op.delay(1000),
 	)
@@ -142,7 +142,7 @@ function dispBlockTimeStamp(id,txInfo){
 			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
 		);
 	},err=>{
-		console.log("retry");	
+		console.log("retry");
 		dispBlockTimeStamp(id,txInfo);
 	})
 }
@@ -212,7 +212,7 @@ function getListenerInfo(listener){
 
 			let unconfirmedMark = "未承認";
 			if (tx.maxFee.compact() / tx.size < 100){
-				unconfirmedMark = "&#x1F422; " + unconfirmedMark; 
+				unconfirmedMark = "&#x1F422; " + unconfirmedMark;
 			}
 
 			$("#rollback").prepend("<tr>"
@@ -265,13 +265,13 @@ function getListenerInfo(listener){
 			}
 
 			$("#statehash" + tx.transactionInfo.hash).addClass("state" + tx.transactionInfo.height); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
-			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）				
+			$("#statehash" + tx.transactionInfo.hash).removeClass("unconfirmed"); //高さ情報クラスを追加（ファイナライズ・ロールバック制御）
 			$("#statehash" + tx.transactionInfo.hash).css("color","brown");
 
 			dispBlockTimeStamp("#date"+ txId,tx.transactionInfo);
 		}
 	})
-		
+
 	listener.newBlock().subscribe(async block=>{
 		newBlockHash = block.hash; //活性チェック用
 		getNewInfo(block);
@@ -287,7 +287,7 @@ function getListenerInfo(listener){
 		lastFinalizedTimestamp = fintime;
 
 		console.log("listener finalized block");
-		for (let h = lastFinalizedHeight + 1; h <= block.height.compact(); h++){		
+		for (let h = lastFinalizedHeight + 1; h <= block.height.compact(); h++){
 			console.log("finalize:" + h);
 
 			$(".state" + h).each((i,o)=>{
@@ -295,7 +295,7 @@ function getListenerInfo(listener){
 				console.log(o);
 				$(o).css("color","green");
 				$(o).removeClass("state" + h);
-			});	
+			});
 		}
 		lastFinalizedHeight = block.height.compact();
 	});
@@ -308,7 +308,7 @@ function getNewInfo(block){
 		console.log("roll back from:" +block.height.compact() );
 		console.log("toll back to:" +lastHeight );
 
-		for (let h = block.height.compact() ; h <= lastHeight; h++){		
+		for (let h = block.height.compact() ; h <= lastHeight; h++){
 			console.log("roll back:" + h);
 
 			$(".state" + h).each((i,o)=>{
@@ -337,14 +337,14 @@ function getNewInfo(block){
 			remainMinutes = 10 - ((new Date()).getTime() - lastFinalizedTimestamp) / 1000 / 60;
 			remainHeight = remainMinutes * 2;
 		}else{
-		
+
 			remainHeight = 38  - (height.compact() - chain.latestFinalizedBlock.height.compact());
 			remainMinutes = remainHeight / 2
 			console.log("remainMinutes:" + remainMinutes);
 			console.log("remainHeight:" + remainHeight);
 		}
 
-		blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height)
+		blockRepo1.getBlockByHeight(chain.latestFinalizedBlock.height)
 		.subscribe(finalizedBlock=>{
 
 			t3 = dispTimeStamp(finalizedBlock.timestamp.compact(),epochAdjustment)
