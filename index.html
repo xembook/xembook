@@ -252,8 +252,8 @@ function showAccountInfo(accountInfo){
 	chainRepo.getChainInfo().subscribe(chain=>{
 
 		rxjs.zip(
-			blockRepo.getBlockByHeight(chain.height),
-			blockRepo.getBlockByHeight(chain.latestFinalizedBlock.height),
+			blockRepo1.getBlockByHeight(chain.height),
+			blockRepo1.getBlockByHeight(chain.latestFinalizedBlock.height),
 		).subscribe(zip => {
 
 			$("#chain_height").html(
