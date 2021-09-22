@@ -147,7 +147,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-1.0.1.min.js"></script>
+<script src="symbol-sdk-1.0.1.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = NODES;
@@ -425,7 +425,9 @@ function showAccountInfo(accountInfo){
 		observer.pipe(
 
 			//すでに署名済みでない場合
-			op.filter(_ => !_.signedByAccount(accountInfo.address))
+			op.filter(_ => {
+				return !_.signedByAccount(nem.PublicAccount.createFromPublicKey(accountInfo.publicKey ,networkType));
+			})
 		).subscribe(_=>{
 
 			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
