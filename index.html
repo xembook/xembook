@@ -116,7 +116,9 @@
 				<dd><a id="xemgallery" href="">XEMGallery</a></dd>
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
 				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
+				<dd><a id="xembookusd" href="">XEMBook(USD)</a></dd>
 				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
+				<dd><a target="_blank" href="https://quest-bc.com/">QUEST</a></dd>
 				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
 			</dl>
 		</div>
@@ -132,10 +134,14 @@
 				<h5 class="modal-title" id="exampleModalLabel2">お知らせ</h5>
 			</div>
 			<div class="modal-body">
-				<label id="modal-label">未承認のトランザクションがあります。<br>ウォレットで詳細を確認してください。</label>
+				<label id="modal-label">未承認のトランザクションがあります。
 
+				</label>
+<div><small>ウォレットでトランザクションの詳細を確認し、同意する場合のみ署名してください。
+署名するとトランザクションが実行されます。内容に同意しない場合は無視してください。
+最長48時間たてばこのトランザクションは期限切れになりメッセージは表示されなくなります。</small></div>
+<br>
 				<dl id="tx_info"></dl>
-
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">閉じる</button>
@@ -154,6 +160,11 @@ var nodelist = NODES;
 var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
+
+const SENDING = "送信";
+const RECEIVING = "受信";
+const AGGREGATE = "集約";
+
 </script>
 <script src="xembook.js"></script>
 <script>
@@ -444,7 +455,10 @@ function showAccountInfo(accountInfo){
 
 						var dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
 						var ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
-						ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
+						if(nem.TransactionType[tx.type] === "TRANSFER"){
+
+							ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
+						}
 						$("#tx_info").append(dtTx + ddTx);
 					}
 					$('#modal-notice').modal('show');
@@ -590,6 +604,7 @@ $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
 $("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
 $("#xemgallery"    ).attr("href", "xemgallery.html?address=" + rawAddress);
+$("#xembookusd"    ).attr("href", "en.html?address=" + rawAddress);
 
 </script>
 </body>

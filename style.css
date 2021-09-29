@@ -60,6 +60,8 @@ hr {
   background-position: left bottom;
   background-repeat: repeat-x;
   background-size: 10px 10px;
+  padding-bottom: 1px;
+
 }
 @media (max-width: 767px){
 	#clipboard {
