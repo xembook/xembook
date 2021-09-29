@@ -299,7 +299,7 @@ async function parseTx(txs,parentId,txTimestamp){
 			var tranType;
 			if(address.plain() ===  tx.signer.address.plain()){
 //			if(alice.plain() === tx.recipientAddress.plain()){
-				tranType = "<font color='red'>送信[集約]</font>";
+				tranType = "<font color='red'>" + SENDING + "[" + AGGREGATE + "]</font>";
 				txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 				.subscribe(fee => {
 
@@ -313,7 +313,7 @@ async function parseTx(txs,parentId,txTimestamp){
 */
 				});
 			}else{
-				tranType = "<font color='green'>受信[集約]</font>";
+				tranType = "<font color='green'>" + RECEIVING + "[" + AGGREGATE + "]</font>";
 //				showTxAmountInfo(id,nem.UInt64.fromNumericString("0"),0);
 
 			}
@@ -340,7 +340,7 @@ async function parseTx(txs,parentId,txTimestamp){
 
 					const id = tx.transactionInfo.id;
 					await appendTx("#table",id,tx);
-					$("#type"+ id ).html("<font color='red'>送信</font>");
+					$("#type"+ id ).html("<font color='red'>" + SENDING + "</font>");
 
 					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 					.subscribe(fee => {
@@ -369,7 +369,7 @@ async function parseTx(txs,parentId,txTimestamp){
 
 				var tranType;
 				if(address.plain() ===  tx.signer.address.plain()){
-					tranType = "<font color='red'>送信</font>";
+					tranType = "<font color='red'>" + SENDING + "</font>";
 					if(parentId === undefined){
 						txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 						.subscribe(fee => {
@@ -380,7 +380,7 @@ async function parseTx(txs,parentId,txTimestamp){
 						showTxAmountInfo(id,mosaicAmount,0);
 					}
 				}else{
-					tranType = "<font color='green'>受信</font>";
+					tranType = "<font color='green'>" + RECEIVING + "</font>";
 					showTxAmountInfo(id,mosaicAmount,0);
 				}
 				$("#type"+ id ).html(tranType);
@@ -391,7 +391,7 @@ async function parseTx(txs,parentId,txTimestamp){
 
 					const id = tx.transactionInfo.id;
 					await appendTx("#table",id,tx);
-					$("#type"+ id ).html("<font color='red'>送信</font>");
+					$("#type"+ id ).html("<font color='red'>" + SENDING + "</font>");
 
 					txRepo.getTransactionEffectiveFee(tx.transactionInfo.hash)
 					.subscribe(fee => {

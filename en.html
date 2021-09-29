@@ -22,16 +22,16 @@
 <div class="container">
 	<div class="row">
 		<div class="account col-sm-4">
-		<h2>アカウント</h2>
+		<h2>Account</h2>
 		<dl id="account_info">
-			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
-			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
-			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
-			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+			<dt>Address</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
+			<dt>Amount</dt><dd><span id="account_balance"></span> XYM</dd>
+			<dt>market Value</dt><dd><span id="market_price"></span></dd>
+			<dt>Importance</dt><dd><span id="account_importance"></span></dd>
 		</dl>
 		<dl id="account_append_info"></dl>
-		<h2>取引所</h2>
-		<small>最終更新　<span id="last_update"></span></small>
+		<h2>Exchange</h2>
+		<small>last update　<span id="last_update"></span></small>
 		<dl>
 		<dt><a href="https://zaif.jp/trade/xym_jpy" target="_blank">Zaif</a></dt><dd><span id="zaif"></span></dd>
 		<dt>Bithumb</dt><dd><span id="bithumb"></span></dd>
@@ -45,78 +45,62 @@
 		<dt>Bitrue</dt><dd><span id="bitrue"></span></dd>
 		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>-->
 		</dl>
-		<h2>ノード</h2>
+		<h2>Node</h2>
 		<dl id="node_info">
-			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
-			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
-			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
-			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
-			<dt>手数料相場</dt>
-			<dd>
-			<table id="fees"  class="table">
-				<thead><tr>
-					<th>送金[中央値]</th>
-					<th>ネームスペース[年]</th>
-					<th>モザイク</th>
-				</tr></thead>
-				<tbody><tr>
-					<td><span id="fee_median"></span>XYM</td>
-					<td><span id="fee_namespace"></span>XYM</td>
-					<td><span id="fee_mosaic"></span>XYM</td>
-				</tr></tbody>
-			</table>
-			</dd>
+			<dt>connect</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+			<dt>latest</dt><dd><span id="chain_height"></span></dd>
+			<dt>finalize</dt><dd><span id="finalized_chain_height"></span></dd>
+			<dt><a id="set_delegated_node" href="javascript:void(0)">delegate node setting</a></dt><dd><span id="delegated_node"></span></dd>
 
 		</dl>
 		</div>
 		<div class="account col-sm-4">
-			<h2>レシート</h2>
-			<h5>対象アカウント</h5>
+			<h2>Receipt</h2>
+			<h5>target</h5>
 			<table id="harvest"  class="table">
 				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
+					<th>date</th>
+					<th>type</th>
+					<th>amount</th>
 				</tr></thead>
 			</table>
 			<dl>
-				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >read more</a></dd>
 			</dl>
-			<h5>送信元アカウント</h5>
+			<h5>sender</h5>
 			<table id="receipt"  class="table">
 				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
+					<th>date</th>
+					<th>type</th>
+					<th>amount</th>
 				</tr></thead>
 			</table>
 			<dl>
-				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >read more</a></dd>
 			</dl>
 		</div>
 		<div class="account col-sm-4">
-			<h2>トランザクション</h2>
+			<h2>Transactions</h2>
 			<table id="table"  class="table">
 				<thead><tr>
-					<th>日時</th>
-					<th>区分</th>
-					<th>数量</th>
+					<th>date</th>
+					<th>type</th>
+					<th>amount</th>
 				</tr></thead>
 			</table>
 			<dl>
-				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >read more</a></dd>
 			</dl>
 		</div>
 	</div>
 	<div>
 		<div class="faucet">
-			<h2>リンク</h2>
+			<h2>Links</h2>
 			<dl>
 				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
 				<dd><a id="xemgallery" href="">XEMGallery</a></dd>
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
 				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
-				<dd><a id="xembookusd" href="">XEMBook(USD)</a></dd>
 				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
 				<dd><a target="_blank" href="https://quest-bc.com/">QUEST</a></dd>
 				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
@@ -131,20 +115,16 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel2">お知らせ</h5>
+				<h5 class="modal-title" id="exampleModalLabel2">Information</h5>
 			</div>
 			<div class="modal-body">
-				<label id="modal-label">未承認のトランザクションがあります。
+				<label id="modal-label">There are unconfirmed transactions.<br>Please check your wallet for details.</label>
 
-				</label>
-<div><small>ウォレットでトランザクションの詳細を確認し、同意する場合のみ署名してください。
-署名するとトランザクションが実行されます。内容に同意しない場合は無視してください。
-最長48時間たてばこのトランザクションは期限切れになりメッセージは表示されなくなります。</small></div>
-<br>
 				<dl id="tx_info"></dl>
+
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">閉じる</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">close</button>
 
 			</div><!-- /.modal-footer -->
 		</div><!-- /.modal-content -->
@@ -161,9 +141,10 @@ var explorer = EXPLORER;
 //const nodelist = TEST_NODES;
 //const explorer = TEST_EXPLORER;
 
-const SENDING = "送信";
-const RECEIVING = "受信";
-const AGGREGATE = "集約";
+const SENDING = "out ";
+const RECEIVING = "in ";
+const AGGREGATE = "agg";
+
 
 </script>
 <script src="xembook.js"></script>
@@ -202,29 +183,21 @@ function showAmountInfo(amount){
 	.done(function(tickers) {
 
 
-//		const probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
-		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
-//		const hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
-		const kucoin = Math.round(tickers.USDJPY * tickers.kucoin * 1000) / 1000;
-//		const bitrue = Math.round(tickers.USDJPY * tickers.bitrue * 1000) / 1000;
-//		const bittrex = Math.round(tickers.USDJPY * tickers.bittrex * 1000) / 1000;
-		const poloniex = Math.round(tickers.USDJPY * tickers.poloniex * 1000) / 1000;
-		const bithumb = Math.round(tickers.KRWJPY * tickers.bithumb * 1000) / 1000;
-		const zaif = tickers.zaif;
+		const gateio =   Math.round( tickers.gateio * 1000) / 1000;
+		const kucoin =   Math.round( tickers.kucoin * 1000) / 1000;
+		const poloniex = Math.round( tickers.poloniex * 1000) / 1000;
+		const bithumb =  Math.round(tickers.KRWJPY / tickers.USDJPY * tickers.bithumb * 1000) / 1000;
+		const zaif = Math.round( tickers.zaif / tickers.USDJPY * 1000) / 1000;
 
-//		$("#probit").text( probit + "円 / XYM");
-		$("#gateio").text( gateio + "円 / XYM");
-//		$("#hbtc").text( hbtc + "円 / XYM");
-		$("#kucoin").text( kucoin + "円 / XYM");
-//		$("#bitrue").text( bitrue + "円 / XYM");
-//		$("#bittrex").text( bittrex + "円 / XYM");
-		$("#poloniex").text( poloniex + "円 / XYM");
-		$("#bithumb").text( bithumb + "円 / XYM");
-		$("#zaif").html( zaif + "円 / XYM <br>[高:" + tickers.high + ",安:" + tickers.low + "]");
+		$("#gateio").text( gateio + " USD / XYM");
+		$("#kucoin").text( kucoin + " USD / XYM");
+		$("#poloniex").text( poloniex + " USD / XYM");
+		$("#bithumb").text( bithumb + "USD / XYM");
+		$("#zaif").html( zaif + " USD / XYM");
 
-		var market_price = amount / 1000000 * zaif;
-		market_price = comma3(String(Math.round(market_price)));
-		$("#market_price").text(market_price + "円 [" + zaif + "JPY/XYM換算]");
+		var market_price = Math.round(amount / 10000 * zaif);
+		market_price = dispAmount(market_price,2);
+		$("#market_price").text(market_price + "USD [" + zaif + "JPY/XYM]");
 		$("#last_update").text(tickers.last_update);
 	});
 }
@@ -245,7 +218,7 @@ function showAccountInfo(accountInfo){
 			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
 		}
 		if(msig.cosignatoryAddresses.length > 0){
-			$("#account_append_info").append('<dt>親アカウント</dt>' + parentKeys);
+			$("#account_append_info").append('<dt>parent account</dt>' + parentKeys);
 		}
 
 		//子アカウント
@@ -255,7 +228,7 @@ function showAccountInfo(accountInfo){
 			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
 		}
 		if(msig.multisigAddresses.length > 0){
-			$("#account_append_info").append('<dt>子アカウント</dt>' + childKeys);
+			$("#account_append_info").append('<dt>child account</dt>' + childKeys);
 		}
 	},err=>console.log("no multisig"))
 
@@ -268,10 +241,10 @@ function showAccountInfo(accountInfo){
 		).subscribe(zip => {
 
 			$("#chain_height").html(
-				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　date: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
 			);
 			$("#finalized_chain_height").html(
-				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　date: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
 			);
 
 			//ネームスペース
@@ -295,32 +268,17 @@ function showAccountInfo(accountInfo){
 						var remainHeight = nsInfo.endHeight.compact() - zip[0].height.compact();
 						t = dispTimeStamp(zip[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
 //						t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment);
-						ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
+						ddNamespace += '<dd>' + namespace + ' [expired: ' + t + ']</dd>';
 					}
 				}
 				if(ddNamespace !== ""){
-					$("#account_append_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+					$("#account_append_info").append('<dt>root namespace</dt>'+ ddNamespace);
 				}
 			});
 		})
 	});
 
-	nwRepo.getTransactionFees().subscribe(fees=>{
 
-		var txFee;
-		if(fees.medianFeeMultiplier > fees.minFeeMultiplier){
-			txFee = fees.medianFeeMultiplier;
-		}else{
-			txFee = fees.minFeeMultiplier;
-		}
-		$("#fee_median").text(dispAmount(txFee * 176,6).slice(0,-4));
-	})
-
-	nwRepo.getRentalFees().subscribe(fees=>{
-		const yearRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
-		$("#fee_namespace").text(dispAmount(yearRentalNamespaceFee,6).slice(0,-7));
-		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
-	})
 
 
 
@@ -390,7 +348,7 @@ function showAccountInfo(accountInfo){
 			);
 
 		},err=>{
-			if (window.confirm("委任ノードが正しく設定されていないかHTTPS非対応です。設定をクリアしますか？\n設定：" + delegatedNode)) {
+			if (window.confirm("The delegation node is not configured correctly or HTTPS is not supported. Do you want to clear the configuration?\nparameter：" + delegatedNode)) {
 				localStorage.removeItem('delegated_node' + rawAddress);
 			}
 		});
@@ -419,7 +377,7 @@ function showAccountInfo(accountInfo){
 				b += 1;
 			}
 			pSig = b / 2880;
-			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]";
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "days, 85%: " + pSig.toFixed(1) + "days]";
 		}
 	}
 	$("#account_importance").text(accountImportance + " " + provabilityHarvest);
@@ -454,11 +412,8 @@ function showAccountInfo(accountInfo){
 					for(const tx of txs){
 
 						var dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
-						var ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
-						if(nem.TransactionType[tx.type] === "TRANSFER"){
-
-							ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
-						}
+						var ddTx = "<dd>sender:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
+						ddTx += "<dd>→receiver:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
 						$("#tx_info").append(dtTx + ddTx);
 					}
 					$('#modal-notice').modal('show');
@@ -474,10 +429,10 @@ function showAccountInfo(accountInfo){
 
 function setDelegatedNode(){
 
-	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
+	var delegatedNode = window.prompt('Enter a delegated node [HTTPS nodes only].\n(例:a.symbol.lcnem.net)','');
 	if(delegatedNode !== null){
 		localStorage.setItem('delegated_node' + rawAddress,delegatedNode);
-		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。");
+		alert("Done. From the next time this page is displayed, we will confirm the validity of the delegated node.");
 	}
 }
 
@@ -583,14 +538,14 @@ function getNewInfo(block){
 	receiptRepo.searchReceipts({targetAddress:address,height:block.height})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
-			alert("レシートが追加されました。再表示してください。");
+			alert("A receipt has been added. Please reload XEMBook.");
 		}
 	})
 
 	txRepo.search({address:address,height:block.height,group:nem.TransactionGroup.Confirmed})
 	.subscribe(_ =>{
 		if(_.data.length > 0){
-			alert("トランザクションが追加されました。再表示してください。");
+			alert("A transaction has been added. Please reload XEMBook.");
 		}
 	})
 }
@@ -604,7 +559,6 @@ $("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
 $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
 $("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
 $("#xemgallery"    ).attr("href", "xemgallery.html?address=" + rawAddress);
-$("#xembookusd"    ).attr("href", "en.html?address=" + rawAddress);
 
 </script>
 </body>
