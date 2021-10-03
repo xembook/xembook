@@ -355,7 +355,13 @@ async function parseTx(txs,parentId,txTimestamp){
 				if(parentId !== undefined){
 
 					//インターナルトランザクション
-					if(address.plain() === tx.recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
+					let recipientAddress = "";
+					if(tx.recipientAddress.constructor.name == "NamespaceId"){
+						recipientAddress = await nsRepo.getLinkedAddress(tx.recipientAddress).toPromise();
+					}else{
+						recipientAddress = tx.recipientAddress;
+					}
+					if(address.plain() === recipientAddress.plain() || address.plain() ===  tx.signer.address.plain()){
 //						await insertTxAfter("#agg" + parentId,id,tx);
 						await insertTxAfter("#agg" + parentId,id,tx,txTimestamp);
 
