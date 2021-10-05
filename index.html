@@ -34,12 +34,13 @@
 		<small>最終更新　<span id="last_update"></span></small>
 		<dl>
 		<dt><a href="https://zaif.jp/trade/xym_jpy" target="_blank">Zaif</a></dt><dd><span id="zaif"></span></dd>
+		<dt><a href="https://app.bitbank.cc/trade/xym_jpy" target="_blank">bitbank</a></dt><dd><span id="bitbank"></span></dd>
 		<dt>Bithumb</dt><dd><span id="bithumb"></span></dd>
 		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
 		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
-		<dt>Poloniex</dt><dd><span id="poloniex"></span></dd>
-
 <!--
+
+		<dt>Poloniex</dt><dd><span id="poloniex"></span></dd>
 		<dt>Bittrex</dt><dd><span id="bittrex"></span></dd>
 		<dt>ProBit</dt><dd><span id="probit"></span></dd>
 		<dt>Bitrue</dt><dd><span id="bitrue"></span></dd>
@@ -216,6 +217,7 @@ function showAmountInfo(amount){
 		const poloniex = Math.round(tickers.USDJPY * tickers.poloniex * 1000) / 1000;
 		const bithumb = Math.round(tickers.KRWJPY * tickers.bithumb * 1000) / 1000;
 		const zaif = tickers.zaif;
+		const bitbank = tickers.bitbank;
 
 //		$("#probit").text( probit + "円 / XYM");
 		$("#gateio").text( gateio + "円 / XYM");
@@ -223,9 +225,10 @@ function showAmountInfo(amount){
 		$("#kucoin").text( kucoin + "円 / XYM");
 //		$("#bitrue").text( bitrue + "円 / XYM");
 //		$("#bittrex").text( bittrex + "円 / XYM");
-		$("#poloniex").text( poloniex + "円 / XYM");
+//		$("#poloniex").text( poloniex + "円 / XYM");
 		$("#bithumb").text( bithumb + "円 / XYM");
 		$("#zaif").html( zaif + "円 / XYM <br>[高:" + tickers.high + ",安:" + tickers.low + "]");
+		$("#bitbank").text( bitbank + "円 / XYM");
 
 		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
