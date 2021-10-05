@@ -227,6 +227,9 @@ async function getRecipets(pageSize){
 
 	reciptPageNumber++;
 
+	var lastHeight = 0;
+	var cnt = 0;
+
 	for(const statements  of res.data){
 
 		const filterdReceipts = statements.receipts.filter(item => {
@@ -236,10 +239,13 @@ async function getRecipets(pageSize){
 			return false;
 		});
 
-		var cnt = 0;
+		if(statements.height.toString() !== lastHeight.toString()){
+			cnt = 0;
+		}
 		for(receipt of filterdReceipts){
 
 			showReceiptInfo("receipt",statements.height,receipt,cnt);
+			lastHeight = statements.height;
 			cnt++;
 		}
 	}
@@ -262,6 +268,8 @@ async function getHarvests(pageSize){
 
 	harvestPageNumber++;
 
+	var lastHeight = 0;
+	var cnt = 0;
 	for(const statements  of res.data){
 
 		const filterdReceipts = statements.receipts.filter(item => {
@@ -271,10 +279,12 @@ async function getHarvests(pageSize){
 			return false;
 		});
 
-		var cnt = 0;
+		if(statements.height.toString() !== lastHeight.toString()){
+			cnt = 0;
+		}
 		for(const receipt of filterdReceipts){
-
 			showReceiptInfo("harvest",statements.height,receipt,cnt);
+			lastHeight = statements.height;
 			cnt++;
 		}
 	}
@@ -459,5 +469,5 @@ function getDateId(timeStamp,epoch){
 
 
 function paddingDate0(num) {
-	return ( num < 10 ) ? '0' + num  : num;
+	return ( num < 10 ) ? '0' + num  : '' + num;
 };
