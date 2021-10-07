@@ -195,7 +195,7 @@
 		accountInfo.subscribe(async _=>{
 			accountRepo.getAccountInfo(address)
 			.pipe(
-				op.delay(100),
+//				op.delay(500),
 				op.mergeMap(_=> _.mosaics),
 			).subscribe(async x=> {
 
@@ -218,8 +218,12 @@
 						console.log(value.data.media.ipfs);
 						console.log(imgtarget);
 
-						index = Math.floor(Math.random() * 4);
-						$.ajax({url: "https://node" + index + ".preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'});
+//						index = Math.floor(Math.random() * 4);
+						setTimeout( function(){$.ajax({url: "https://node0.preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'})}, Math.floor(Math.random() * 3000));
+						setTimeout( function(){$.ajax({url: "https://node1.preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'})}, Math.floor(Math.random() * 3000));
+						setTimeout( function(){$.ajax({url: "https://node2.preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'})}, Math.floor(Math.random() * 3000));
+						setTimeout( function(){$.ajax({url: "https://node3.preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'})}, Math.floor(Math.random() * 3000));
+
 						createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,imgtarget,escape_html(decodeURIComponent( escape(value.data.meta.name))));
 
 						imgtarget++;
