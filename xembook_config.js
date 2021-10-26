@@ -2,7 +2,7 @@
 const EXPLORER = "http://explorer.symbolblockchain.io";
 const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
 
-const ACTIVE_IMPORTANCE_RATE = 0.31379559;
+const ACTIVE_IMPORTANCE_RATE = 0.318266623;
 
 const TEST_NODES = [
 
