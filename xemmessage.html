@@ -32,7 +32,7 @@
 				<button id="search_btn"	class="btn btn-default">再検索</button>
 			</form>
 		</div>
-	
+
 		<div class="col-sm-12">
 
 		<h2>トランザクション</h2>
@@ -47,7 +47,7 @@
 		</table>
 		<dl>
 			<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
-		</dl>		
+		</dl>
 		</div>
 	</div>
 	<div class="row">
@@ -76,7 +76,7 @@
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-1.0.1.min.js"></script>
+<script src="symbol-sdk-1.0.2.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = NODES;
@@ -250,7 +250,7 @@ function getMessage(tx){
 		if(tx.message.type === nem.MessageType.EncryptedMessage){
 
 			message = "[EncryptedMessage]";
-		
+
 		}else if(tx.message.type === nem.MessageType.PersistentHarvestingDelegationMessage){
 
 			message = "[PersistentHarvestingDelegationMessage]";
@@ -260,7 +260,7 @@ function getMessage(tx){
 			message = tx.message.payload;
 
 		}else if(tx.message.type === nem.MessageType.RawMessage){
-		
+
 			message = tx.message.payload;
 		}
 	}
