@@ -127,14 +127,18 @@ function showInfo(accountInfo){
 	})
 }
 
-function getBatchOfTransfers(maxCount){
+var gettingInformation = false;
 
+
+function getBatchOfTransfers(maxCount){
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getTransfers(25);
 		if (isLastPage || count >= maxCount){
+			gettingInformation = false;
 			clearInterval(timer);
 		}
 	},2500)
@@ -143,12 +147,14 @@ function getBatchOfTransfers(maxCount){
 
 function getBatchOfHarvests(maxCount){
 
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getHarvests(25);
 		if (isLastPage || count >= maxCount){
+			gettingInformation = false;
 			clearInterval(timer);
 		}
 	},2500)
@@ -156,12 +162,14 @@ function getBatchOfHarvests(maxCount){
 
 function getBatchOfRecipets(maxCount){
 
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getRecipets(25);
 		if (isLastPage || count >= maxCount){
+			gettingInformation = false;
 			clearInterval(timer);
 		}
 	},2500)
@@ -366,9 +374,24 @@ function onCSVDownload(a, table, filename) {
 }
 
 
-$('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
-$('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
-$('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
+$('#transfers_more').click(function(){
+	if(!gettingInformation){
+		getBatchOfTransfers(5);
+	}
+	return false;
+});
+$('#harvests_more').click(function(){
+	if(!gettingInformation){
+		getBatchOfHarvests(5);
+	}
+	return false;
+});
+$('#receipts_more').click(function(){
+	if(!gettingInformation){
+		getBatchOfRecipets(5);
+	}
+	return false;
+});
 $("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
 $("#xemmessage"       ).attr("href", "xemmessage.html?address=" + rawAddress);
 
