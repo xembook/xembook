@@ -15,6 +15,7 @@
 	ga('create', 'UA-100421513-1', 'auto');
 	ga('send', 'pageview');
 	</script>
+
 </head>
 <body>
 	<h1>XEMTax(β)</h1>
@@ -41,7 +42,10 @@
 					<th class='text-right'>円平均</th>
 				</tr></thead>
 			</table>
-			<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			<dd id="harvests_footer">
+				<div id="spinner_harvests" class="collapse"><img src="loading-s-17.gif" /></div>
+				<a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a>
+			</dd>
 			<a id="harvests_csv" href="javascript:void(0)" >CSVダウンロード</a>
 		</dl>
 		<dl>
@@ -56,6 +60,7 @@
 				</tr></thead>
 			</table>
 			<dd id="receipts_footer">
+				<div id="spinner_receipts" class="collapse"><img src="loading-s-17.gif" /></div>
 				<a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a><br>
 			</dd>
 			<a id="receipts_csv" href="javascript:void(0)" >CSVダウンロード</a>
@@ -74,6 +79,7 @@
 			</tr></thead>
 		</table>
 		<dd id="transfers_footer">
+			<div id="spinner_transfers" class="collapse"><img src="loading-s-17.gif" /></div>
 			<a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a><br>
 		</dd>
 		<a id="transfers_csv" href="javascript:void(0)" >CSVダウンロード</a>
@@ -93,7 +99,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-<script src="symbol-sdk-1.0.1.min.js"></script>
+<script src="symbol-sdk-1.0.2.min.js"></script>
 <script src="xembook_config.js"></script>
 <script>
 var nodelist = JP_NODES;
@@ -127,44 +133,57 @@ function showInfo(accountInfo){
 	})
 }
 
-function getBatchOfTransfers(maxCount){
+var gettingInformation = false;
 
+$('#spinner_transfers').collapse('hide');
+$('#spinner_receipts').collapse('hide');
+$('#spinner_harvests').collapse('hide');
+
+function getBatchOfTransfers(maxCount){
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getTransfers(25);
 		if (isLastPage || count >= maxCount){
+			$('#spinner_transfers').collapse('hide');
+			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2500)
+	},2100)
 }
-
 
 function getBatchOfHarvests(maxCount){
 
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getHarvests(25);
 		if (isLastPage || count >= maxCount){
+			$('#spinner_harvests').collapse('hide');
+			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2500)
+	},2100)
 }
 
 function getBatchOfRecipets(maxCount){
 
+	gettingInformation = true;
 	var count = 0;
 	var timer;
 	timer = setInterval( async function(){
 		count++;
 		isLastPage = await getRecipets(25);
 		if (isLastPage || count >= maxCount){
+			$('#spinner_receipts').collapse('hide');
+			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2500)
+	},2100)
 }
 
 
@@ -366,9 +385,27 @@ function onCSVDownload(a, table, filename) {
 }
 
 
-$('#transfers_more').click(function(){getBatchOfTransfers(5);return false;});
-$('#harvests_more').click(function(){getBatchOfHarvests(5);return false;});
-$('#receipts_more').click(function(){getBatchOfRecipets(5);return false;});
+$('#transfers_more').click(function(){
+	if(!gettingInformation){
+		$('#spinner_transfers').collapse('show');
+		getBatchOfTransfers(5);
+	}
+	return false;
+});
+$('#harvests_more').click(function(){
+	if(!gettingInformation){
+		$('#spinner_harvests').collapse('show');
+		getBatchOfHarvests(5);
+	}
+	return false;
+});
+$('#receipts_more').click(function(){
+	if(!gettingInformation){
+		$('#spinner_receipts').collapse('show');
+		getBatchOfRecipets(5);
+	}
+	return false;
+});
 $("#xembook"          ).attr("href", "index.html?address=" + rawAddress);
 $("#xemmessage"       ).attr("href", "xemmessage.html?address=" + rawAddress);
 
