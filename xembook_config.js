@@ -1,6 +1,6 @@
 
-const EXPLORER = "http://explorer.symbolblockchain.io";
-const TEST_EXPLORER = "http://explorer.testnet.symboldev.network";
+const EXPLORER = "https://symbol.fyi";
+const TEST_EXPLORER = "https://testnet.symbol.fyi";
 
 const ACTIVE_IMPORTANCE_RATE = 0.318266623;
 

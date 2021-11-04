@@ -225,7 +225,7 @@ async function appendAggTx(tx){
 
 	const id = tx.transactionInfo.id;
 	$("#table").append("<tr id='agg" + id + "'>"
-	+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+	+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 	+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 	+ "</span></a></td>"
 	+ "<td id='type" + id + "'></td>" //mosaicLabel
@@ -244,7 +244,7 @@ async function appendTx(insTag,id,tx){
 
 	$(insTag).append(
 		"<tr>"
-		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+		+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 		+ "</span></a></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
