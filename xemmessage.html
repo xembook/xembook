@@ -201,7 +201,7 @@ function appendTx(insTag,id,tx){
 
 		$(insTag).append(
 			"<tr>"
-			+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+			+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 			   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 			+ "</span></a></td>"
 			+ "<td id='type" + id + "'></td>" //mosaicLabel

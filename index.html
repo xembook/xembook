@@ -279,10 +279,10 @@ function showAccountInfo(accountInfo){
 		).subscribe(zip => {
 
 			$("#chain_height").html(
-				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='" + EXPLORER + "/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
 			);
 			$("#finalized_chain_height").html(
-				"[ <a target='_blank' href='http://explorer.symbolblockchain.io/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
+				"[ <a target='_blank' href='" + EXPLORER + "/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
 			);
 
 			//ネームスペース
@@ -507,7 +507,7 @@ function appendAggTx(tx){
 
 	const txId = tx.transactionInfo.id;
 	$("#table").append("<tr id='agg" + txId + "'>"
-	+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+	+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 	+ tx.transactionInfo.hash + "'><span id='date" + txId + "'>"
 	+ "</span></a></td>"
 	+ "<td id='type" + txId + "'></td>" //mosaicLabel
@@ -522,7 +522,7 @@ function appendTx(insTag,id,tx){
 
 	$(insTag).append(
 		"<tr>"
-		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+		+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 		+ "</span></a></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
