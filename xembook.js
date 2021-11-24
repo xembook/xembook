@@ -1,6 +1,6 @@
-var transferPageNumber = 1;
-var harvestPageNumber = 1;
-var reciptPageNumber = 1;
+var transferPageNumber = 0;
+var harvestPageNumber = 0;
+var reciptPageNumber = 0;
 var rawAddress = "";
 if (1 < document.location.search.length) {
 
@@ -199,6 +199,7 @@ function showPriceInfo(accountInfo){
 //トランザクション取得
 async function getTransfers(pageSize){
 
+	transferPageNumber++;
 	const txs = await txRepo.search({
 		address:address,
 		group:nem.TransactionGroup.Confirmed,
@@ -207,7 +208,6 @@ async function getTransfers(pageSize){
 		pageNumber:transferPageNumber,
 		order:"desc"}).toPromise();
 
-	transferPageNumber++;
 	parseTx(txs.data);
 
 	if(txs.isLastPage){
@@ -218,6 +218,7 @@ async function getTransfers(pageSize){
 
 async function getRecipets(pageSize){
 
+	reciptPageNumber++;
 	const res = await receiptRepo.searchReceipts({
 		senderAddress:address,
 		pageNumber:reciptPageNumber,
@@ -225,7 +226,6 @@ async function getRecipets(pageSize){
 		order:"desc"
 	}).toPromise();
 
-	reciptPageNumber++;
 
 	var lastHeight = 0;
 	var cnt = 0;
@@ -259,6 +259,8 @@ async function getRecipets(pageSize){
 //入金レシート
 async function getHarvests(pageSize){
 
+	harvestPageNumber++;
+
 	const res = await receiptRepo.searchReceipts({
 		targetAddress:address,
 		pageNumber:harvestPageNumber,
@@ -266,7 +268,6 @@ async function getHarvests(pageSize){
 		order:"desc"
 	}).toPromise();
 
-	harvestPageNumber++;
 
 	var lastHeight = 0;
 	var cnt = 0;

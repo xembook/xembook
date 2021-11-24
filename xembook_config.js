@@ -291,7 +291,6 @@ const NODES = [
 "https://0-0-0-0-0-0-0-0-delicious-harvest.sushi-node.jp:3001",
 "https://0-0-2symbol.open-nodes.com:3001",
 "https://node1.ahyk.net:3001",
-"https://harvesting-sweet-potatoes.club:3001",
 "https://harvesting-sweet-potatoes.com:3001",
 "https://01.symbol-gentoo.tokyo:3001",
 "https://0-0-0-0-0-0-germany.rich-harvester.club:3001",

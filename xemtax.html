@@ -151,7 +151,7 @@ function getBatchOfTransfers(maxCount){
 			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2100)
+	},600)
 }
 
 function getBatchOfHarvests(maxCount){
@@ -167,7 +167,7 @@ function getBatchOfHarvests(maxCount){
 			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2100)
+	},600)
 }
 
 function getBatchOfRecipets(maxCount){
@@ -183,7 +183,7 @@ function getBatchOfRecipets(maxCount){
 			gettingInformation = false;
 			clearInterval(timer);
 		}
-	},2100)
+	},600)
 }
 
 
@@ -388,21 +388,21 @@ function onCSVDownload(a, table, filename) {
 $('#transfers_more').click(function(){
 	if(!gettingInformation){
 		$('#spinner_transfers').collapse('show');
-		getBatchOfTransfers(5);
+		getBatchOfTransfers(10);
 	}
 	return false;
 });
 $('#harvests_more').click(function(){
 	if(!gettingInformation){
 		$('#spinner_harvests').collapse('show');
-		getBatchOfHarvests(5);
+		getBatchOfHarvests(10);
 	}
 	return false;
 });
 $('#receipts_more').click(function(){
 	if(!gettingInformation){
 		$('#spinner_receipts').collapse('show');
-		getBatchOfRecipets(5);
+		getBatchOfRecipets(10);
 	}
 	return false;
 });

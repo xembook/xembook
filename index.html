@@ -140,12 +140,8 @@
 
 				</label>
 <div><small>ウォレットでトランザクションの詳細を確認し、同意する場合のみ署名してください。
-署名するとトランザクションが実行されます。内容に同意しない場合は無視してください。
+内容に同意しない場合は無視してください。
 最長48時間たてばこのトランザクションは期限切れになりメッセージは表示されなくなります。
-<br>
-<font color="red"><b>
-委任ハーベストの設定直後に無関係のTXを署名させる詐欺行為が確認されています。ご注意ください。
-</b></font>
 </small></div>
 <br>
 				<dl id="tx_info"></dl>
@@ -469,6 +465,19 @@ function showAccountInfo(accountInfo){
 						if(nem.TransactionType[tx.type] === "TRANSFER"){
 
 							ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
+
+							const xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+							if(xym.length > 0
+								&& address.plain() ===  tx.signer.address.plain()){
+
+								for(const mosaic of xym){
+									ddTx += "<dd><font color='red'><b>あなたの送金額:" + dispAmount(mosaic.amount,6) + " XYM</b><font></dd>";
+									if(mosaic.amount.compact()  > accountInfo.mosaics.find(item=> currencyId === item.id.toHex()).amount.compact() * 2 / 3){
+									
+										ddTx += "<dd><font color='red'><b>保有量の2/3以上を送金します。詐欺の可能性を強く疑ってください。</b><font></dd>";
+									}
+								}
+							}
 						}
 						$("#tx_info").append(dtTx + ddTx);
 					}
