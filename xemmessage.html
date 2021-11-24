@@ -110,9 +110,9 @@ function replacer( str, word , size ) {
 $('#search_btn').click(function(){
 
 	$('#table tbody *').remove();
-	transferPageNumber = 1;
-	harvestPageNumber = 1;
-	reciptPageNumber = 1;
+	transferPageNumber = 0;
+	harvestPageNumber = 0;
+	reciptPageNumber = 0;
 
 	getBatchOfTransfers(1);
 
