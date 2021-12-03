@@ -184,7 +184,7 @@
 	</script>
 	<script src="xembook.js"></script>
 	<script>
-	var imgtarget =0;
+	var imgtarget =-1;
 	var photo = "";
 
 	function getListenerInfo(listener){}
@@ -205,14 +205,24 @@
 					metadataType:nem.MetadataType.Mosaic
 				}).toPromise();
 
+				setTimeout(function(){
+
+					if(imgtarget < 0){
+						createImgTag("XEMGallery.png",imgtarget,"sample image");
+						imgtarget++;
+					}
+				}, 100);
+
 				if(xx.data.length > 0){
 
+						imgtarget++;
 						console.log(xx.data[0].metadataEntry.value);
 						let value = "";
 						if ( xx.data[0].metadataEntry.value.indexOf('{') >= 0) {
 							value = JSON.parse(xx.data[0].metadataEntry.value);
 						}else{
-							value = JSON.parse(hex2a(xx.data[0].metadataEntry.value));
+//							value = JSON.parse(hex2a(xx.data[0].metadataEntry.value));
+							value = JSON.parse(nem.Convert.decodeHex(xx.data[0].metadataEntry.value));
 						}
 						console.log(value);
 						console.log(value.data.media.ipfs);
@@ -225,14 +235,11 @@
 						setTimeout( function(){$.ajax({url: "https://node3.preload.ipfs.io/api/v0/refs?arg=" + value.data.media.ipfs ,type: 'GET'})}, Math.floor(Math.random() * 3000));
 
 						createImgTag("https://ipfs.io/ipfs/" + value.data.media.ipfs,imgtarget,escape_html(decodeURIComponent( escape(value.data.meta.name))));
-
-						imgtarget++;
-
 				}
 			});
 		});
 	}
-
+/*
 	var hex2a = function hex2a(hexx) {
 		var hex = hexx.toString();
 		var str = '';
@@ -241,7 +248,7 @@
 		}
 		return str;
 	};
-
+*/
 	function escape_html (string) {
 		if(typeof string !== 'string') {
 			return string;
