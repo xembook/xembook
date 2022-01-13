@@ -35,10 +35,13 @@
 		<dl>
 		<dt><a href="https://zaif.jp/trade/xym_jpy" target="_blank">Zaif</a></dt><dd><span id="zaif"></span></dd>
 		<dt><a href="https://app.bitbank.cc/trade/xym_jpy" target="_blank">bitbank</a></dt><dd><span id="bitbank"></span></dd>
-		<dt>GMOコイン</dt><dd><span id="gmo"></span></dd>
-		<dt>Bithumb</dt><dd><span id="bithumb"></span></dd>
+		<dt><a href="https://coin.z.com/jp/corp/information/xym-market/" target="_blank">GMOコイン</a></dt><dd><span id="gmo"></span></dd>
+		<dt><a href="https://www.huobi.co.jp/ja-jp/exchange/xym_jpy/" target="_blank">Huobi</a></dt><dd><span id="huobi"></span></dd>
+		
+		
 		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
-<!--		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
+		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
+		<!--dt>Bithumb</dt><dd><span id="bithumb"></span></dd>
 
 
 		<dt>Poloniex</dt><dd><span id="poloniex"></span></dd>
@@ -216,6 +219,7 @@ function showAmountInfo(amount){
 		const zaif = tickers.zaif;
 		const bitbank = tickers.bitbank;
 		const gmo = tickers.gmo;
+		const huobi = tickers.huobi;
 
 //		$("#probit").text( probit + "円 / XYM");
 		$("#gateio").text( gateio + "円 / XYM");
@@ -228,6 +232,7 @@ function showAmountInfo(amount){
 		$("#zaif").html( zaif + "円 / XYM <br>[高:" + tickers.high + ",安:" + tickers.low + "]");
 		$("#bitbank").text( bitbank + "円 / XYM");
 		$("#gmo").text( gmo + "円 / XYM");
+		$("#huobi").text( huobi + "円 / XYM");
 
 		var market_price = amount / 1000000 * zaif;
 		market_price = comma3(String(Math.round(market_price)));
