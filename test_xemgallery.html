@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<link rel="apple-touch-icon" href="icon.png">
+	<title>XEMBook</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="style.css" />
+	<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-100421513-1', 'auto');
+	ga('send', 'pageview');
+	</script>
+</head>
+<body>
+	<h1>XEMBook</h1>
+	<hr class="zigzag-orange-white">
+<div class="container">
+	<div class="row">
+		<div class="account col-sm-4">
+		<h2>アカウント</h2>
+		<dl id="account_info">
+			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
+			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
+			<dt>時価総額</dt><dd><span id="market_price"></span></dd>
+			<dt>重要度</dt><dd><span id="account_importance"></span></dd>
+		</dl>
+		<dl id="account_append_info"></dl>
+		<h2>取引所</h2>
+		<small>最終更新　<span id="last_update"></span></small>
+		<dl>
+		<dt><a href="https://zaif.jp/trade/xym_jpy" target="_blank">Zaif</a></dt><dd><span id="zaif"></span></dd>
+		<dt><a href="https://app.bitbank.cc/trade/xym_jpy" target="_blank">bitbank</a></dt><dd><span id="bitbank"></span></dd>
+		<dt><a href="https://coin.z.com/jp/corp/information/xym-market/" target="_blank">GMOコイン</a></dt><dd><span id="gmo"></span></dd>
+		<dt><a href="https://www.huobi.co.jp/ja-jp/exchange/xym_jpy/" target="_blank">Huobi</a></dt><dd><span id="huobi"></span></dd>
+		
+		
+		<dt>Gate.io</dt><dd><span id="gateio"></span></dd>
+		<dt>KuCoin</dt><dd><span id="kucoin"></span></dd>
+		<!--dt>Bithumb</dt><dd><span id="bithumb"></span></dd>
+
+
+		<dt>Poloniex</dt><dd><span id="poloniex"></span></dd>
+		<dt>Bittrex</dt><dd><span id="bittrex"></span></dd>
+		<dt>ProBit</dt><dd><span id="probit"></span></dd>
+		<dt>Bitrue</dt><dd><span id="bitrue"></span></dd>
+		<dt>HBTC</dt><dd><span id="hbtc"></span></dd>-->
+		</dl>
+		<h2>ノード</h2>
+		<dl id="node_info">
+			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
+			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
+			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
+			<dt>手数料相場</dt>
+			<dd>
+			<table id="fees"  class="table">
+				<thead><tr>
+					<th>送金[中央値]</th>
+					<th>ネームスペース[年]</th>
+					<th>モザイク</th>
+				</tr></thead>
+				<tbody><tr>
+					<td><span id="fee_median"></span>XYM</td>
+					<td><span id="fee_namespace"></span>XYM</td>
+					<td><span id="fee_mosaic"></span>XYM</td>
+				</tr></tbody>
+			</table>
+			</dd>
+
+		</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>レシート</h2>
+			<h5>対象アカウント</h5>
+			<table id="harvest"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="harvests_footer"><a id="harvests_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+			<h5>送信元アカウント</h5>
+			<table id="receipt"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="receipts_footer"><a id="receipts_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
+		<div class="account col-sm-4">
+			<h2>トランザクション</h2>
+			<table id="table"  class="table">
+				<thead><tr>
+					<th>日時</th>
+					<th>区分</th>
+					<th>数量</th>
+				</tr></thead>
+			</table>
+			<dl>
+				<dd id="transfers_footer"><a id="transfers_more" href="javascript:void(0)" >さらに読み込む</a></dd>
+			</dl>
+		</div>
+	</div>
+	<div>
+		<div class="faucet">
+			<h2>リンク</h2>
+			<dl>
+				<dd><a id="xemmessage"  href="">XEMMessage</a></dd>
+				<dd><a id="xemgallery" href="">XEMGallery</a></dd>
+				<dd><a id="xemtax" href="">XEMTax</a></dd>
+				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
+				<dd><a id="xembookusd" href="">XEMBook(USD)</a></dd>
+				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
+				<dd><a target="_blank" href="https://quest-bc.com/">QUEST</a></dd>
+				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
+			</dl>
+		</div>
+	</div>
+
+</div>
+
+<!-- 通知モーダル -->
+<div class="modal fade" id="modal-notice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel2">お知らせ</h5>
+			</div>
+			<div class="modal-body">
+				<label id="modal-label">未承認のトランザクションがあります。
+
+				</label>
+<div><small>ウォレットでトランザクションの詳細を確認し、同意する場合のみ署名してください。
+内容に同意しない場合は無視してください。
+最長48時間たてばこのトランザクションは期限切れになりメッセージは表示されなくなります。
+</small></div>
+<br>
+				<dl id="tx_info"></dl>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal"	id="modal_ok">閉じる</button>
+
+			</div><!-- /.modal-footer -->
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="symbol-sdk-1.0.2.min.js"></script>
+<script src="xembook_config.js"></script>
+<script>
+var nodelist = NODES;
+var explorer = EXPLORER;
+//const nodelist = TEST_NODES;
+//const explorer = TEST_EXPLORER;
+
+const SENDING = "送信";
+const RECEIVING = "受信";
+const AGGREGATE = "集約";
+
+</script>
+<script src="xembook.js"></script>
+<script>
+
+function getListenerInfo(listener){
+
+	listener.newBlock().subscribe(async block=>{
+		newBlockHash = block.hash; //活性チェック用
+		getNewInfo(block);
+	});
+
+	if(listener.isOpen()){
+		$("#node_activity").html("<font color='green'>● </font>");
+	}else{
+		$("#node_activity").html("<font color='red'>● </font>");
+	}
+
+}
+function showInfo(accountInfo){
+
+	accountInfo.subscribe(async _=>{
+		showAccountInfo(_);
+		await getHarvests(15);
+		await getTransfers(20);
+		await getRecipets(15);
+	});
+}
+
+function showAmountInfo(amount){
+
+	$.when(
+//		$.ajax({url: "https://blockchain.info/ticker?cors=true"         ,type: 'GET'}),
+		$.ajax({url: "https://s3-ap-northeast-1.amazonaws.com/xembook.net/data/v2/tickers.json" ,type: 'GET',cache: false}),
+	)
+	.done(function(tickers) {
+
+
+//		const probit = Math.round(tickers.USDJPY * tickers.probit * 1000) / 1000;
+		const gateio = Math.round(tickers.USDJPY * tickers.gateio * 1000) / 1000;
+//		const hbtc = Math.round(tickers.USDJPY * tickers.hbtc * 1000) / 1000;
+		const kucoin = Math.round(tickers.USDJPY * tickers.kucoin * 1000) / 1000;
+//		const bitrue = Math.round(tickers.USDJPY * tickers.bitrue * 1000) / 1000;
+//		const bittrex = Math.round(tickers.USDJPY * tickers.bittrex * 1000) / 1000;
+		const poloniex = Math.round(tickers.USDJPY * tickers.poloniex * 1000) / 1000;
+		const bithumb = Math.round(tickers.KRWJPY * tickers.bithumb * 1000) / 1000;
+		const zaif = tickers.zaif;
+		const bitbank = tickers.bitbank;
+		const gmo = tickers.gmo;
+		const huobi = tickers.huobi;
+
+//		$("#probit").text( probit + "円 / XYM");
+		$("#gateio").text( gateio + "円 / XYM");
+//		$("#hbtc").text( hbtc + "円 / XYM");
+		$("#kucoin").text( kucoin + "円 / XYM");
+//		$("#bitrue").text( bitrue + "円 / XYM");
+//		$("#bittrex").text( bittrex + "円 / XYM");
+//		$("#poloniex").text( poloniex + "円 / XYM");
+		$("#bithumb").text( bithumb + "円 / XYM");
+		$("#zaif").html( zaif + "円 / XYM <br>[高:" + tickers.high + ",安:" + tickers.low + "]");
+		$("#bitbank").text( bitbank + "円 / XYM");
+		$("#gmo").text( gmo + "円 / XYM");
+		$("#huobi").text( huobi + "円 / XYM");
+
+		var market_price = amount / 1000000 * zaif;
+		market_price = comma3(String(Math.round(market_price)));
+		$("#market_price").text(market_price + "円 [" + zaif + "JPY/XYM換算]");
+		$("#last_update").text(tickers.last_update);
+	});
+}
+
+function showAccountInfo(accountInfo){
+
+	$("#account_append_info").empty();
+	$("#account_importance").empty();
+
+	//マルチシグ
+	msigRepo.getMultisigAccountInfo(accountInfo.address)
+	.subscribe(msig=>{
+
+		//親アカウント
+		var parentKeys = "";
+		for(const cosignatory of msig.cosignatoryAddresses){
+			const parentAddress = cosignatory.pretty().slice(0,20) + "..." + cosignatory.pretty().slice( -3 );
+			parentKeys += '<dd><a href="?address=' + cosignatory.address + '">' + parentAddress + '</a></dd>';
+		}
+		if(msig.cosignatoryAddresses.length > 0){
+			$("#account_append_info").append('<dt>親アカウント</dt>' + parentKeys);
+		}
+
+		//子アカウント
+		var childKeys = "";
+		for(const multisig of msig.multisigAddresses){
+			const childAddress = multisig.pretty().slice(0,20) + "..."+ multisig.pretty().slice( -3 );
+			childKeys += '<dd><a href="?address=' + multisig.address + '">' + childAddress + '</a></dd>';
+		}
+		if(msig.multisigAddresses.length > 0){
+			$("#account_append_info").append('<dt>子アカウント</dt>' + childKeys);
+		}
+	},err=>console.log("no multisig"))
+
+	//ブロック
+	chainRepo.getChainInfo().subscribe(chain=>{
+
+		rxjs.zip(
+			blockRepo1.getBlockByHeight(chain.height),
+			blockRepo1.getBlockByHeight(chain.latestFinalizedBlock.height),
+		).subscribe(zip => {
+
+			$("#chain_height").html(
+				"[ <a target='_blank' href='" + EXPLORER + "/blocks/" + zip[0].height.compact() + "'>" + zip[0].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[0].timestamp.toString()),epochAdjustment)
+			);
+			$("#finalized_chain_height").html(
+				"[ <a target='_blank' href='" + EXPLORER + "/blocks/" + zip[1].height.compact() + "'>" + zip[1].height.compact() + "</a> ]　日時: " + dispTimeStamp(Number(zip[1].timestamp.toString()),epochAdjustment)
+			);
+
+			//ネームスペース
+			nsRepo.search({ownerAddress:accountInfo.address})
+			.subscribe(async ns=>{
+
+				var ddNamespace = "";
+				for(const nsInfo of ns.data){
+
+					if(nsInfo.levels.length == 1){
+						const names = await nsRepo.getNamespacesNames([nsInfo.levels[nsInfo.levels.length - 1]]).toPromise();
+
+						var namespace = "";
+						for(const namespaceName of names){
+							if(namespace != ""){
+								namespace = "." + namespace;
+							}
+							namespace = namespaceName.name + namespace;
+						}
+
+						var remainHeight = nsInfo.endHeight.compact() - zip[0].height.compact();
+						t = dispTimeStamp(zip[0].timestamp.compact() + (remainHeight * 30000),epochAdjustment)
+//						t = dispTimeStamp(nsInfo.endHeight.compact() * 30000,epochAdjustment);
+						ddNamespace += '<dd>' + namespace + ' [期限: ' + t + ']</dd>';
+					}
+				}
+				if(ddNamespace !== ""){
+					$("#account_append_info").append('<dt>ルートネームスペース</dt>'+ ddNamespace);
+				}
+			});
+		})
+	});
+
+	nwRepo.getTransactionFees().subscribe(fees=>{
+
+		var txFee;
+		if(fees.medianFeeMultiplier > fees.minFeeMultiplier){
+			txFee = fees.medianFeeMultiplier;
+		}else{
+			txFee = fees.minFeeMultiplier;
+		}
+		$("#fee_median").text(dispAmount(txFee * 176,6).slice(0,-4));
+	})
+
+	nwRepo.getRentalFees().subscribe(fees=>{
+		const yearRentalNamespaceFee = fees.effectiveRootNamespaceRentalFeePerBlock * 2 * 60 * 24 * 30 * 12;
+		$("#fee_namespace").text(dispAmount(yearRentalNamespaceFee,6).slice(0,-7));
+		$("#fee_mosaic").text(dispAmount(fees.effectiveMosaicRentalFee,6).slice(0,-7));
+	})
+
+
+
+	//ノード
+	nodeRepo.getNodeInfo().subscribe(node => {
+
+		var nodeHost = node.host;
+		if(nemScriptionExpiredHeight !== null){
+			nodeHost = "[JP] " + nodeHost;
+		}
+		$("#node_host").text(nodeHost);
+	});
+
+	//委任ノード
+	const NO_3001_NODES = [
+	"node.xembook.net",
+	"a.symbol.lcnem.net",
+	];
+
+	const delegatedNode = localStorage.getItem('delegated_node' + rawAddress);
+	var dnode ="https://" + delegatedNode;
+	if(!NO_3001_NODES.includes(delegatedNode)){
+		dnode = dnode + ":3001";
+	}
+
+	if(delegatedNode !== null){
+
+		const drepo = new nem.RepositoryFactoryHttp(dnode);
+		const dnodeRepo = drepo.createNodeRepository();
+
+		dnodeRepo.getUnlockedAccount().subscribe(async ukeys=>{
+
+			const harvesterKeys = Array();
+			for(unlockedPublicKey of ukeys){
+				const unlockedAddress = nem.PublicAccount.createFromPublicKey(unlockedPublicKey,networkType).address;
+				try{
+					unlockedInfo = await accountRepo.getAccountInfo(unlockedAddress).toPromise();
+					harvesterKeys.push(unlockedInfo.supplementalPublicKeys.linked.publicKey);
+				}catch{
+					console.log("no unlockedInfo:" + unlockedAddress.plain());
+				}
+			}
+
+			const dchainRepo = drepo.createChainRepository();
+
+/*
+			const zipChain = await rxjs.zip(
+				chainRepo.getChainInfo(),
+				dchainRepo.getChainInfo()
+			).toPromise();
+*/
+			const dchain = await dchainRepo.getChainInfo().toPromise();
+			var unlockedMark = "";
+			if(!harvesterKeys.includes(accountInfo.publicKey)){
+
+				unlockedMark = "<font color='red'>● </font>";
+			}else if(latestBlock.height.compact() > dchain.height.compact() + 1){
+
+				unlockedMark = "<font color='orange'>● </font>";
+			}else{
+
+				unlockedMark = "<font color='green'>● </font>";
+			}
+
+			$("#delegated_node").html(
+				unlockedMark + delegatedNode
+			);
+
+		},err=>{
+			if (window.confirm("委任ノードが正しく設定されていないかHTTPS非対応です。設定をクリアしますか？\n設定：" + delegatedNode)) {
+				localStorage.removeItem('delegated_node' + rawAddress);
+			}
+		});
+	}
+
+	//重要度
+	var accountImportance = Number(accountInfo.importance.toString()) / totalChainImportance ;
+	var provabilityHarvest = "";
+	if(accountImportance > 0){
+
+		accountImportance = Math.round( accountImportance );
+		accountImportance /= 1000000;
+		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE;
+		pFalse = 1 - activeImportance;
+		p = 1 - activeImportance;
+		b = 1;
+		while(0.5 < p){
+			p = p * pFalse;
+			b += 1;
+		}
+		pHalf = b / 2880 ;
+		if(pHalf > 0.5){
+
+			while(0.15 < p){
+				p = p * pFalse;
+				b += 1;
+			}
+			pSig = b / 2880;
+			provabilityHarvest = "[50%: " + pHalf.toFixed(1) + "日, 85%: " + pSig.toFixed(1) + "日]";
+		}
+	}
+	$("#account_importance").text(accountImportance + " " + provabilityHarvest);
+
+	//アグリゲートトランザクション検知
+	const bondedListener = listener.aggregateBondedAdded(accountInfo.address);
+	const bondedHttp = txRepo.search({address:accountInfo.address,group:nem.TransactionGroup.Partial})
+	.pipe(
+		op.delay(2000),
+		op.mergeMap(page => page.data)
+	);
+
+	const bondedSubscribe = function(observer){
+		observer.pipe(
+
+			//すでに署名済みでない場合
+			op.filter(_ => {
+				return !_.signedByAccount(nem.PublicAccount.createFromPublicKey(accountInfo.publicKey ,networkType));
+			})
+		).subscribe(_=>{
+
+			txRepo.getTransactionsById([_.transactionInfo.hash],nem.TransactionGroup.Partial)
+			.pipe(
+				op.filter(aggTx => aggTx.length > 0)
+			)
+			.subscribe(aggTx =>{
+
+				//インナートランザクションの署名者に自分が指定されている場合
+				if(aggTx[0].innerTransactions.find((inTx) => inTx.signer.equals(accountInfo.publicAccount))!= undefined){
+
+					txs = aggTx[0].innerTransactions;
+					for(const tx of txs){
+
+						var dtTx = "<dt>" + nem.TransactionType[tx.type] + "</dt>";
+						var ddTx = "<dd>送信者:" + tx.signer.address.pretty().slice(0,14) + "..." + tx.signer.address.pretty().slice(-3) + "</dd>";
+						if(nem.TransactionType[tx.type] === "TRANSFER"){
+
+							ddTx += "<dd>→受信者:" + tx.recipientAddress.pretty().slice(0,14) + "..." + tx.recipientAddress.pretty().slice(-3)  + "</dd>";
+
+							const xym = tx.mosaics.filter(item=> [currencyNamespaceId,currencyId].includes(item.id.toHex()));
+							if(xym.length > 0
+								&& address.plain() ===  tx.signer.address.plain()){
+
+								for(const mosaic of xym){
+									ddTx += "<dd><font color='red'><b>あなたの送金額:" + dispAmount(mosaic.amount,6) + " XYM</b><font></dd>";
+									if(mosaic.amount.compact()  > accountInfo.mosaics.find(item=> currencyId === item.id.toHex()).amount.compact() * 2 / 3){
+									
+										ddTx += "<dd><font color='red'><b>保有量の2/3以上を送金します。詐欺の可能性を強く疑ってください。</b><font></dd>";
+									}
+								}
+							}
+						}
+						$("#tx_info").append(dtTx + ddTx);
+					}
+					$('#modal-notice').modal('show');
+				}
+			});
+
+		});
+	}
+
+	bondedSubscribe(bondedListener);
+	bondedSubscribe(bondedHttp);
+}
+
+function setDelegatedNode(){
+
+	var delegatedNode = window.prompt('委任ノードを入力してください[HTTPSノードのみ]\n(例:a.symbol.lcnem.net)','');
+	if(delegatedNode !== null){
+		localStorage.setItem('delegated_node' + rawAddress,delegatedNode);
+		alert("設定しました。次回表示時より、委任ノードの有効状態を確認します。");
+	}
+}
+
+function dispBlockTimeStamp(id,height){
+
+	blockRepo.getBlockByHeight(height)
+	.subscribe(block => {
+
+		$(id).text(
+			dispTimeStamp(Number(block.timestamp.toString()),epochAdjustment)
+		);
+	})
+}
+
+function appendAggTx(tx){
+
+	const txId = tx.transactionInfo.id;
+	$("#table").append("<tr id='agg" + txId + "'>"
+	+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
+	+ tx.transactionInfo.hash + "'><span id='date" + txId + "'>"
+	+ "</span></a></td>"
+	+ "<td id='type" + txId + "'></td>" //mosaicLabel
+	+ "<td id='amount" + txId + "' class='text-right'></td>"
+	+ "</tr>"
+	);
+
+	dispBlockTimeStamp("#date"+ txId,tx.transactionInfo.height);
+}
+
+function appendTx(insTag,id,tx){
+
+	$(insTag).append(
+		"<tr>"
+		+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
+		   + tx.transactionInfo.hash + "'><span id='date" + id + "'>"
+		+ "</span></a></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "' class='text-right'></td>"
+		+ "</tr>"
+	);
+
+	dispBlockTimeStamp("#date"+ id,tx.transactionInfo.height);
+}
+
+function insertTxAfter(insTag,id,tx,txTimestamp){
+
+	$(insTag).after(
+		"<tr>"
+		+ "<td></td>"
+		+ "<td id='type" + id + "'></td>" //mosaicLabel
+		+ "<td id='amount" + id + "'  class='text-right'></td>"
+		+ "</tr>"
+	);
+}
+
+function showReceiptInfo(tag,height,receipt,cnt){
+
+	if(cnt === 0){
+		cnt = "";
+	}
+
+	$("#" + tag).append("<tr>"
+	+ "<td id='" + tag + "_date" + height + receipt.type + cnt + "'></td>"
+	+ "<td id='" + tag + "_type' style='font-size:84%;' class='text-left'>" + nem.ReceiptType[receipt.type] + "</td>"
+	+ "<td id='" + tag + "_amount' class='text-right'>" + dispAmount(receipt.amount,6) + "</td>" //mosaicLabel
+	+ "</tr>"
+	);
+
+	dispBlockTimeStamp("#" + tag + "_date"+ height + receipt.type,height);
+}
+
+function showTxAmountInfo(id,amount,fee){
+
+	$("#amount" + id).text(
+		dispAmount(
+			amount.add(nem.UInt64.fromNumericString(fee.toString()))
+			,6
+		)
+	);
+}
+
+var lastBlockHash = "";
+setInterval(function(){
+
+	showPriceInfo(accountRepo.getAccountInfo(address));
+
+	var nodeActivity = "";
+	if(lastBlockHash === newBlockHash){
+		nodeActivity = "<font color='red'>● </font>";
+	}else{
+		nodeActivity = "<font color='green'>● </font>";
+	}
+
+	$("#node_activity").html(nodeActivity);
+	lastBlockHash = newBlockHash;
+
+
+
+}, 60000);
+
+function getNewInfo(block){
+
+	receiptRepo.searchReceipts({targetAddress:address,height:block.height})
+	.subscribe(_ =>{
+		if(_.data.length > 0){
+			alert("レシートが追加されました。再表示してください。");
+		}
+	})
+
+	txRepo.search({address:address,height:block.height,group:nem.TransactionGroup.Confirmed})
+	.subscribe(_ =>{
+		if(_.data.length > 0){
+			alert("トランザクションが追加されました。再表示してください。");
+		}
+	})
+}
+
+$('#transfers_more').click(function(){getTransfers(20);return false;});
+$('#harvests_more' ).click(function(){getHarvests(15); return false;});
+$('#receipts_more' ).click(function(){getRecipets(15); return false;});
+$('#set_delegated_node').click(function(){setDelegatedNode();return false;});
+
+$("#xemmessage").attr("href", "xemmessage.html?address=" + rawAddress);
+$("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
+$("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
+$("#xemgallery"    ).attr("href", "xemgallery.html?address=" + rawAddress);
+$("#xembookusd"    ).attr("href", "en.html?address=" + rawAddress);
+
+</script>
+</body>
+</html>
