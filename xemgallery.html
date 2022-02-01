@@ -49,12 +49,12 @@
 			top: 3px;
 			bottom: 3px;
 			text-align: center;
-		    line-height: 350px;
-		    font-size: 30px;
-		    color: #fff;
-		    -webkit-transition: all 0.5s ease-in-out 0s;
-		    -moz-transition: all 0.5s ease-in-out 0s;
-		    transition: all 0.5s ease-in-out 0s;
+			line-height: 350px;
+			font-size: 30px;
+			color: #fff;
+			-webkit-transition: all 0.5s ease-in-out 0s;
+			-moz-transition: all 0.5s ease-in-out 0s;
+			transition: all 0.5s ease-in-out 0s;
 		}
 		.gal-item a:hover:after{
 			opacity: 1;
@@ -66,20 +66,20 @@
 			padding: 0px;
 		}
 		.modal-open .gal-item button.close{
-		    position: absolute;
-		    width: 25px;
-		    height: 25px;
-		    background-color: #000;
-		    opacity: 1;
-		    color: #fff;
-		    z-index: 999;
-		    right: -12px;
-		    top: -12px;
-		    border-radius: 50%;
-		    font-size: 15px;
-		    border: 2px solid #fff;
-		    line-height: 25px;
-		    -webkit-box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
+			position: absolute;
+			width: 25px;
+			height: 25px;
+			background-color: #000;
+			opacity: 1;
+			color: #fff;
+			z-index: 999;
+			right: -12px;
+			top: -12px;
+			border-radius: 50%;
+			font-size: 15px;
+			border: 2px solid #fff;
+			line-height: 25px;
+			-webkit-box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
 			box-shadow: 0 0 1px 1px rgba(0,0,0,0.35);
 		}
 		.modal-open .gal-item button.close:focus{
@@ -110,50 +110,50 @@
 			line-height: 20px;
 		}
 		.gal-container .modal.fade .modal-dialog {
-		    -webkit-transform: scale(0.1);
-		    -moz-transform: scale(0.1);
-		    -ms-transform: scale(0.1);
-		    transform: scale(0.1);
-		    top: 100px;
-		    opacity: 0;
-		    -webkit-transition: all 0.3s;
-		    -moz-transition: all 0.3s;
-		    transition: all 0.3s;
+			-webkit-transform: scale(0.1);
+			-moz-transform: scale(0.1);
+			-ms-transform: scale(0.1);
+			transform: scale(0.1);
+			top: 100px;
+			opacity: 0;
+			-webkit-transition: all 0.3s;
+			-moz-transition: all 0.3s;
+			transition: all 0.3s;
 		}
 
 		.gal-container .modal.fade.in .modal-dialog {
-		    -webkit-transform: scale(1);
-		    -moz-transform: scale(1);
-		    -ms-transform: scale(1);
-		    transform: scale(1);
-		    -webkit-transform: translate3d(0, -100px, 0);
-		    transform: translate3d(0, -100px, 0);
-		    opacity: 1;
+			-webkit-transform: scale(1);
+			-moz-transform: scale(1);
+			-ms-transform: scale(1);
+			transform: scale(1);
+			-webkit-transform: translate3d(0, -100px, 0);
+			transform: translate3d(0, -100px, 0);
+			opacity: 1;
 		}
 		@media (min-width: 768px) {
 		.gal-container .modal-dialog {
-		    width: 55%;
-		    margin: 50 auto;
+			width: 55%;
+			margin: 50 auto;
 		}
 		}
 		@media (max-width: 768px) {
-		    .gal-container .modal-content{
-		        height:250px;
-		    }
+			.gal-container .modal-content{
+				height:250px;
+			}
 		}
 		/* Footer Style */
 		i.red{
-		    color:#BC0213;
+			color:#BC0213;
 		}
 		.gal-container{
-		    padding-top :0px;
-		    padding-bottom:0px;
+			padding-top :0px;
+			padding-bottom:0px;
 		}
 		footer{
-		    font-family: 'Quicksand', sans-serif;
+			font-family: 'Quicksand', sans-serif;
 		}
 		footer a,footer a:hover{
-		    color: #88C425;
+			color: #88C425;
 		}
 
 	</style>
@@ -170,7 +170,7 @@
 	</div>
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-	<script src="symbol-sdk-1.0.2.min.js"></script>
+	<script src="symbol-sdk-1.0.3.min.js"></script>
 	<script src="xembook_config.js"></script>
 	<script>
 	var nodelist = NODES;
@@ -187,9 +187,20 @@
 	var imgtarget =-1;
 	var photo = "";
 
+	nglist = [];
+	fetch('https://nft-drive-data-explorer.tk/black_list/',)
+	.then((response) => {
+	    return response.text().then(function(text) {
+	        nglist = JSON.parse(text);      
+	        console.log(text);
+	    });
+	})
+				
 	function getListenerInfo(listener){}
 	function getNewInfo(block){}
 	function showAmountInfo(amount){}
+	function showAccountInfo(accountInfo){}
+	
 	function showInfo(accountInfo){
 
 		accountInfo.subscribe(async _=>{
@@ -198,6 +209,10 @@
 //				op.delay(500),
 				op.mergeMap(_=> _.mosaics),
 			).subscribe(async x=> {
+
+
+				nftdrive(x,nglist);
+
 
 				xx = await metaRepo.search({
 					scopedMetadataKey:"D2E513530574930D",
@@ -211,7 +226,7 @@
 						createImgTag("XEMGallery.png",imgtarget,"sample image");
 						imgtarget++;
 					}
-				}, 100);
+				}, 3000);
 
 				if(xx.data.length > 0){
 
@@ -239,6 +254,83 @@
 			});
 		});
 	}
+	
+	async function nftdrive(x,nglist){
+
+		mosaicRepo.getMosaic(x.id)
+		.pipe(
+			op.filter(mo=>{
+				return !nglist.find(elem => elem[1] === mo.id.toHex())
+			})
+		)
+		.subscribe(async mo=>{
+
+			const ownerAddress = mo.ownerAddress;
+			const preTxes = await txRepo.search({
+				type:[
+					nem.TransactionType.TRANSFER,
+				],
+
+				address:ownerAddress,group:nem.TransactionGroup.Confirmed,pageSize:10,order:nem.Order.Asc
+			}).toPromise();
+			console.log(preTxes.data)
+			if(preTxes.data.find(tx => {
+				if(tx.message === undefined){
+					return false;
+				}else if(tx.message.payload==="Please note that this mosaic is an NFT."){
+					return true;
+				}else{
+					return false;
+				}
+			})){
+			
+				console.log("this is NFT-Drive");
+			
+
+				const tx = await txRepo.search({
+					type:[
+						nem.TransactionType.AGGREGATE_COMPLETE,
+						nem.TransactionType.AGGREGATE_BONDED,
+					],
+					address:ownerAddress,group:nem.TransactionGroup.Confirmed,pageSize:100
+				}).toPromise();
+
+				const aggTxes = [];
+				for (let idx = 0; idx < tx.data.length; idx++) {
+					const aggTx = await txRepo.getTransaction(tx.data[idx].transactionInfo.hash,nem.TransactionGroup.Confirmed).toPromise();
+
+					if(aggTx.innerTransactions.find(elem => elem.type === 16724)){
+						aggTxes.push(aggTx);
+					}
+				}
+
+				const sotedAggTxes = aggTxes.sort(function(a, b) {
+
+					if (Number(a.innerTransactions[0].message.payload) > Number(b.innerTransactions[0].message.payload)) {return 1;} else {return -1;}
+				})
+
+				let nftData = "";
+				let header = 15;
+				for (let aggTx of sotedAggTxes) {
+
+					for(let idx = 0 + header; idx < aggTx.innerTransactions.length;idx++){
+						nftData += aggTx.innerTransactions[idx].message.payload;
+					}
+					header = 1;
+				}
+
+				if(nftData.indexOf("data:image/") >= 0){
+					imgtarget++;
+					createImgTag(nftData ,imgtarget,sotedAggTxes[0].innerTransactions[4].message.payload);
+				
+				}
+
+
+			}
+		});
+
+	}	
+	
 /*
 	var hex2a = function hex2a(hexx) {
 		var hex = hexx.toString();
@@ -268,6 +360,9 @@
 	var createImgTag = function(src,target,comment){
 
 		console.log(comment);
+		if(comment.length > 40){
+			comment = comment.slice(0,40) + "...";
+		}
 //		var photo = '<div class="col-md-8 col-sm-12 co-xs-12 gal-item">';
 
 		var photo = '<div class="col-md-4 col-sm-6 co-xs-12 gal-item">';
