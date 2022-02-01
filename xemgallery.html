@@ -185,6 +185,7 @@
 	<script src="xembook.js"></script>
 	<script>
 	var imgtarget =-1;
+	var needSample = true;
 	var photo = "";
 
 	nglist = [];
@@ -222,14 +223,14 @@
 
 				setTimeout(function(){
 
-					if(imgtarget < 0){
+					if(needSample == true){
 						createImgTag("XEMGallery.png",imgtarget,"sample image");
 						imgtarget++;
 					}
-				}, 3000);
+				}, 500);
 
 				if(xx.data.length > 0){
-
+						needSample = false;
 						imgtarget++;
 						console.log(xx.data[0].metadataEntry.value);
 						let value = "";
@@ -266,40 +267,48 @@
 		.subscribe(async mo=>{
 
 			//COMSA
-			xx = await metaRepo.search({
-				scopedMetadataKey:"C66A4EBE09577AF6",
+			let xx = await metaRepo.search({
 				targetId:mo.id,
-				metadataType:nem.MetadataType.Mosaic
+				metadataType:nem.MetadataType.Mosaic,
+				pageSize:100
 			}).toPromise();
 
-			if(xx.data.length > 0){
+			let comsaHeader = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'DA030AA7795EBE75');
+			if(comsaHeader !== undefined){
+				needSample = false;
+				let headerJSON = JSON.parse(comsaHeader.metadataEntry.value);
+				let aggTxes1 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'D77BFE313AF3EF1F');
+				let aggTxes2 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'AACFBE3CC93EABF3');
+				let aggTxes3 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'A0B069B710B3754C');
+				let aggTxes4 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'D75B016AA9FAC056');
 
-				value = JSON.parse(xx.data[0].metadataEntry.value);
-				console.log(value[0]);
-				//const aggTxes = [];
-				const aggTx = await txRepo.getTransaction(value[0],nem.TransactionGroup.Confirmed).toPromise();
+				let aggTxes = JSON.parse(aggTxes1.metadataEntry.value);
 
-				let nftData = "";
-				let headerJSON = JSON.parse(aggTx.innerTransactions[0].message.payload);
-				console.log(headerJSON.mime_type);
-				let dataType = "data:" + headerJSON.mime_type + ";base64,";
-				let title = headerJSON.title;
-				for(let idx = 1; idx < aggTx.innerTransactions.length;idx++){
-					let payload = aggTx.innerTransactions[idx].message.payload;
-					console.log(aggTx.innerTransactions[idx].message.payload);
-					
-
-					nftData += payload.slice(6);
+				if(aggTxes2 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes2.metadataEntry.value));
 				}
 
+				if(aggTxes3 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes3.metadataEntry.value));
+				}
+				
+				if(aggTxes4 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes4.metadataEntry.value));
+				}
+
+				let nftData = "";
+				let dataType = "data:" + headerJSON.mime_type + ";base64,";
+				for (let idx = 0; idx < aggTxes.length; idx++) {
+					const aggTx = await txRepo.getTransaction(aggTxes[idx],nem.TransactionGroup.Confirmed).toPromise();
+					for(let idx = 1; idx < aggTx.innerTransactions.length;idx++){
+						let payload = aggTx.innerTransactions[idx].message.payload;
+						nftData += payload.slice(6);
+					}
+				}
+				
 				imgtarget++;
-				console.log(title);
-				createImgTag(dataType + nftData ,imgtarget,escape_html(decodeURIComponent( title)));
-				
-
-
+				createImgTag(dataType + nftData ,imgtarget,escape_html(decodeURIComponent( nem.Convert.decodeHex(headerJSON.title))));
 			}
-				
 
 			//NFT-Drive
 			const ownerAddress = mo.ownerAddress;
@@ -315,6 +324,7 @@
 				if(tx.message === undefined){
 					return false;
 				}else if(tx.message.payload==="Please note that this mosaic is an NFT."){
+					needSample = false;
 					return true;
 				}else{
 					return false;
@@ -322,8 +332,6 @@
 			})){
 			
 				console.log("this is NFT-Drive");
-			
-
 				const tx = await txRepo.search({
 					type:[
 						nem.TransactionType.AGGREGATE_COMPLETE,
@@ -360,15 +368,15 @@
 					console.log(nftData);
 					imgtarget++;
 					createImgTag(nftData ,imgtarget,sotedAggTxes[0].innerTransactions[4].message.payload);
-				
 				}
-
-
 			}
 		});
-
 	}	
-	
+
+const sleep = (time) => {
+  return new Promise((resolve) => setTimeout(resolve, time))
+}
+
 /*
 	var hex2a = function hex2a(hexx) {
 		var hex = hexx.toString();
