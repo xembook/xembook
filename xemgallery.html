@@ -265,6 +265,43 @@
 		)
 		.subscribe(async mo=>{
 
+			//COMSA
+			xx = await metaRepo.search({
+				scopedMetadataKey:"C66A4EBE09577AF6",
+				targetId:mo.id,
+				metadataType:nem.MetadataType.Mosaic
+			}).toPromise();
+
+			if(xx.data.length > 0){
+
+				value = JSON.parse(xx.data[0].metadataEntry.value);
+				console.log(value[0]);
+				//const aggTxes = [];
+				const aggTx = await txRepo.getTransaction(value[0],nem.TransactionGroup.Confirmed).toPromise();
+
+				let nftData = "";
+				let headerJSON = JSON.parse(aggTx.innerTransactions[0].message.payload);
+				console.log(headerJSON.mime_type);
+				let dataType = "data:" + headerJSON.mime_type + ";base64,";
+				let title = headerJSON.title;
+				for(let idx = 1; idx < aggTx.innerTransactions.length;idx++){
+					let payload = aggTx.innerTransactions[idx].message.payload;
+					console.log(aggTx.innerTransactions[idx].message.payload);
+					
+
+					nftData += payload.slice(6);
+				}
+
+				imgtarget++;
+				console.log(title);
+				createImgTag(dataType + nftData ,imgtarget,escape_html(decodeURIComponent( title)));
+				
+
+
+			}
+				
+
+			//NFT-Drive
 			const ownerAddress = mo.ownerAddress;
 			const preTxes = await txRepo.search({
 				type:[
@@ -320,6 +357,7 @@
 				}
 
 				if(nftData.indexOf("data:image/") >= 0){
+					console.log(nftData);
 					imgtarget++;
 					createImgTag(nftData ,imgtarget,sotedAggTxes[0].innerTransactions[4].message.payload);
 				
