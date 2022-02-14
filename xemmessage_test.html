@@ -347,6 +347,7 @@ $(document).on("click","#sss", function() {
 		).setMaxFee(100);
 
 		console.log(tx);
+		window.SSS.setTransaction(tx);
 
 		window.SSS.requestSign().then((signedTx) => {
 			txRepo.announce(signedTx).subscribe(x=>console.log(x));
