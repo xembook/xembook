@@ -96,6 +96,7 @@ isSssEnabled = false;
 setTimeout(() => {
 	if (!window.SSS) {
 		console.log('sss not installed')
+		isSssEnabled = true;
 	} else {
 		console.log('sss installed');
 		isSssEnabled = true;
@@ -105,6 +106,7 @@ setTimeout(() => {
 function getListenerInfo(listener){}
 function getNewInfo(block){}
 function showAmountInfo(amount){}
+function showAccountInfo(accountInfo){}
 function showInfo(accountInfo){
 	getBatchOfTransfers(1);
 }
@@ -212,26 +214,31 @@ function appendTx(insTag,id,tx){
 
 		let recipientNamespaceId = "";
 		let recipientAddress = "";
-		console.log(tx.recipientAddress.constructor.name);
-		if(tx.recipientAddress.constructor.name === "Address"){
-			recipientAddress = tx.recipientAddress.plain();
-			console.log(recipientAddress);
-		
-		}else{
-		//NamespaceId
-			recipientNamespaceId = tx.recipientAddress.toHex();
-			console.log(recipientNamespaceId);
-		
-		}
 
 		let tr = "<tr>";
 		let addSss = "";
-		
-		if(tx.signer.address.plain() === rawAddress  && isSssEnabled){
-			tr = "<tr signer='" + tx.signer.publicKey + "' recipientAddress='" + recipientAddress + "' recipientNamespaceId='" + recipientNamespaceId + "'>";
-			addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS1</button>";
 
-		} 
+		if(tx.recipientAddress !== undefined){
+
+			console.log(tx.recipientAddress.constructor.name);
+			if(tx.recipientAddress.constructor.name === "Address"){
+				recipientAddress = tx.recipientAddress.plain();
+				console.log(recipientAddress);
+			
+			}else{
+			//NamespaceId
+				recipientNamespaceId = tx.recipientAddress.toHex();
+				console.log(recipientNamespaceId);
+			
+			}
+
+			
+			if(tx.signer.address.plain() === rawAddress  && isSssEnabled){
+				tr = "<tr signer='" + tx.signer.publicKey + "' recipientAddress='" + recipientAddress + "' recipientNamespaceId='" + recipientNamespaceId + "'>";
+				addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS1</button>";
+
+			}
+		}
 
 		$(insTag).append(
 //			"<tr>"
@@ -260,27 +267,28 @@ function insertTxAfter(insTag,id,tx,txTimestamp){
 
 	let recipientNamespaceId = "";
 	let recipientAddress = "";
-	console.log(tx.recipientAddress.constructor.name);
-	if(tx.recipientAddress.constructor.name === "Address"){
-		recipientAddress = tx.recipientAddress.plain();
-		console.log(recipientAddress);
-	
-	}else{
-	//NamespaceId
-		recipientNamespaceId = tx.recipientAddress.toHex();
-		console.log(recipientNamespaceId);
-	
-	}
-
 
 	let tr = "<tr>";
 	let addSss = "";	
-	
-	if(tx.signer.address.plain() === rawAddress && isSssEnabled){
-		tr = "<tr signer='" + tx.signer.publicKey + "' recipientAddress='" + recipientAddress + "' recipientNamespaceId='" + recipientNamespaceId + "'>";
-		addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS2</button>";
-	} 
 
+	if(tx.recipientAddress !== undefined){
+		console.log(tx.recipientAddress.constructor.name);
+		if(tx.recipientAddress.constructor.name === "Address"){
+			recipientAddress = tx.recipientAddress.plain();
+			console.log(recipientAddress);
+		
+		}else{
+		//NamespaceId
+			recipientNamespaceId = tx.recipientAddress.toHex();
+			console.log(recipientNamespaceId);
+		
+		}
+		
+		if(tx.signer.address.plain() === rawAddress && isSssEnabled){
+			tr = "<tr signer='" + tx.signer.publicKey + "' recipientAddress='" + recipientAddress + "' recipientNamespaceId='" + recipientNamespaceId + "'>";
+			addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS2</button>";
+		} 
+	}
 
 	$(insTag).after(
 //		"<tr>"
@@ -302,6 +310,9 @@ function showTxAmountInfo(id,amount,fee){
 			,6
 		)
 	);
+
+	$("#amount" + id).attr("sssamount",amount);
+	
 }
 
 $(document).on("click","#sss", function() {
@@ -324,22 +335,23 @@ $(document).on("click","#sss", function() {
 	}	
 
 	var message = prompt("送信メッセージを入力してください");
-	console.log(message)
+	console.log(message);
 
-	let tx = nem.TransferTransaction.create(
-	nem.Deadline.create(epochAdjustment),
-	recipientAddress, 
-	[],
-	nem.PlainMessage.create(message),
-	networkType
-	).setMaxFee(100);
+	if(message !== null){
+		let tx = nem.TransferTransaction.create(
+		nem.Deadline.create(epochAdjustment),
+		recipientAddress, 
+		[networkCurrency.createAbsolute(Number($(this).parent().parent().children().eq(2).attr("sssamount")))],
+		nem.PlainMessage.create(message),
+		networkType
+		).setMaxFee(100);
 
-	console.log(tx);
+		console.log(tx);
 
-	window.SSS.requestSign().then((signedTx) => {
-		txRepo.announce(signedTx).subscribe(x=>console.log(x));
-    })
-      
+		window.SSS.requestSign().then((signedTx) => {
+			txRepo.announce(signedTx).subscribe(x=>console.log(x));
+	    })
+	}      
 
 
 //	signedTx = alice.sign(tx,"57F7DA205008026C776CB6AED843393F04CD458E0AA2D9F1D5F31A402072B2D6");
