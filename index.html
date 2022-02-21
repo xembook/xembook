@@ -22,7 +22,7 @@
 <div class="container">
 	<div class="row">
 		<div class="account col-sm-4">
-		<h2>アカウント</h2>
+		<h2>アカウント<span id="sss"></span></h2>
 		<dl id="account_info">
 			<dt>アドレス</dt><dd><span id="account_address"></span> <a target="_blank" id="account_explorer">explorer</a></dd>
 			<dt>残高</dt><dd><span id="account_balance"></span> XYM</dd>
@@ -175,6 +175,8 @@ const AGGREGATE = "集約";
 <script src="xembook.js"></script>
 <script>
 
+isSssEnabled = false;
+
 function getListenerInfo(listener){
 
 	listener.newBlock().subscribe(async block=>{
@@ -192,6 +194,24 @@ function getListenerInfo(listener){
 function showInfo(accountInfo){
 
 	accountInfo.subscribe(async _=>{
+
+		if (!window.SSS) {
+			console.log('sss not installed');
+
+		} else {
+			console.log('sss installed');
+			console.log('installed', window.SSS.activePublicKey)
+			const publicAccount = PublicAccount.createFromPublicKey(
+				window.SSS.activePublicKey,
+				networkType
+			);
+			if(publicAccount.address.plain() === _.address.plain()){
+			
+				$("#sss").text("📘");
+				isSssEnabled = true;
+			}
+		}
+
 		showAccountInfo(_);
 		await getHarvests(15);
 		await getTransfers(20);

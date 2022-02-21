@@ -2,7 +2,8 @@
 const EXPLORER = "https://symbol.fyi";
 const TEST_EXPLORER = "https://testnet.symbol.fyi";
 
-const ACTIVE_IMPORTANCE_RATE = 0.318266623;
+//const ACTIVE_IMPORTANCE_RATE = 0.318266623;
+const ACTIVE_IMPORTANCE_RATE = 0.25055618;
 
 const TEST_NODES = [
 
