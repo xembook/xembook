@@ -40,7 +40,7 @@
 			<thead><tr>
 				<th width="120">日時</th>
 				<th width="90">区分</th>
-				<th>数量</th>
+				<th class='text-right'>数量</th>
 				<th>メッセージ</th>
 			</tr></thead>
 			<tbody></tbody>
@@ -91,9 +91,22 @@ const AGGREGATE = "集約";
 <script src="xembook.js"></script>
 <script>
 
+isSssEnabled = false;
+
+setTimeout(() => {
+	if (!window.SSS) {
+		console.log('sss not installed')
+		isSssEnabled = true;
+	} else {
+		console.log('sss installed');
+		isSssEnabled = true;
+	}
+}, 100);
+
 function getListenerInfo(listener){}
 function getNewInfo(block){}
 function showAmountInfo(amount){}
+function showAccountInfo(accountInfo){}
 function showInfo(accountInfo){
 	getBatchOfTransfers(1);
 }
@@ -153,11 +166,10 @@ function appendAggTx(tx){
 		}
 	}
 
-
 	if(isHit){
 		const id = tx.transactionInfo.id;
 		$("#table").append("<tr id='agg" + id + "'>"
-		+ "<td><a target='_blank' href='http://explorer.symbolblockchain.io/transactions/"
+		+ "<td><a target='_blank' href='" + EXPLORER + "/transactions/"
 		+ tx.transactionInfo.hash + "'><span id='date" + id + "'>"
 		+ "</span></a></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
@@ -196,8 +208,12 @@ function appendTx(insTag,id,tx){
 		}
 	}
 
-
 	if(isHit){
+
+		let addSss = "";
+		if(tx.signer.address.plain() === rawAddress  && isSssEnabled){
+			addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS</button>";
+		}
 
 		$(insTag).append(
 			"<tr>"
@@ -206,7 +222,7 @@ function appendTx(insTag,id,tx){
 			+ "</span></a></td>"
 			+ "<td id='type" + id + "'></td>" //mosaicLabel
 			+ "<td id='amount" + id + "' class='text-right'></td>"
-			+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+			+ "<td class='text-left'>" + getMessage(tx) + addSss + "</td>"
 			+ "</tr>"
 		);
 
@@ -222,26 +238,65 @@ function appendTx(insTag,id,tx){
 
 function insertTxAfter(insTag,id,tx,txTimestamp){
 
+	let addSss = "";	
+
+	if(tx.signer.address.plain() === rawAddress && isSssEnabled){
+		addSss = "<br><button id='sss' type='button' class='btn btn-primary btn-xs'>SSS</button>";
+	} 
+
 	$(insTag).after(
 		"<tr>"
 		+ "<td></td>"
 		+ "<td id='type" + id + "'></td>" //mosaicLabel
 		+ "<td id='amount" + id + "'  class='text-right'></td>"
-		+ "<td class='text-left'>" + getMessage(tx) + "</td>"
+		+ "<td class='text-left'>" + getMessage(tx) + addSss + "</td>"
 		+ "</tr>"
 	);
 }
 
 function showTxAmountInfo(id,amount,fee){
 
-	$("#amount" + id).text(
+	$("#amount" + id).html(
 		dispAmount(
 			amount.add(nem.UInt64.fromNumericString(fee.toString()))
 			,6
 		)
 	);
+
+	$("#amount" + id).attr("sssamount",amount);
+	
 }
 
+$(document).on("click","#sss", async function() {
+
+
+	var message = prompt("SSSにTXをセットします。送信メッセージを入力してください");
+	console.log(message);
+
+	if(message !== null){
+
+		const txId = $(this).parent().parent().children().eq(1).attr("id").substring(4,28);
+		const sssTx = await txRepo.getTransaction(txId,nem.TransactionGroup.Confirmed).toPromise();
+		
+		let tx = nem.TransferTransaction.create(
+		nem.Deadline.create(epochAdjustment),
+		sssTx.recipientAddress, 
+		sssTx.mosaics,
+		nem.PlainMessage.create(""),
+		sssTx.networkType
+		).setMaxFee(100);
+
+		console.log(tx);
+		window.SSS.setTransaction(tx);
+
+		window.SSS.requestSign().then((signedTx) => {
+			txRepo.announce(signedTx).subscribe(x=>console.log(x));
+		})
+	}
+
+	return false;
+});
+	
 
 function getMessage(tx){
 
