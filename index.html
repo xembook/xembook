@@ -435,7 +435,10 @@ function showAccountInfo(accountInfo){
 
 		accountImportance = Math.round( accountImportance );
 		accountImportance /= 1000000;
-		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE;
+//		var activeImportance = accountImportance / 100  / ACTIVE_IMPORTANCE_RATE;
+		var activeImportance = (accountImportance / 100) / ACTIVE_IMPORTANCE_RATE  * (totalChainImportance / 100000000)  ;
+		
+		
 		pFalse = 1 - activeImportance;
 		p = 1 - activeImportance;
 		b = 1;
