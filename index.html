@@ -201,7 +201,7 @@ function showInfo(accountInfo){
 		} else {
 			console.log('sss installed');
 			console.log('installed', window.SSS.activePublicKey)
-			const publicAccount = PublicAccount.createFromPublicKey(
+			const publicAccount = nem.PublicAccount.createFromPublicKey(
 				window.SSS.activePublicKey,
 				networkType
 			);
