@@ -282,7 +282,7 @@ $(document).on("click","#sss", async function() {
 		nem.Deadline.create(epochAdjustment),
 		sssTx.recipientAddress, 
 		sssTx.mosaics,
-		nem.PlainMessage.create(""),
+		nem.PlainMessage.create(message),
 		sssTx.networkType
 		).setMaxFee(100);
 
