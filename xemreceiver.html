@@ -384,7 +384,7 @@ $("#submit_price").click(function(){
 		networkType
 	);
 	qrcode = qr.QRCodeGenerator.createTransactionRequest(tx,networkType,generationHash);
-	qrcode.toBase64().subscribe(x=>$("#receiverqr").html('<img src=' + x + '>'))
+	qrcode.toBase64().subscribe(x=>$("#receiverqr").html('<img src=' + x + ' width="250" height="250">'))
 
 });
 </script>
