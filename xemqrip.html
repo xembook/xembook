@@ -145,7 +145,7 @@ function getCodeInfo(src){
 		if('payload' in data){
 			//トランザクション
 			console.log("payload");
-			const tx = nem.TransactionMapping.createFromPayload(data.payload);
+			const tx = nem.TransactionMapping.createFromPayload(data.payload).setMaxFee(100);
 			console.log(tx);
 
 			if(isSssEnabled){
