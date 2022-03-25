@@ -145,20 +145,21 @@ function getCodeInfo(src){
 		if('payload' in data){
 			//トランザクション
 			console.log("payload");
-			const tx = nem.TransactionMapping.createFromPayload(data.payload)
+			const tx = nem.TransactionMapping.createFromPayload(data.payload);
 			console.log(tx);
 
 			if(isSssEnabled){
 
 				const transactionService = new nem.TransactionService(txRepo, receiptRepo);
 				window.SSS.setTransaction(tx);
-
-
 				window.SSS.requestSign().then((signedTx) => {
-					transactionService.announce(signedTx,listener).subscribe(x=>{
+					console.log(signedTx);
+					txRepo.announce(signedTx).subscribe(x=>{
 
-						$("#xembook").attr("href", "index.html?address=" + x.signer.address.plain());
-						$("#account_explorer").attr("href", explorer + "/accounts/" + x.signer.address.plain());
+						const mapTx = nem.TransactionMapping.createFromPayload(signedTx.payload);
+						
+						$("#xembook").attr("href", "index.html?address=" + mapTx.signer.address.plain());
+						$("#account_explorer").attr("href", explorer + "/accounts/" + mapTx.signer.address.plain());
 
 						$('#div1').collapse('show');
 					});
