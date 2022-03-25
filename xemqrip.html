@@ -149,18 +149,19 @@ function getCodeInfo(src){
 			console.log(tx);
 
 			if(isSssEnabled){
+
+				const transactionService = new nem.TransactionService(txRepo, receiptRepo);
 				window.SSS.setTransaction(tx);
 
 
 				window.SSS.requestSign().then((signedTx) => {
-					txRepo.announce(signedTx).subscribe(x=>console.log(x));
+					transactionService.announce(signedTx,listener).subscribe(x=>{
 
-					$("#xembook").attr("href", "index.html?address=" + tx.signer.address.plain());
-					$("#account_explorer").attr("href", explorer + "/accounts/" + tx.signer.address.plain());
+						$("#xembook").attr("href", "index.html?address=" + x.signer.address.plain());
+						$("#account_explorer").attr("href", explorer + "/accounts/" + x.signer.address.plain());
 
-					$('#div1').collapse('show');
-
-
+						$('#div1').collapse('show');
+					});
 				});
 			}else{
 				alert("SSSと連携していません")
