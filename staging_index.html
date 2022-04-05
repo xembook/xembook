@@ -122,6 +122,7 @@
 				<dd><a id="xemtax" href="">XEMTax</a></dd>
 				<dd><a id="xemreceiver" href="">XEMReceiver</a></dd>
 				<dd><a id="xembookusd" href="">XEMBook(USD)</a></dd>
+				<dd><a id="xemqrip" href="">XEMQRip</a></dd>
 				<dd><a target="_blank" href="https://nemlog.nem.social/">NEMLOG</a></dd>
 				<dd><a target="_blank" href="https://quest-bc.com/">QUEST</a></dd>
 				<dd><a target="_blank" href="https://symbol-tools.com/symbolTools/view/tool/nodeList.html">Symbol Node List</a></dd>
@@ -510,6 +511,10 @@ function showAccountInfo(accountInfo){
 									}
 								}
 							}
+						}else{
+							if(["MULTISIG_ACCOUNT_MODIFICATION","SECRET_PROOF" ].includes( nem.TransactionType[tx.type])){
+								isSmallPay = false;
+							}
 						}
 						$("#tx_info").append(dtTx + ddTx);
 					}
@@ -666,6 +671,7 @@ $("#xemtax"    ).attr("href", "xemtax.html?address=" + rawAddress);
 $("#xemreceiver"    ).attr("href", "xemreceiver.html?address=" + rawAddress);
 $("#xemgallery"    ).attr("href", "xemgallery.html?address=" + rawAddress);
 $("#xembookusd"    ).attr("href", "en.html?address=" + rawAddress);
+$("#xemqrip"    ).attr("href", "xemqrip.html?address=" + rawAddress);
 
 </script>
 </body>
