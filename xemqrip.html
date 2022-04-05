@@ -44,6 +44,7 @@
 			<div class="collapse" id="div1">
 
 				<dl>
+					<dd><span id="qrinfo"></span></dd>
 					<dd><a id="xembook" href="index.html">XEMBookで確認</a></dd>
 					<dd><a target="_blank" id="account_explorer">Explorerで確認</a></dd>
 				</dl>
@@ -152,6 +153,8 @@ function getCodeInfo(src){
 
 				const transactionService = new nem.TransactionService(txRepo, receiptRepo);
 				window.SSS.setTransaction(tx);
+
+				
 				window.SSS.requestSign().then((signedTx) => {
 					console.log(signedTx);
 					txRepo.announce(signedTx).subscribe(x=>{
@@ -172,6 +175,7 @@ function getCodeInfo(src){
 			//ContactQR
 			console.log("publicKey");
 			contactAddress = nem.PublicAccount.createFromPublicKey(data.publicKey,networkType).address;
+			$("#qrinfo").text(contactAddress.plain());
 			$("#xembook").attr("href", "index.html?address=" + contactAddress.plain());
 			$("#account_explorer").attr("href", explorer + "/accounts/" + contactAddress.plain());
 
@@ -182,13 +186,15 @@ function getCodeInfo(src){
 		}else if('ciphertext' in data){
 			//暗号化された秘密鍵
 			console.log("ciphertext");
+			alert("非対応のQRコードです。")
 
 		}else if('privateKey' in data){
 			//生身の秘密鍵
 			console.log("privateKey");
+			alert("非対応のQRコードです。")
 		}else{
 		
-		
+			alert("非対応のQRコードです。")
 		}
 
 	}
