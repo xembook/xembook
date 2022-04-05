@@ -523,7 +523,7 @@ function showAccountInfo(accountInfo){
 				
 						window.SSS.setTransaction(aggTx[0]);
 						window.SSS.requestSignWithCosignatories([]).then((signedTx) => {
-							txRepo.announce(signedTx).subscribe(x=>console.log(x));
+							txRepo.announceAggregateBondedCosignature(signedTx).subscribe(x=>console.log(x));
 						})
 					}
 
