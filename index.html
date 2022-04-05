@@ -522,7 +522,7 @@ function showAccountInfo(accountInfo){
 					if(isSssEnabled && isSmallPay){
 				
 						window.SSS.setTransaction(aggTx[0]);
-						window.SSS.requestSignWithCosignatories([]).then((signedTx) => {
+						window.SSS.requestSignCosignatureTransaction().then((signedTx) => {
 							txRepo.announceAggregateBondedCosignature(signedTx).subscribe(x=>console.log(x));
 						})
 					}
