@@ -155,10 +155,43 @@ const NG_NODES = [
 "https://criptian-xym-node.net:3001",
 ];
 
+
+const INDEXED = [
+"11.dusan.gq",
+"bonsai.anodebank.net",
+"angel.vistiel-arch.jp",
+"pasomi.dusan.gq"
+];
+
+
 const NODES = [
 
 "https://node.xembook.net",
-"https://a.symbol.lcnem.net",
+//"https://a.symbol.lcnem.net",
+
+"https://angel.vistiel-arch.jp:3001",
+"https://pasomi.dusan.gq:3001",
+
+//"https://11.dusan.gq:3001",
+//"https://bonsai.anodebank.net:3001",
+
+"https://xym168.allnodes.me:3001",
+"https://xym400.allnodes.me:3001",
+"https://xym185.allnodes.me:3001",
+"https://xym327.allnodes.me:3001",
+"https://xym727.allnodes.me:3001",
+"https://001-xym-hainetu.com:3001",
+"https://xym574.allnodes.me:3001",
+"https://xym102.allnodes.me:3001",
+"https://xym321.allnodes.me:3001",
+"https://xym207.allnodes.me:3001",
+"https://cryptocat-xym-node.com:3001",
+"https://symbol.nuaka.net:3001",
+"https://little.sixis.xyz:3001",
+"https://xymtokyo.harvest-node.net:3001",
+"https://0-0symbol-node1.trivill.com:3001",
+"https://xym271.allnodes.me:3001",
+
 
 "https://ik1-432-48199.vs.sakura.ne.jp:3001",
 "https://001symbol.blockchain-node.tech:3001",

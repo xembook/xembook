@@ -52,7 +52,7 @@
 		</dl>
 		<h2>ノード</h2>
 		<dl id="node_info">
-			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span></dd>
+			<dt>接続ノード</dt><dd><span id="node_activity"></span><span id="node_host"></span><span id="node_icon"></span></dd>
 			<dt>最新ブロック</dt><dd><span id="chain_height"></span></dd>
 			<dt>確定ブロック</dt><dd><span id="finalized_chain_height"></span></dd>
 			<dt><a id="set_delegated_node" href="javascript:void(0)">委任ノード設定</a></dt><dd><span id="delegated_node"></span></dd>
@@ -365,6 +365,20 @@ function showAccountInfo(accountInfo){
 			nodeHost = "[JP] " + nodeHost;
 		}
 		$("#node_host").text(nodeHost);
+
+
+		if(INDEXED.find(indexdNode=>indexdNode === node.host)){
+		
+			$("#node_icon").text("🚀");
+		}
+
+		$.ajax({url: "https://symbol-tools.com/symbolTools/api/open/smallScaleNodeList" ,type: 'POST',cache: false})
+		.done(function(x){
+
+			if(x.nodeList.find(smallnode=>smallnode.hostName ===node.host)){
+				$("#node_icon").text("🐶");	
+			}
+		});
 	});
 
 	//委任ノード
