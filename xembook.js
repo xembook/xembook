@@ -114,6 +114,7 @@ var networkType;
 var currencyId;
 var totalChainImportance;
 var currencyNamespaceId;
+var networkCurrency;
 const nemScriptionExpiredHeight = localStorage.getItem('NEMscriptionExpiredHeight' + rawAddress);
 
 (async() =>{
@@ -145,11 +146,19 @@ const nemScriptionExpiredHeight = localStorage.getItem('NEMscriptionExpiredHeigh
 //	resMosaicRepo = repo.createRestrictionMosaicRepository();
 //	slRepo = repo.createSecretLockRepository();
 
-	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
-	networkType = await repo.getNetworkType().toPromise();
-	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
-	networkCurrency = (await repo.getCurrencies().toPromise()).currency;
-	generationHash = await repo.getGenerationHash().toPromise();
+//	currencyId = (await repo.getCurrencies().toPromise()).currency.mosaicId.toHex();
+//	networkType = await repo.getNetworkType().toPromise();
+//	totalChainImportance = Number((await nwRepo.getNetworkProperties().toPromise()).chain.totalChainImportance.split("'").join('').slice( 0, -8 ));
+//	networkCurrency = (await repo.getCurrencies().toPromise()).currency;
+//	generationHash = await repo.getGenerationHash().toPromise();
+
+	currencyId = "6BED913FA20223F8";
+	networkType = 104;
+	totalChainImportance = 78429286;
+	repo.getCurrencies().subscribe(x=>{
+			networkCurrency = x.currency;
+	});
+	generationHash = "57F7DA205008026C776CB6AED843393F04CD458E0AA2D9F1D5F31A402072B2D6";
 
 	currencyNamespaceId = (new nem.NamespaceId("symbol.xym")).id.toHex();
 	latestBlock = (await blockRepo.search({order: nem.Order.Desc}).toPromise()).data[0];
