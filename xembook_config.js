@@ -160,21 +160,47 @@ const INDEXED = [
 "11.dusan.gq",
 "bonsai.anodebank.net",
 "angel.vistiel-arch.jp",
-"pasomi.dusan.gq"
+"pasomi.dusan.gq",
+"iroha-symbolnode.com",
+"sym-main-01.opening-line.jp",
+"sym-main-02.opening-line.jp",
+"sym-main-03.opening-line.jp",
+"sym-main-04.opening-line.jp",
+"sym-main-05.opening-line.jp",
+"sym-main-06.opening-line.jp",
+"sym-main-07.opening-line.jp",
+"sym-main-08.opening-line.jp",
+"sym-main-09.opening-line.jp",
+"sym-main-10.opening-line.jp",
+"symbol.from.nagoya",
+"symbolism.from.nagoya",
+"symbol-mikun.net",
 ];
 
 
 const NODES = [
 
-"https://node.xembook.net",
-//"https://a.symbol.lcnem.net",
-
+"https://11.dusan.gq:3001",
+"https://bonsai.anodebank.net:3001",
 "https://angel.vistiel-arch.jp:3001",
 "https://pasomi.dusan.gq:3001",
+"https://iroha-symbolnode.com:3001",
+"https://sym-main-01.opening-line.jp:3001",
+"https://sym-main-02.opening-line.jp:3001",
+"https://sym-main-03.opening-line.jp:3001",
+"https://sym-main-04.opening-line.jp:3001",
+"https://sym-main-05.opening-line.jp:3001",
+"https://sym-main-06.opening-line.jp:3001",
+"https://sym-main-07.opening-line.jp:3001",
+"https://sym-main-08.opening-line.jp:3001",
+"https://sym-main-09.opening-line.jp:3001",
+"https://sym-main-10.opening-line.jp:3001",
+"https://symbol.from.nagoya:3001",
+"https://symbolism.from.nagoya:3001",
+"https://symbol-mikun.net:3001",
 
-//"https://11.dusan.gq:3001",
-//"https://bonsai.anodebank.net:3001",
 
+"https://node.xembook.net",
 "https://xym168.allnodes.me:3001",
 "https://xym400.allnodes.me:3001",
 "https://xym185.allnodes.me:3001",
@@ -687,6 +713,7 @@ const NODES = [
 "https://symbol-tools.com:3001",
 "https://symbol-world.tk:3001",
 "https://symbol.from.nagoya:3001",
+"https://symbolism.from.nagoya:3001",
 "https://symbol02.sjtaro.work:3001",
 "https://symbol02.spdysgr.net:3001",
 "https://50038.xym.stir-hosyu.com:3001",
@@ -696,7 +723,6 @@ const NODES = [
 "https://symbol-node.yagiyoshi.com:3001",
 "https://yumeloto.com:3001",
 "https://yumeya1.com:3001",
-
 
 ].filter(word => !NG_NODES.includes(word));
 
