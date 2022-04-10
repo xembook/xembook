@@ -220,15 +220,15 @@
 					targetId:x.id,
 					metadataType:nem.MetadataType.Mosaic
 				}).toPromise();
-
+/*
 				setTimeout(function(){
 
 					if(needSample == true){
 						createImgTag("XEMGallery.png",imgtarget,"sample image");
 						imgtarget++;
 					}
-				}, 500);
-
+				}, 5000);
+*/
 				if(xx.data.length > 0){
 						needSample = false;
 						imgtarget++;
@@ -309,6 +309,47 @@
 				imgtarget++;
 				createImgTag(dataType + nftData ,imgtarget,escape_html(decodeURIComponent( nem.Convert.decodeHex(headerJSON.title))));
 			}
+
+			//ウクライナNFT
+
+			let ukraineHeader = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === '8AFD95A719B1BB90');
+			if(ukraineHeader !== undefined){
+
+				const rootTransactionHash = JSON.parse(ukraineHeader.metadataEntry.value).info.rootTransactionHash;
+				const tx = await txRepo.getTransactionsById([rootTransactionHash] ,nem.TransactionGroup.Confirmed).toPromise();
+				const aggTxes = [];
+				for (let i = 0; i < tx[0].innerTransactions[1].message.payload.length / 64; i++) {
+					aggTxes.push(tx[0].innerTransactions[1].message.payload.substr(i * 64, 64));
+				}
+
+				let nftData = "";
+				for(aggTx of aggTxes){
+
+				const data = {"transactionIds": [aggTx]}
+				const res =  await fetch(nodeRepo.url + "/transactions/confirmed", {
+					headers: {
+						"Content-Type": "application/json;charset=utf-8"
+					},
+					method: "POST",
+					body: JSON.stringify(data)
+				});
+				const json = await res.json();
+				const innerTxes = json[0].transaction.transactions;
+				for(innerTx of innerTxes){
+					nftData += innerTx.transaction.message;
+				}
+				}
+
+				const buffer = nem.Convert.hexToUint8(nftData);
+				const blob = new Blob( [buffer], { type: 'image/png' } );
+				const url = window.URL || window.webkitURL;
+				imgtarget++;
+
+				createImgTag(url.createObjectURL(blob),imgtarget,"");
+			}
+
+
+
 
 			//NFT-Drive
 			const ownerAddress = mo.ownerAddress;
