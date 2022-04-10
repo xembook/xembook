@@ -317,6 +317,8 @@
 
 				const rootTransactionHash = JSON.parse(ukraineHeader.metadataEntry.value).info.rootTransactionHash;
 				const tx = await txRepo.getTransactionsById([rootTransactionHash] ,nem.TransactionGroup.Confirmed).toPromise();
+				const metaInfo = tx[0].innerTransactions[0].message.payload.split("\n");
+
 				const aggTxes = [];
 				for (let i = 0; i < tx[0].innerTransactions[1].message.payload.length / 64; i++) {
 					aggTxes.push(tx[0].innerTransactions[1].message.payload.substr(i * 64, 64));
@@ -345,7 +347,7 @@
 				const url = window.URL || window.webkitURL;
 				imgtarget++;
 
-				createImgTag(url.createObjectURL(blob),imgtarget,"");
+				createImgTag(url.createObjectURL(blob),imgtarget,escape_html(decodeURIComponent(metaInfo[2])));
 			}
 
 
