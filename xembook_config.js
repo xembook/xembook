@@ -175,6 +175,16 @@ const INDEXED = [
 "symbol.from.nagoya",
 "symbolism.from.nagoya",
 "symbol-mikun.net",
+"sym-main.opening-line.jp",
+"sym-main-11.opening-line.jp",
+"00.symbol-node.com",
+"01.symbol-node.com",
+"02.symbol-node.com",
+"03.symbol-node.com",
+"04.symbol-node.com",
+"node1.xym-harvesting.com",
+"node2.xym-harvesting.com",
+
 ];
 
 
