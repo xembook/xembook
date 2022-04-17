@@ -184,6 +184,7 @@ const INDEXED = [
 "04.symbol-node.com",
 "node1.xym-harvesting.com",
 "node2.xym-harvesting.com",
+"d-01-pi-net.d-world.fun"
 
 ];
 
@@ -208,6 +209,7 @@ const NODES = [
 "https://symbol.from.nagoya:3001",
 "https://symbolism.from.nagoya:3001",
 "https://symbol-mikun.net:3001",
+"https://d-01-pi-net.d-world.fun:3001",
 
 
 "https://node.xembook.net",
