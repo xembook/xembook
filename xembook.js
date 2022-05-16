@@ -18,6 +18,7 @@ if (1 < document.location.search.length) {
 	}
 }
 
+/*
 if( rawAddress == ""){
 
 	var proaddress = window.prompt('Symbolアドレスを入力してください','');
@@ -31,6 +32,34 @@ if( rawAddress == ""){
 		history.replaceState(null,null,"?address=" + rawAddress);
 	}
 }
+*/
+if( rawAddress == ""){
+	setTimeout(function() { // SSSのスクリプトを読み込むための待機
+
+		// SSSが許可されている　かつ　アクティブアカウントのアドレスが104　の場合に確認してOKを選択でSSSのアクティブアカウントを用いる
+		if (!!window.SSS && window.SSS.activeNetworkType === 104 && window.confirm("「" + window.SSS.activeAddress + "」を表示します")) {
+			proaddress = window.SSS.activeAddress
+		} else {
+			var proaddress = window.prompt('Symbolアドレスを入力してください','');
+			if(proaddress === '' || proaddress === null){
+				alert("サンプルアカウントを表示します");
+				proaddress = "NCESRRSDSXQW7LTYWMHZOCXAESNNBNNVXHPB6WY";
+			}
+		}
+		rawAddress = proaddress.replace( /-/g , "" ).toUpperCase();
+
+		// 500ms 待つためページをロードしないと処理の順番が崩れるためリダイレクト
+
+		window.location = "?address=" + rawAddress
+
+		// if(history.replaceState) { 
+		// 	history.replaceState(null,null,"?address=" + rawAddress);
+		// }
+
+	}, 500)
+
+}
+
 rawAddress = rawAddress.replace( /-/g , "" ).toUpperCase();
 
 const nem = require("/node_modules/symbol-sdk");
