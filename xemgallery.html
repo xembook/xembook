@@ -173,6 +173,8 @@
 	<script src="symbol-sdk-2.0.0.min.js"></script>
 	<script src="xembook_config.js"></script>
 	<script>
+
+	Buffer = require("/node_modules/buffer").Buffer;
 	var nodelist = NODES;
 	var explorer = EXPLORER;
 	//const nodelist = TEST_NODES;
@@ -300,14 +302,66 @@
 				let dataType = "data:" + headerJSON.mime_type + ";base64,";
 				for (let idx = 0; idx < aggTxes.length; idx++) {
 					const aggTx = await txRepo.getTransaction(aggTxes[idx],nem.TransactionGroup.Confirmed).toPromise();
-					for(let idx = 1; idx < aggTx.innerTransactions.length;idx++){
-						let payload = aggTx.innerTransactions[idx].message.payload;
+					for(let idx2 = 1; idx2 < aggTx.innerTransactions.length;idx2++){
+						let payload = aggTx.innerTransactions[idx2].message.payload;
 						nftData += payload.slice(6);
 					}
 				}
 				
 				imgtarget++;
 				createImgTag(dataType + nftData ,imgtarget,escape_html(decodeURIComponent( nem.Convert.decodeHex(headerJSON.title))));
+			}
+
+
+			let comsaNcftHeader = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === '8E0823CEF8A40075');
+			if(comsaNcftHeader !== undefined){
+				needSample = false;
+				let headerJSON = JSON.parse(comsaNcftHeader.metadataEntry.value);
+				let aggTxes1 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'D77BFE313AF3EF1F');
+				let aggTxes2 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'AACFBE3CC93EABF3');
+				let aggTxes3 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'A0B069B710B3754C');
+				let aggTxes4 = xx.data.find(tx=>tx.metadataEntry.scopedMetadataKey.toHex() === 'D75B016AA9FAC056');
+
+				let aggTxes = JSON.parse(aggTxes1.metadataEntry.value);
+
+				if(aggTxes2 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes2.metadataEntry.value));
+				}
+
+				if(aggTxes3 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes3.metadataEntry.value));
+				}
+				
+				if(aggTxes4 !== undefined){
+					aggTxes = aggTxes.concat(JSON.parse(aggTxes4.metadataEntry.value));
+				}
+
+				let nftData = "";
+				let dataType = "data:" + headerJSON.mime_type + ";base64,";
+				for(aggTx of aggTxes){
+
+					const data = {"transactionIds": [aggTx]}
+					const res =  await fetch(nodeRepo.url + "/transactions/confirmed", {
+						headers: {
+							"Content-Type": "application/json;charset=utf-8"
+						},
+						method: "POST",
+						body: JSON.stringify(data)
+					});
+					const json = await res.json();
+					const innerTxes = json[0].transaction.transactions;
+					let isSkip = true;
+					for(innerTx of innerTxes){
+						if(isSkip){
+							isSkip = false;
+							continue;
+						}
+						nftData += innerTx.transaction.message;
+					}
+				}
+				
+				imgtarget++;
+				createImgTag(dataType  + Buffer.from(nftData, "hex").toString("base64") ,imgtarget,escape_html(decodeURIComponent( nem.Convert.decodeHex(headerJSON.title))));
 			}
 
 			//ウクライナNFT
@@ -327,19 +381,19 @@
 				let nftData = "";
 				for(aggTx of aggTxes){
 
-				const data = {"transactionIds": [aggTx]}
-				const res =  await fetch(nodeRepo.url + "/transactions/confirmed", {
-					headers: {
-						"Content-Type": "application/json;charset=utf-8"
-					},
-					method: "POST",
-					body: JSON.stringify(data)
-				});
-				const json = await res.json();
-				const innerTxes = json[0].transaction.transactions;
-				for(innerTx of innerTxes){
-					nftData += innerTx.transaction.message;
-				}
+					const data = {"transactionIds": [aggTx]}
+					const res =  await fetch(nodeRepo.url + "/transactions/confirmed", {
+						headers: {
+							"Content-Type": "application/json;charset=utf-8"
+						},
+						method: "POST",
+						body: JSON.stringify(data)
+					});
+					const json = await res.json();
+					const innerTxes = json[0].transaction.transactions;
+					for(innerTx of innerTxes){
+						nftData += innerTx.transaction.message;
+					}
 				}
 
 				const buffer = nem.Convert.hexToUint8(nftData);
