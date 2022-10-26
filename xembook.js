@@ -70,7 +70,7 @@ const address = nem.Address.createFromRawAddress(rawAddress);
 function connectNode(nodes,d){
 
 	const node = nodes[Math.floor(Math.random() * nodes.length)] ;
-	$.ajax({url:  node + "/node/health" ,type: 'GET',timeout: 1600})
+	$.ajax({url:  node + "/node/health" ,type: 'GET',timeout: 2400})
 	.then(res => {
 		if(res.status.apiNode == "up" && res.status.db == "up"){
 			console.log(node);
